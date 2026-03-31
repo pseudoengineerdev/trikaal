@@ -43,14 +43,15 @@ def compute_chart_snapshot(
     return {
         "meta": {
             "status": "computed",
-            "reference_status": "pending_drik_capture",
             "profile_id": profile.profile_id,
             "timezone": birth_event.timezone,
             "utc_iso": utc_dt.isoformat().replace("+00:00", "Z"),
         },
         "astronomy": {
             "julian_day_utc": round(julian_day_utc, 10),
-            "sun_sidereal_deg": round(sun_data[0], 8),
-            "moon_sidereal_deg": round(moon_data[0], 8),
+            "sun_sidereal_deg": round(sun_data[0], 2),
+            "moon_sidereal_deg": round(moon_data[0], 2),
+            "sun_sidereal_deg_raw": round(sun_data[0], 8),
+            "moon_sidereal_deg_raw": round(moon_data[0], 8),
         },
     }

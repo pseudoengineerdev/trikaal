@@ -29,6 +29,19 @@ Read these two values from output:
 
 From Drik Panchang, record the corresponding canonical values for the same input.
 
+Captured reference for this repo (as of 2026-03-31):
+
+- URL: `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=1275339&date=04/07/1999&time=12:22:00&lang=en`
+- Sun (Surya) full degree: `78.02`
+- Moon (Chandra) full degree: `320.35`
+
+Current engine output (same input):
+
+- Sun sidereal degree: `78.03`
+- Moon sidereal degree: `320.37`
+
+Current parity status for these fields: `not matched`
+
 ## Step 3: Update Fixture
 
 Edit:

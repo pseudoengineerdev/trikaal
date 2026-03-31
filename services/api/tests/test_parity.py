@@ -12,6 +12,9 @@ def test_canonical_drik_parity_check() -> None:
     assert payload["fixture_id"] == "drik_mumbai_1999_07_04_1222_v1"
     assert payload["matched"] is False
     assert payload["difference_count"] == 2
-    paths = [item["path"] for item in payload["differences"]]
-    assert "astronomy.sun_sidereal_deg" in paths
-    assert "astronomy.moon_sidereal_deg" in paths
+    assert payload["differences"][0]["path"] == "astronomy.moon_sidereal_deg"
+    assert payload["differences"][0]["expected"] == 320.35
+    assert payload["differences"][0]["actual"] == 320.37
+    assert payload["differences"][1]["path"] == "astronomy.sun_sidereal_deg"
+    assert payload["differences"][1]["expected"] == 78.02
+    assert payload["differences"][1]["actual"] == 78.03
