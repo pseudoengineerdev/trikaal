@@ -10,6 +10,8 @@ def test_canonical_drik_parity_check() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["fixture_id"] == "drik_mumbai_1999_07_04_1222_v1"
-    assert payload["matched"] is True
-    assert payload["difference_count"] == 0
-    assert payload["differences"] == []
+    assert payload["matched"] is False
+    assert payload["difference_count"] == 2
+    paths = [item["path"] for item in payload["differences"]]
+    assert "astronomy.sun_sidereal_deg" in paths
+    assert "astronomy.moon_sidereal_deg" in paths

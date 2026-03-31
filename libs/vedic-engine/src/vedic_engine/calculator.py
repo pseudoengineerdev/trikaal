@@ -43,6 +43,7 @@ def compute_chart_snapshot(
     return {
         "meta": {
             "status": "computed",
+            "reference_status": "pending_drik_capture",
             "profile_id": profile.profile_id,
             "timezone": birth_event.timezone,
             "utc_iso": utc_dt.isoformat().replace("+00:00", "Z"),

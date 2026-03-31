@@ -18,12 +18,18 @@
   },
   "expected_snapshot": {
     "meta": {
-      "status": "computed"
+      "status": "computed",
+      "reference_status": "pending_drik_capture"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": null,
+      "moon_sidereal_deg": null
     }
   },
   "comparison_rules": {
     "exact_paths": [
-      "meta.status"
+      "meta.status",
+      "meta.reference_status"
     ],
     "float_tolerance": 1e-06
   }
