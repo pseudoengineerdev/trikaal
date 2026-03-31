@@ -29,12 +29,27 @@
       "sun_rashi": "Mitu",
       "moon_rashi": "Kumb",
       "lagna_rashi": "Kany",
+      "mangal_rashi": "Tula",
+      "budha_rashi": "Kark",
+      "guru_rashi": "Mesh",
+      "shukra_rashi": "Simh",
+      "shani_rashi": "Mesh",
       "sun_nakshatra": "Ardra",
       "sun_pada": 4,
       "moon_nakshatra": "P Bhadrapada",
       "moon_pada": 1,
       "lagna_nakshatra": "Hasta",
-      "lagna_pada": 2
+      "lagna_pada": 2,
+      "mangal_nakshatra": "Chitra",
+      "mangal_pada": 4,
+      "budha_nakshatra": "Pushya",
+      "budha_pada": 3,
+      "guru_nakshatra": "Ashwini",
+      "guru_pada": 3,
+      "shukra_nakshatra": "Magha",
+      "shukra_pada": 1,
+      "shani_nakshatra": "Bharani",
+      "shani_pada": 3
     }
   },
   "comparison_rules": {

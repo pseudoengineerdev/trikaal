@@ -41,6 +41,11 @@ Captured reference for this repo (as of 2026-03-31):
 - Sun Nakshatra/Pada: `Ardra / 4`
 - Moon Nakshatra/Pada: `P Bhadrapada / 1`
 - Lagna Nakshatra/Pada: `Hasta / 2`
+- Mangal Rashi/Nakshatra/Pada: `Tula / Chitra / 4`
+- Budha Rashi/Nakshatra/Pada: `Kark / Pushya / 3`
+- Guru Rashi/Nakshatra/Pada: `Mesh / Ashwini / 3`
+- Shukra Rashi/Nakshatra/Pada: `Simh / Magha / 1`
+- Shani Rashi/Nakshatra/Pada: `Mesh / Bharani / 3`
 
 Current engine output (same input):
 
