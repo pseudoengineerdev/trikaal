@@ -1,0 +1,66 @@
+[
+  {
+    "place_label": "Mumbai, India",
+    "latitude": 19.076,
+    "longitude": 72.8777,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 14.0,
+    "aliases": ["mumbai", "mumbai india", "bombay"]
+  },
+  {
+    "place_label": "Delhi, India",
+    "latitude": 28.6139,
+    "longitude": 77.209,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 216.0,
+    "aliases": ["delhi", "new delhi", "delhi india", "new delhi india"]
+  },
+  {
+    "place_label": "Bengaluru, India",
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 920.0,
+    "aliases": ["bengaluru", "bangalore", "bengaluru india", "bangalore india"]
+  },
+  {
+    "place_label": "Kolkata, India",
+    "latitude": 22.5726,
+    "longitude": 88.3639,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 9.0,
+    "aliases": ["kolkata", "calcutta", "kolkata india", "calcutta india"]
+  },
+  {
+    "place_label": "Chennai, India",
+    "latitude": 13.0827,
+    "longitude": 80.2707,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 6.0,
+    "aliases": ["chennai", "madras", "chennai india", "madras india"]
+  },
+  {
+    "place_label": "Hyderabad, India",
+    "latitude": 17.385,
+    "longitude": 78.4867,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 542.0,
+    "aliases": ["hyderabad", "hyderabad india"]
+  },
+  {
+    "place_label": "Pune, India",
+    "latitude": 18.5204,
+    "longitude": 73.8567,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 560.0,
+    "aliases": ["pune", "pune india", "poona", "poona india"]
+  },
+  {
+    "place_label": "Ahmedabad, India",
+    "latitude": 23.0225,
+    "longitude": 72.5714,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 53.0,
+    "aliases": ["ahmedabad", "ahmedabad india"]
+  }
+]
