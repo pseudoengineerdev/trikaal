@@ -71,6 +71,20 @@
       "spashth_rahu_pada": 1,
       "spashth_ketu_nakshatra": "Shravana",
       "spashth_ketu_pada": 3
+    },
+    "bhava": {
+      "lagna_house": 1,
+      "sun_house": 10,
+      "moon_house": 6,
+      "mangal_house": 2,
+      "budha_house": 11,
+      "guru_house": 8,
+      "shukra_house": 12,
+      "shani_house": 8,
+      "rahu_house": 11,
+      "ketu_house": 5,
+      "spashth_rahu_house": 11,
+      "spashth_ketu_house": 5
     }
   },
   "comparison_rules": {
