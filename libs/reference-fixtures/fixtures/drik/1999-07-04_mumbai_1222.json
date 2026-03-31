@@ -22,7 +22,16 @@
     },
     "astronomy": {
       "sun_sidereal_deg": 78.02,
-      "moon_sidereal_deg": 320.35
+      "moon_sidereal_deg": 320.35,
+      "lagna_sidereal_deg": 163.65
+    },
+    "vedic": {
+      "sun_nakshatra": "Ardra",
+      "sun_pada": 4,
+      "moon_nakshatra": "P Bhadrapada",
+      "moon_pada": 1,
+      "lagna_nakshatra": "Hasta",
+      "lagna_pada": 2
     }
   },
   "comparison_rules": {

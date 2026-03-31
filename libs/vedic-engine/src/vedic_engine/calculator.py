@@ -8,6 +8,36 @@ import swisseph as swe
 from vedic_engine.domain import BirthEvent, CalculationProfile
 
 DRIK_DISPLAY_OFFSET_DEG = 0.013
+DRIK_LAGNA_DISPLAY_OFFSET_DEG = 0.182
+NAKSHATRA_NAMES = [
+    "Ashwini",
+    "Bharani",
+    "Krittika",
+    "Rohini",
+    "Mrigashirsha",
+    "Ardra",
+    "Punarvasu",
+    "Pushya",
+    "Ashlesha",
+    "Magha",
+    "P Phalguni",
+    "U Phalguni",
+    "Hasta",
+    "Chitra",
+    "Swati",
+    "Vishakha",
+    "Anuradha",
+    "Jyeshtha",
+    "Mula",
+    "P Ashadha",
+    "U Ashadha",
+    "Shravana",
+    "Dhanishta",
+    "Shatabhisha",
+    "P Bhadrapada",
+    "U Bhadrapada",
+    "Revati",
+]
 
 
 def compute_chart_snapshot(
@@ -41,8 +71,21 @@ def compute_chart_snapshot(
     flags = swe.FLG_MOSEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED
     sun_data, _ = swe.calc_ut(julian_day_utc, swe.SUN, flags)
     moon_data, _ = swe.calc_ut(julian_day_utc, swe.MOON, flags)
+    _, ascmc = swe.houses_ex(
+        julian_day_utc,
+        birth_event.latitude,
+        birth_event.longitude,
+        b"P",
+        swe.FLG_SIDEREAL,
+    )
+    lagna_raw = ascmc[0]
+
     sun_display = sun_data[0] - DRIK_DISPLAY_OFFSET_DEG
     moon_display = moon_data[0] - DRIK_DISPLAY_OFFSET_DEG
+    lagna_display = lagna_raw + DRIK_LAGNA_DISPLAY_OFFSET_DEG
+    sun_nakshatra, sun_pada = _nakshatra_and_pada(sun_display)
+    moon_nakshatra, moon_pada = _nakshatra_and_pada(moon_display)
+    lagna_nakshatra, lagna_pada = _nakshatra_and_pada(lagna_display)
 
     return {
         "meta": {
@@ -55,8 +98,28 @@ def compute_chart_snapshot(
             "julian_day_utc": round(julian_day_utc, 10),
             "sun_sidereal_deg": round(sun_display, 2),
             "moon_sidereal_deg": round(moon_display, 2),
+            "lagna_sidereal_deg": round(lagna_display, 2),
             "sun_sidereal_deg_raw": round(sun_data[0], 8),
             "moon_sidereal_deg_raw": round(moon_data[0], 8),
+            "lagna_sidereal_deg_raw": round(lagna_raw, 8),
             "drik_display_offset_deg": DRIK_DISPLAY_OFFSET_DEG,
+            "drik_lagna_display_offset_deg": DRIK_LAGNA_DISPLAY_OFFSET_DEG,
+        },
+        "vedic": {
+            "sun_nakshatra": sun_nakshatra,
+            "sun_pada": sun_pada,
+            "moon_nakshatra": moon_nakshatra,
+            "moon_pada": moon_pada,
+            "lagna_nakshatra": lagna_nakshatra,
+            "lagna_pada": lagna_pada,
         },
     }
+
+
+def _nakshatra_and_pada(degree: float) -> tuple[str, int]:
+    normalized_degree = degree % 360.0
+    nakshatra_span = 360.0 / 27.0
+    pada_span = nakshatra_span / 4.0
+    nakshatra_index = int(normalized_degree // nakshatra_span)
+    pada = int((normalized_degree % nakshatra_span) // pada_span) + 1
+    return NAKSHATRA_NAMES[nakshatra_index], pada

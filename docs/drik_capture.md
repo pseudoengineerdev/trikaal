@@ -34,6 +34,10 @@ Captured reference for this repo (as of 2026-03-31):
 - URL: `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=1275339&date=04/07/1999&time=12:22:00&lang=en`
 - Sun (Surya) full degree: `78.02`
 - Moon (Chandra) full degree: `320.35`
+- Lagna full degree: `163.65`
+- Sun Nakshatra/Pada: `Ardra / 4`
+- Moon Nakshatra/Pada: `P Bhadrapada / 1`
+- Lagna Nakshatra/Pada: `Hasta / 2`
 
 Current engine output (same input):
 
