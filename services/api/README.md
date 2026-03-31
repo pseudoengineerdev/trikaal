@@ -30,6 +30,7 @@ uvicorn trikaal_api.main:app --reload
 
 - `GET /health`
 - `GET /v1/engine/parity/canonical-reference`
+- `GET /v1/engine/canonical-preview`
 
 ## Test
 
