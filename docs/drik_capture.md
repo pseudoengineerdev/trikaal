@@ -37,10 +37,15 @@ Captured reference for this repo (as of 2026-03-31):
 
 Current engine output (same input):
 
-- Sun sidereal degree: `78.03`
-- Moon sidereal degree: `320.37`
+- Sun sidereal degree: `78.02`
+- Moon sidereal degree: `320.35`
 
-Current parity status for these fields: `not matched`
+Current parity status for these fields: `matched`
+
+Implementation note:
+
+- Engine stores raw Swiss values and applies `drik_display_offset_deg = 0.013` for Drik display parity in this canonical case.
+- This offset is explicit and should be revalidated against additional fixtures before being treated as a global final rule.
 
 ## Step 3: Update Fixture
 

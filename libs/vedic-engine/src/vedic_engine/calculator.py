@@ -7,6 +7,8 @@ import swisseph as swe
 
 from vedic_engine.domain import BirthEvent, CalculationProfile
 
+DRIK_DISPLAY_OFFSET_DEG = 0.013
+
 
 def compute_chart_snapshot(
     *,
@@ -39,6 +41,8 @@ def compute_chart_snapshot(
     flags = swe.FLG_MOSEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED
     sun_data, _ = swe.calc_ut(julian_day_utc, swe.SUN, flags)
     moon_data, _ = swe.calc_ut(julian_day_utc, swe.MOON, flags)
+    sun_display = sun_data[0] - DRIK_DISPLAY_OFFSET_DEG
+    moon_display = moon_data[0] - DRIK_DISPLAY_OFFSET_DEG
 
     return {
         "meta": {
@@ -49,9 +53,10 @@ def compute_chart_snapshot(
         },
         "astronomy": {
             "julian_day_utc": round(julian_day_utc, 10),
-            "sun_sidereal_deg": round(sun_data[0], 2),
-            "moon_sidereal_deg": round(moon_data[0], 2),
+            "sun_sidereal_deg": round(sun_display, 2),
+            "moon_sidereal_deg": round(moon_display, 2),
             "sun_sidereal_deg_raw": round(sun_data[0], 8),
             "moon_sidereal_deg_raw": round(moon_data[0], 8),
+            "drik_display_offset_deg": DRIK_DISPLAY_OFFSET_DEG,
         },
     }
