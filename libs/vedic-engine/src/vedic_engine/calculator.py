@@ -38,6 +38,23 @@ NAKSHATRA_NAMES = [
     "U Bhadrapada",
     "Revati",
 ]
+RASHI_NAMES = [
+    "Mesh",
+    "Vrish",
+    "Mith",
+    "Kark",
+    "Simh",
+    "Kany",
+    "Tula",
+    "Vrsc",
+    "Dhanu",
+    "Makar",
+    "Kumb",
+    "Meen",
+]
+REFERENCE_RASHI_ALIASES = {
+    "Mith": "Mitu",
+}
 
 
 def compute_chart_snapshot(
@@ -86,6 +103,9 @@ def compute_chart_snapshot(
     sun_nakshatra, sun_pada = _nakshatra_and_pada(sun_display)
     moon_nakshatra, moon_pada = _nakshatra_and_pada(moon_display)
     lagna_nakshatra, lagna_pada = _nakshatra_and_pada(lagna_display)
+    sun_rashi = _rashi_name(sun_display)
+    moon_rashi = _rashi_name(moon_display)
+    lagna_rashi = _rashi_name(lagna_display)
 
     return {
         "meta": {
@@ -106,6 +126,9 @@ def compute_chart_snapshot(
             "reference_lagna_display_offset_deg": REFERENCE_LAGNA_DISPLAY_OFFSET_DEG,
         },
         "vedic": {
+            "sun_rashi": sun_rashi,
+            "moon_rashi": moon_rashi,
+            "lagna_rashi": lagna_rashi,
             "sun_nakshatra": sun_nakshatra,
             "sun_pada": sun_pada,
             "moon_nakshatra": moon_nakshatra,
@@ -123,3 +146,10 @@ def _nakshatra_and_pada(degree: float) -> tuple[str, int]:
     nakshatra_index = int(normalized_degree // nakshatra_span)
     pada = int((normalized_degree % nakshatra_span) // pada_span) + 1
     return NAKSHATRA_NAMES[nakshatra_index], pada
+
+
+def _rashi_name(degree: float) -> str:
+    normalized_degree = degree % 360.0
+    rashi_index = int(normalized_degree // 30.0)
+    internal_name = RASHI_NAMES[rashi_index]
+    return REFERENCE_RASHI_ALIASES.get(internal_name, internal_name)
