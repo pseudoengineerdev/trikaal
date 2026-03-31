@@ -169,28 +169,24 @@ class _BirthInputPageState extends State<BirthInputPage> {
                             : const Text('Compute Chart'),
                       ),
                     ),
+                    if (_loading) ...<Widget>[
+                      const SizedBox(height: 10),
+                      const _LoadingHint(),
+                    ],
                   ],
                 ),
               ),
               if (_error != null) ...<Widget>[
                 const SizedBox(height: 12),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        _error!,
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: _loading ? null : _submit,
-                      child: const Text('Retry'),
-                    ),
-                  ],
+                _ErrorCard(
+                  message: _error!,
+                  onRetry: _loading ? null : _submit,
                 ),
               ],
-              if (_result != null) ...<Widget>[
-                const SizedBox(height: 20),
+              const SizedBox(height: 20),
+              if (_result == null && !_loading) ...<Widget>[
+                const _EmptyResultHint(),
+              ] else if (_result != null) ...<Widget>[
                 _ResultCard(result: _result!),
               ],
             ],
@@ -570,6 +566,114 @@ class _PlaceSuggestionList extends StatelessWidget {
               ),
             )
             .toList(growable: false),
+      ),
+    );
+  }
+}
+
+class _LoadingHint extends StatelessWidget {
+  const _LoadingHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Row(
+        children: <Widget>[
+          SizedBox(
+            height: 16,
+            width: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Text('Computing chart using Drik profile...'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorCard extends StatelessWidget {
+  const _ErrorCard({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.08),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              const Icon(Icons.error_outline, color: Colors.red),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  message,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: onRetry,
+              child: const Text('Retry'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyResultHint extends StatelessWidget {
+  const _EmptyResultHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'No chart computed yet',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Select date, time, and place, then tap "Compute Chart".',
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }
