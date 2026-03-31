@@ -2,7 +2,7 @@ from vedic_engine.calculator import compute_chart_snapshot
 from vedic_engine.domain import BirthEvent, CalculationProfile
 
 
-def test_calculator_returns_seeded_snapshot_for_canonical_case() -> None:
+def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     snapshot = compute_chart_snapshot(
         birth_event=BirthEvent(
             local_date="1999-07-04",
@@ -16,10 +16,15 @@ def test_calculator_returns_seeded_snapshot_for_canonical_case() -> None:
         profile=CalculationProfile(),
     )
 
-    assert snapshot == {"meta": {"status": "fixture_seeded"}}
+    assert snapshot["meta"]["status"] == "computed"
+    assert snapshot["meta"]["timezone"] == "Asia/Kolkata"
+    assert snapshot["meta"]["utc_iso"] == "1999-07-04T06:52:00Z"
+    assert isinstance(snapshot["astronomy"]["julian_day_utc"], float)
+    assert isinstance(snapshot["astronomy"]["sun_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["moon_sidereal_deg"], float)
 
 
-def test_calculator_returns_not_implemented_for_non_canonical_case() -> None:
+def test_calculator_computes_for_non_canonical_case() -> None:
     snapshot = compute_chart_snapshot(
         birth_event=BirthEvent(
             local_date="2000-01-01",
@@ -33,4 +38,5 @@ def test_calculator_returns_not_implemented_for_non_canonical_case() -> None:
         profile=CalculationProfile(),
     )
 
-    assert snapshot == {"meta": {"status": "engine_not_implemented"}}
+    assert snapshot["meta"]["status"] == "computed"
+    assert snapshot["meta"]["utc_iso"] == "1999-12-31T18:30:00Z"

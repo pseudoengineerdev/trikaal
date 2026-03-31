@@ -22,16 +22,23 @@ def compare_snapshots(
 ) -> list[SnapshotDifference]:
     exact_match_paths = set(exact_paths or [])
     differences: list[SnapshotDifference] = []
-    all_paths = sorted(
-        set(_flatten_paths(expected_snapshot).keys()) | set(_flatten_paths(actual_snapshot).keys())
-    )
-
     flattened_expected = _flatten_paths(expected_snapshot)
     flattened_actual = _flatten_paths(actual_snapshot)
 
-    for path in all_paths:
+    for path in sorted(flattened_expected.keys()):
         expected = flattened_expected.get(path)
-        actual = flattened_actual.get(path)
+        if path not in flattened_actual:
+            differences.append(
+                SnapshotDifference(
+                    path=path,
+                    expected=expected,
+                    actual=None,
+                    reason="missing_path",
+                )
+            )
+            continue
+
+        actual = flattened_actual[path]
 
         if path in exact_match_paths:
             if str(expected) != str(actual):

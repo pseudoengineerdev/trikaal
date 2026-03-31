@@ -42,3 +42,16 @@ def test_comparator_enforces_exact_path_comparison() -> None:
     assert len(differences) == 1
     assert differences[0].path == "meta.status"
     assert differences[0].reason == "exact_mismatch"
+
+
+def test_comparator_ignores_unexpected_actual_paths() -> None:
+    expected = {"meta": {"status": "ok"}}
+    actual = {"meta": {"status": "ok", "extra": "value"}, "grahas": {"sun": 10.5}}
+
+    differences = compare_snapshots(
+        expected_snapshot=expected,
+        actual_snapshot=actual,
+        exact_paths=["meta.status"],
+    )
+
+    assert differences == []
