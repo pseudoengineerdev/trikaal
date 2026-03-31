@@ -1,0 +1,15 @@
+from fastapi.testclient import TestClient
+
+from trikaal_api.main import app
+
+
+def test_canonical_reference_parity_check() -> None:
+    client = TestClient(app)
+    response = client.get("/v1/engine/parity/canonical-reference")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["fixture_id"] == "reference_mumbai_1999_07_04_1222_v1"
+    assert payload["matched"] is True
+    assert payload["difference_count"] == 0
+    assert payload["differences"] == []
