@@ -43,3 +43,21 @@ def test_chart_endpoint_rejects_invalid_latitude() -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_chart_endpoint_rejects_unknown_timezone() -> None:
+    client = TestClient(app)
+    response = client.post(
+        "/v1/engine/chart",
+        json={
+            "local_date": "1999-07-04",
+            "local_time": "12:22",
+            "timezone": "Mars/Phobos",
+            "latitude": 19.0760,
+            "longitude": 72.8777,
+            "elevation_m": 14.0,
+            "place_label": "Mumbai, India",
+        },
+    )
+
+    assert response.status_code == 422
