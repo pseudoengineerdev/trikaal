@@ -35,6 +35,11 @@ Captured reference for this repo (as of 2026-03-31):
 - Sun (Surya) full degree: `78.02`
 - Moon (Chandra) full degree: `320.35`
 - Lagna full degree: `163.65`
+- Mangal full degree: `185.85`
+- Budha full degree: `102.75`
+- Guru full degree: `7.04`
+- Shukra full degree: `120.92`
+- Shani full degree: `20.65`
 - Sun Rashi: `Mitu`
 - Moon Rashi: `Kumb`
 - Lagna Rashi: `Kany`
@@ -56,8 +61,9 @@ Current parity status for these fields: `matched`
 
 Implementation note:
 
-- Engine stores raw Swiss values and applies `drik_display_offset_deg = 0.013` for Drik display parity in this canonical case.
-- This offset is explicit and should be revalidated against additional fixtures before being treated as a global final rule.
+- Engine stores raw Swiss values and applies `drik_display_offset_deg = 0.01` for graha display parity in this canonical case.
+- Display degrees are truncated to 2 decimals (not standard rounded), matching observed Drik full-degree formatting for this case.
+- Lagna uses explicit `drik_lagna_display_offset_deg = 0.182`.
 
 ## Step 3: Update Fixture
 
