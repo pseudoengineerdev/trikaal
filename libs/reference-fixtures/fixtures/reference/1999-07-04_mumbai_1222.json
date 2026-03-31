@@ -1,0 +1,30 @@
+{
+  "fixture_id": "reference_mumbai_1999_07_04_1222_v1",
+  "source": "reference_panchang",
+  "captured_at_utc": "2026-03-31T00:00:00Z",
+  "birth_input": {
+    "local_date": "1999-07-04",
+    "local_time": "12:22",
+    "timezone": "Asia/Kolkata",
+    "latitude": 19.076,
+    "longitude": 72.8777,
+    "elevation_m": 14.0,
+    "place_label": "Mumbai, India"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "fixture_seeded"
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 1e-06
+  }
+}
