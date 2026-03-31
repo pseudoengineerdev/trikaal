@@ -24,6 +24,7 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg_raw"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg_raw"], float)
+    assert snapshot["astronomy"]["reference_display_offset_deg"] == 0.013
 
 
 def test_calculator_computes_for_non_canonical_case() -> None:
