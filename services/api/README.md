@@ -26,6 +26,11 @@ source .venv/bin/activate
 uvicorn trikaal_api.main:app --reload
 ```
 
+## Endpoints (Current)
+
+- `GET /health`
+- `GET /v1/engine/parity/canonical-drik`
+
 ## Test
 
 ```bash
