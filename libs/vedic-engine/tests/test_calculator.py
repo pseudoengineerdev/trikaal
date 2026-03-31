@@ -22,9 +22,18 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert isinstance(snapshot["astronomy"]["julian_day_utc"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["lagna_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg_raw"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["lagna_sidereal_deg_raw"], float)
     assert snapshot["astronomy"]["reference_display_offset_deg"] == 0.013
+    assert snapshot["astronomy"]["reference_lagna_display_offset_deg"] == 0.182
+    assert snapshot["vedic"]["sun_nakshatra"] == "Ardra"
+    assert snapshot["vedic"]["sun_pada"] == 4
+    assert snapshot["vedic"]["moon_nakshatra"] == "P Bhadrapada"
+    assert snapshot["vedic"]["moon_pada"] == 1
+    assert snapshot["vedic"]["lagna_nakshatra"] == "Hasta"
+    assert snapshot["vedic"]["lagna_pada"] == 2
 
 
 def test_calculator_computes_for_non_canonical_case() -> None:
