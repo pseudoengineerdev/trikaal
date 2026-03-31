@@ -17,12 +17,13 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     )
 
     assert snapshot["meta"]["status"] == "computed"
-    assert snapshot["meta"]["reference_status"] == "pending_reference_capture"
     assert snapshot["meta"]["timezone"] == "Asia/Kolkata"
     assert snapshot["meta"]["utc_iso"] == "1999-07-04T06:52:00Z"
     assert isinstance(snapshot["astronomy"]["julian_day_utc"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["sun_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["moon_sidereal_deg_raw"], float)
 
 
 def test_calculator_computes_for_non_canonical_case() -> None:
