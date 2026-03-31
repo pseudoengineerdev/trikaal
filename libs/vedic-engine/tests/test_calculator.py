@@ -31,12 +31,27 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["vedic"]["sun_rashi"] == "Mitu"
     assert snapshot["vedic"]["moon_rashi"] == "Kumb"
     assert snapshot["vedic"]["lagna_rashi"] == "Kany"
+    assert snapshot["vedic"]["mangal_rashi"] == "Tula"
+    assert snapshot["vedic"]["budha_rashi"] == "Kark"
+    assert snapshot["vedic"]["guru_rashi"] == "Mesh"
+    assert snapshot["vedic"]["shukra_rashi"] == "Simh"
+    assert snapshot["vedic"]["shani_rashi"] == "Mesh"
     assert snapshot["vedic"]["sun_nakshatra"] == "Ardra"
     assert snapshot["vedic"]["sun_pada"] == 4
     assert snapshot["vedic"]["moon_nakshatra"] == "P Bhadrapada"
     assert snapshot["vedic"]["moon_pada"] == 1
     assert snapshot["vedic"]["lagna_nakshatra"] == "Hasta"
     assert snapshot["vedic"]["lagna_pada"] == 2
+    assert snapshot["vedic"]["mangal_nakshatra"] == "Chitra"
+    assert snapshot["vedic"]["mangal_pada"] == 4
+    assert snapshot["vedic"]["budha_nakshatra"] == "Pushya"
+    assert snapshot["vedic"]["budha_pada"] == 3
+    assert snapshot["vedic"]["guru_nakshatra"] == "Ashwini"
+    assert snapshot["vedic"]["guru_pada"] == 3
+    assert snapshot["vedic"]["shukra_nakshatra"] == "Magha"
+    assert snapshot["vedic"]["shukra_pada"] == 1
+    assert snapshot["vedic"]["shani_nakshatra"] == "Bharani"
+    assert snapshot["vedic"]["shani_pada"] == 3
 
 
 def test_calculator_computes_for_non_canonical_case() -> None:

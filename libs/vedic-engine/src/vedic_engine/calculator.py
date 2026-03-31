@@ -88,6 +88,11 @@ def compute_chart_snapshot(
     flags = swe.FLG_MOSEPH | swe.FLG_SIDEREAL | swe.FLG_SPEED
     sun_data, _ = swe.calc_ut(julian_day_utc, swe.SUN, flags)
     moon_data, _ = swe.calc_ut(julian_day_utc, swe.MOON, flags)
+    mars_data, _ = swe.calc_ut(julian_day_utc, swe.MARS, flags)
+    mercury_data, _ = swe.calc_ut(julian_day_utc, swe.MERCURY, flags)
+    jupiter_data, _ = swe.calc_ut(julian_day_utc, swe.JUPITER, flags)
+    venus_data, _ = swe.calc_ut(julian_day_utc, swe.VENUS, flags)
+    saturn_data, _ = swe.calc_ut(julian_day_utc, swe.SATURN, flags)
     _, ascmc = swe.houses_ex(
         julian_day_utc,
         birth_event.latitude,
@@ -99,13 +104,28 @@ def compute_chart_snapshot(
 
     sun_display = sun_data[0] - REFERENCE_DISPLAY_OFFSET_DEG
     moon_display = moon_data[0] - REFERENCE_DISPLAY_OFFSET_DEG
+    mars_display = mars_data[0] - REFERENCE_DISPLAY_OFFSET_DEG
+    mercury_display = mercury_data[0] - REFERENCE_DISPLAY_OFFSET_DEG
+    jupiter_display = jupiter_data[0] - REFERENCE_DISPLAY_OFFSET_DEG
+    venus_display = venus_data[0] - REFERENCE_DISPLAY_OFFSET_DEG
+    saturn_display = saturn_data[0] - REFERENCE_DISPLAY_OFFSET_DEG
     lagna_display = lagna_raw + REFERENCE_LAGNA_DISPLAY_OFFSET_DEG
     sun_nakshatra, sun_pada = _nakshatra_and_pada(sun_display)
     moon_nakshatra, moon_pada = _nakshatra_and_pada(moon_display)
     lagna_nakshatra, lagna_pada = _nakshatra_and_pada(lagna_display)
+    mars_nakshatra, mars_pada = _nakshatra_and_pada(mars_display)
+    mercury_nakshatra, mercury_pada = _nakshatra_and_pada(mercury_display)
+    jupiter_nakshatra, jupiter_pada = _nakshatra_and_pada(jupiter_display)
+    venus_nakshatra, venus_pada = _nakshatra_and_pada(venus_display)
+    saturn_nakshatra, saturn_pada = _nakshatra_and_pada(saturn_display)
     sun_rashi = _rashi_name(sun_display)
     moon_rashi = _rashi_name(moon_display)
     lagna_rashi = _rashi_name(lagna_display)
+    mars_rashi = _rashi_name(mars_display)
+    mercury_rashi = _rashi_name(mercury_display)
+    jupiter_rashi = _rashi_name(jupiter_display)
+    venus_rashi = _rashi_name(venus_display)
+    saturn_rashi = _rashi_name(saturn_display)
 
     return {
         "meta": {
@@ -129,12 +149,27 @@ def compute_chart_snapshot(
             "sun_rashi": sun_rashi,
             "moon_rashi": moon_rashi,
             "lagna_rashi": lagna_rashi,
+            "mangal_rashi": mars_rashi,
+            "budha_rashi": mercury_rashi,
+            "guru_rashi": jupiter_rashi,
+            "shukra_rashi": venus_rashi,
+            "shani_rashi": saturn_rashi,
             "sun_nakshatra": sun_nakshatra,
             "sun_pada": sun_pada,
             "moon_nakshatra": moon_nakshatra,
             "moon_pada": moon_pada,
             "lagna_nakshatra": lagna_nakshatra,
             "lagna_pada": lagna_pada,
+            "mangal_nakshatra": mars_nakshatra,
+            "mangal_pada": mars_pada,
+            "budha_nakshatra": mercury_nakshatra,
+            "budha_pada": mercury_pada,
+            "guru_nakshatra": jupiter_nakshatra,
+            "guru_pada": jupiter_pada,
+            "shukra_nakshatra": venus_nakshatra,
+            "shukra_pada": venus_pada,
+            "shani_nakshatra": saturn_nakshatra,
+            "shani_pada": saturn_pada,
         },
     }
 
