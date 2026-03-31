@@ -55,6 +55,7 @@ RASHI_NAMES = [
 ]
 DRIK_RASHI_ALIASES = {
     "Mith": "Mitu",
+    "Makar": "Maka",
 }
 
 
@@ -94,6 +95,8 @@ def compute_chart_snapshot(
     jupiter_data, _ = swe.calc_ut(julian_day_utc, swe.JUPITER, flags)
     venus_data, _ = swe.calc_ut(julian_day_utc, swe.VENUS, flags)
     saturn_data, _ = swe.calc_ut(julian_day_utc, swe.SATURN, flags)
+    mean_node_data, _ = swe.calc_ut(julian_day_utc, swe.MEAN_NODE, flags)
+    true_node_data, _ = swe.calc_ut(julian_day_utc, swe.TRUE_NODE, flags)
     _, ascmc = swe.houses_ex(
         julian_day_utc,
         birth_event.latitude,
@@ -110,6 +113,10 @@ def compute_chart_snapshot(
     jupiter_display = jupiter_data[0] - DRIK_DISPLAY_OFFSET_DEG
     venus_display = venus_data[0] - DRIK_DISPLAY_OFFSET_DEG
     saturn_display = saturn_data[0] - DRIK_DISPLAY_OFFSET_DEG
+    mean_rahu_display = mean_node_data[0] - DRIK_DISPLAY_OFFSET_DEG
+    mean_ketu_display = (mean_rahu_display + 180.0) % 360.0
+    true_rahu_display = true_node_data[0] - DRIK_DISPLAY_OFFSET_DEG
+    true_ketu_display = (true_rahu_display + 180.0) % 360.0
     lagna_display = lagna_raw + DRIK_LAGNA_DISPLAY_OFFSET_DEG
     sun_nakshatra, sun_pada = _nakshatra_and_pada(sun_display)
     moon_nakshatra, moon_pada = _nakshatra_and_pada(moon_display)
@@ -119,6 +126,10 @@ def compute_chart_snapshot(
     jupiter_nakshatra, jupiter_pada = _nakshatra_and_pada(jupiter_display)
     venus_nakshatra, venus_pada = _nakshatra_and_pada(venus_display)
     saturn_nakshatra, saturn_pada = _nakshatra_and_pada(saturn_display)
+    mean_rahu_nakshatra, mean_rahu_pada = _nakshatra_and_pada(mean_rahu_display)
+    mean_ketu_nakshatra, mean_ketu_pada = _nakshatra_and_pada(mean_ketu_display)
+    true_rahu_nakshatra, true_rahu_pada = _nakshatra_and_pada(true_rahu_display)
+    true_ketu_nakshatra, true_ketu_pada = _nakshatra_and_pada(true_ketu_display)
     sun_rashi = _rashi_name(sun_display)
     moon_rashi = _rashi_name(moon_display)
     lagna_rashi = _rashi_name(lagna_display)
@@ -127,6 +138,10 @@ def compute_chart_snapshot(
     jupiter_rashi = _rashi_name(jupiter_display)
     venus_rashi = _rashi_name(venus_display)
     saturn_rashi = _rashi_name(saturn_display)
+    mean_rahu_rashi = _rashi_name(mean_rahu_display)
+    mean_ketu_rashi = _rashi_name(mean_ketu_display)
+    true_rahu_rashi = _rashi_name(true_rahu_display)
+    true_ketu_rashi = _rashi_name(true_ketu_display)
 
     return {
         "meta": {
@@ -144,6 +159,10 @@ def compute_chart_snapshot(
             "guru_sidereal_deg": _truncate_2(jupiter_display),
             "shukra_sidereal_deg": _truncate_2(venus_display),
             "shani_sidereal_deg": _truncate_2(saturn_display),
+            "rahu_sidereal_deg": _truncate_2(mean_rahu_display),
+            "ketu_sidereal_deg": _truncate_2(mean_ketu_display),
+            "spashth_rahu_sidereal_deg": _truncate_2(true_rahu_display),
+            "spashth_ketu_sidereal_deg": _truncate_2(true_ketu_display),
             "lagna_sidereal_deg": _truncate_2(lagna_display),
             "sun_sidereal_deg_raw": round(sun_data[0], 8),
             "moon_sidereal_deg_raw": round(moon_data[0], 8),
@@ -152,6 +171,10 @@ def compute_chart_snapshot(
             "guru_sidereal_deg_raw": round(jupiter_data[0], 8),
             "shukra_sidereal_deg_raw": round(venus_data[0], 8),
             "shani_sidereal_deg_raw": round(saturn_data[0], 8),
+            "rahu_sidereal_deg_raw": round(mean_node_data[0], 8),
+            "ketu_sidereal_deg_raw": round((mean_node_data[0] + 180.0) % 360.0, 8),
+            "spashth_rahu_sidereal_deg_raw": round(true_node_data[0], 8),
+            "spashth_ketu_sidereal_deg_raw": round((true_node_data[0] + 180.0) % 360.0, 8),
             "lagna_sidereal_deg_raw": round(lagna_raw, 8),
             "drik_display_offset_deg": DRIK_DISPLAY_OFFSET_DEG,
             "drik_lagna_display_offset_deg": DRIK_LAGNA_DISPLAY_OFFSET_DEG,
@@ -165,6 +188,10 @@ def compute_chart_snapshot(
             "guru_rashi": jupiter_rashi,
             "shukra_rashi": venus_rashi,
             "shani_rashi": saturn_rashi,
+            "rahu_rashi": mean_rahu_rashi,
+            "ketu_rashi": mean_ketu_rashi,
+            "spashth_rahu_rashi": true_rahu_rashi,
+            "spashth_ketu_rashi": true_ketu_rashi,
             "sun_nakshatra": sun_nakshatra,
             "sun_pada": sun_pada,
             "moon_nakshatra": moon_nakshatra,
@@ -181,6 +208,14 @@ def compute_chart_snapshot(
             "shukra_pada": venus_pada,
             "shani_nakshatra": saturn_nakshatra,
             "shani_pada": saturn_pada,
+            "rahu_nakshatra": mean_rahu_nakshatra,
+            "rahu_pada": mean_rahu_pada,
+            "ketu_nakshatra": mean_ketu_nakshatra,
+            "ketu_pada": mean_ketu_pada,
+            "spashth_rahu_nakshatra": true_rahu_nakshatra,
+            "spashth_rahu_pada": true_rahu_pada,
+            "spashth_ketu_nakshatra": true_ketu_nakshatra,
+            "spashth_ketu_pada": true_ketu_pada,
         },
     }
 

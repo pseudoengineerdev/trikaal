@@ -40,6 +40,10 @@ Captured reference for this repo (as of 2026-03-31):
 - Guru full degree: `7.04`
 - Shukra full degree: `120.92`
 - Shani full degree: `20.65`
+- Rahu full degree: `110.78`
+- Ketu full degree: `290.78`
+- Spashth Rahu full degree: `109.38`
+- Spashth Ketu full degree: `289.38`
 - Sun Rashi: `Mitu`
 - Moon Rashi: `Kumb`
 - Lagna Rashi: `Kany`
@@ -51,6 +55,10 @@ Captured reference for this repo (as of 2026-03-31):
 - Guru Rashi/Nakshatra/Pada: `Mesh / Ashwini / 3`
 - Shukra Rashi/Nakshatra/Pada: `Simh / Magha / 1`
 - Shani Rashi/Nakshatra/Pada: `Mesh / Bharani / 3`
+- Rahu Rashi/Nakshatra/Pada: `Kark / Ashlesha / 2`
+- Ketu Rashi/Nakshatra/Pada: `Maka / Shravana / 4`
+- Spashth Rahu Rashi/Nakshatra/Pada: `Kark / Ashlesha / 1`
+- Spashth Ketu Rashi/Nakshatra/Pada: `Maka / Shravana / 3`
 
 Current engine output (same input):
 
