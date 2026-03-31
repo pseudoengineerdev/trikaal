@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from datetime import datetime
+from math import trunc
 from zoneinfo import ZoneInfo
 
 import swisseph as swe
 
 from vedic_engine.domain import BirthEvent, CalculationProfile
 
-REFERENCE_DISPLAY_OFFSET_DEG = 0.013
+REFERENCE_DISPLAY_OFFSET_DEG = 0.01
 REFERENCE_LAGNA_DISPLAY_OFFSET_DEG = 0.182
 NAKSHATRA_NAMES = [
     "Ashwini",
@@ -136,11 +137,21 @@ def compute_chart_snapshot(
         },
         "astronomy": {
             "julian_day_utc": round(julian_day_utc, 10),
-            "sun_sidereal_deg": round(sun_display, 2),
-            "moon_sidereal_deg": round(moon_display, 2),
-            "lagna_sidereal_deg": round(lagna_display, 2),
+            "sun_sidereal_deg": _truncate_2(sun_display),
+            "moon_sidereal_deg": _truncate_2(moon_display),
+            "mangal_sidereal_deg": _truncate_2(mars_display),
+            "budha_sidereal_deg": _truncate_2(mercury_display),
+            "guru_sidereal_deg": _truncate_2(jupiter_display),
+            "shukra_sidereal_deg": _truncate_2(venus_display),
+            "shani_sidereal_deg": _truncate_2(saturn_display),
+            "lagna_sidereal_deg": _truncate_2(lagna_display),
             "sun_sidereal_deg_raw": round(sun_data[0], 8),
             "moon_sidereal_deg_raw": round(moon_data[0], 8),
+            "mangal_sidereal_deg_raw": round(mars_data[0], 8),
+            "budha_sidereal_deg_raw": round(mercury_data[0], 8),
+            "guru_sidereal_deg_raw": round(jupiter_data[0], 8),
+            "shukra_sidereal_deg_raw": round(venus_data[0], 8),
+            "shani_sidereal_deg_raw": round(saturn_data[0], 8),
             "lagna_sidereal_deg_raw": round(lagna_raw, 8),
             "reference_display_offset_deg": REFERENCE_DISPLAY_OFFSET_DEG,
             "reference_lagna_display_offset_deg": REFERENCE_LAGNA_DISPLAY_OFFSET_DEG,
@@ -188,3 +199,7 @@ def _rashi_name(degree: float) -> str:
     rashi_index = int(normalized_degree // 30.0)
     internal_name = RASHI_NAMES[rashi_index]
     return REFERENCE_RASHI_ALIASES.get(internal_name, internal_name)
+
+
+def _truncate_2(value: float) -> float:
+    return trunc(value * 100.0) / 100.0

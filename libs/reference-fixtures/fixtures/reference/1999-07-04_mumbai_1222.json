@@ -23,6 +23,11 @@
     "astronomy": {
       "sun_sidereal_deg": 78.02,
       "moon_sidereal_deg": 320.35,
+      "mangal_sidereal_deg": 185.85,
+      "budha_sidereal_deg": 102.75,
+      "guru_sidereal_deg": 7.04,
+      "shukra_sidereal_deg": 120.92,
+      "shani_sidereal_deg": 20.65,
       "lagna_sidereal_deg": 163.65
     },
     "vedic": {

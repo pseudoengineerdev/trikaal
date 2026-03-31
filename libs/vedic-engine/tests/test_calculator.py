@@ -22,12 +22,27 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert isinstance(snapshot["astronomy"]["julian_day_utc"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["mangal_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["budha_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["guru_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["shukra_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["shani_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["lagna_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg_raw"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["mangal_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["budha_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["guru_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["shukra_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["shani_sidereal_deg_raw"], float)
     assert isinstance(snapshot["astronomy"]["lagna_sidereal_deg_raw"], float)
-    assert snapshot["astronomy"]["reference_display_offset_deg"] == 0.013
+    assert snapshot["astronomy"]["reference_display_offset_deg"] == 0.01
     assert snapshot["astronomy"]["reference_lagna_display_offset_deg"] == 0.182
+    assert snapshot["astronomy"]["mangal_sidereal_deg"] == 185.85
+    assert snapshot["astronomy"]["budha_sidereal_deg"] == 102.75
+    assert snapshot["astronomy"]["guru_sidereal_deg"] == 7.04
+    assert snapshot["astronomy"]["shukra_sidereal_deg"] == 120.92
+    assert snapshot["astronomy"]["shani_sidereal_deg"] == 20.65
     assert snapshot["vedic"]["sun_rashi"] == "Mitu"
     assert snapshot["vedic"]["moon_rashi"] == "Kumb"
     assert snapshot["vedic"]["lagna_rashi"] == "Kany"
