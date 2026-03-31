@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'features/charts/presentation/birth_input_page.dart';
+
 void main() {
   runApp(const TrikaalApp());
 }
@@ -12,11 +14,8 @@ class TrikaalApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trikaal',
       debugShowCheckedModeBanner: false,
-      home: const Scaffold(
-        body: Center(
-          child: Text('Trikaal mobile app scaffold is ready for API integration.'),
-        ),
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.orange),
+      home: const BirthInputPage(),
     );
   }
 }

@@ -19,11 +19,9 @@ class ChartApiException implements Exception {
 }
 
 class ChartApiClient {
-  ChartApiClient({
-    String? baseUrl,
-    http.Client? httpClient,
-  })  : _baseUrl = baseUrl ?? AppConfig.apiBaseUrl,
-        _httpClient = httpClient ?? http.Client();
+  ChartApiClient({String? baseUrl, http.Client? httpClient})
+    : _baseUrl = baseUrl ?? AppConfig.apiBaseUrl,
+      _httpClient = httpClient ?? http.Client();
 
   final String _baseUrl;
   final http.Client _httpClient;
@@ -41,8 +39,9 @@ class ChartApiClient {
   }
 
   Future<PlaceSearchResponse> searchPlaces(String query) async {
-    final uri = Uri.parse('$_baseUrl/v1/places/search')
-        .replace(queryParameters: <String, String>{'query': query});
+    final uri = Uri.parse(
+      '$_baseUrl/v1/places/search',
+    ).replace(queryParameters: <String, String>{'query': query});
     final response = await _httpClient.get(uri);
     final body = _decode(response.body);
     _throwIfError(response.statusCode, body);
