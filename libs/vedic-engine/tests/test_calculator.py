@@ -91,6 +91,18 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["vedic"]["spashth_rahu_pada"] == 1
     assert snapshot["vedic"]["spashth_ketu_nakshatra"] == "Shravana"
     assert snapshot["vedic"]["spashth_ketu_pada"] == 3
+    assert snapshot["bhava"]["lagna_house"] == 1
+    assert snapshot["bhava"]["sun_house"] == 10
+    assert snapshot["bhava"]["moon_house"] == 6
+    assert snapshot["bhava"]["mangal_house"] == 2
+    assert snapshot["bhava"]["budha_house"] == 11
+    assert snapshot["bhava"]["guru_house"] == 8
+    assert snapshot["bhava"]["shukra_house"] == 12
+    assert snapshot["bhava"]["shani_house"] == 8
+    assert snapshot["bhava"]["rahu_house"] == 11
+    assert snapshot["bhava"]["ketu_house"] == 5
+    assert snapshot["bhava"]["spashth_rahu_house"] == 11
+    assert snapshot["bhava"]["spashth_ketu_house"] == 5
 
 
 def test_calculator_computes_for_non_canonical_case() -> None:

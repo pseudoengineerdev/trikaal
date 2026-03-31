@@ -57,6 +57,7 @@ REFERENCE_RASHI_ALIASES = {
     "Mith": "Mitu",
     "Makar": "Maka",
 }
+REFERENCE_ALIAS_TO_INTERNAL_RASHI = {value: key for key, value in REFERENCE_RASHI_ALIASES.items()}
 
 
 def compute_chart_snapshot(
@@ -142,6 +143,17 @@ def compute_chart_snapshot(
     mean_ketu_rashi = _rashi_name(mean_ketu_display)
     true_rahu_rashi = _rashi_name(true_rahu_display)
     true_ketu_rashi = _rashi_name(true_ketu_display)
+    sun_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=sun_rashi)
+    moon_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=moon_rashi)
+    mangal_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=mars_rashi)
+    budha_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=mercury_rashi)
+    guru_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=jupiter_rashi)
+    shukra_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=venus_rashi)
+    shani_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=saturn_rashi)
+    rahu_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=mean_rahu_rashi)
+    ketu_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=mean_ketu_rashi)
+    spashth_rahu_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=true_rahu_rashi)
+    spashth_ketu_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=true_ketu_rashi)
 
     return {
         "meta": {
@@ -217,6 +229,20 @@ def compute_chart_snapshot(
             "spashth_ketu_nakshatra": true_ketu_nakshatra,
             "spashth_ketu_pada": true_ketu_pada,
         },
+        "bhava": {
+            "lagna_house": 1,
+            "sun_house": sun_house,
+            "moon_house": moon_house,
+            "mangal_house": mangal_house,
+            "budha_house": budha_house,
+            "guru_house": guru_house,
+            "shukra_house": shukra_house,
+            "shani_house": shani_house,
+            "rahu_house": rahu_house,
+            "ketu_house": ketu_house,
+            "spashth_rahu_house": spashth_rahu_house,
+            "spashth_ketu_house": spashth_ketu_house,
+        },
     }
 
 
@@ -238,3 +264,11 @@ def _rashi_name(degree: float) -> str:
 
 def _truncate_2(value: float) -> float:
     return trunc(value * 100.0) / 100.0
+
+
+def _house_from_lagna(*, lagna_rashi: str, target_rashi: str) -> int:
+    lagna_internal = REFERENCE_ALIAS_TO_INTERNAL_RASHI.get(lagna_rashi, lagna_rashi)
+    target_internal = REFERENCE_ALIAS_TO_INTERNAL_RASHI.get(target_rashi, target_rashi)
+    lagna_index = RASHI_NAMES.index(lagna_internal)
+    target_index = RASHI_NAMES.index(target_internal)
+    return ((target_index - lagna_index) % 12) + 1
