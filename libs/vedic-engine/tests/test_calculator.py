@@ -27,6 +27,10 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert isinstance(snapshot["astronomy"]["guru_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["shukra_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["shani_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["rahu_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["ketu_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["spashth_rahu_sidereal_deg"], float)
+    assert isinstance(snapshot["astronomy"]["spashth_ketu_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["lagna_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg_raw"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg_raw"], float)
@@ -35,6 +39,10 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert isinstance(snapshot["astronomy"]["guru_sidereal_deg_raw"], float)
     assert isinstance(snapshot["astronomy"]["shukra_sidereal_deg_raw"], float)
     assert isinstance(snapshot["astronomy"]["shani_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["rahu_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["ketu_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["spashth_rahu_sidereal_deg_raw"], float)
+    assert isinstance(snapshot["astronomy"]["spashth_ketu_sidereal_deg_raw"], float)
     assert isinstance(snapshot["astronomy"]["lagna_sidereal_deg_raw"], float)
     assert snapshot["astronomy"]["reference_display_offset_deg"] == 0.01
     assert snapshot["astronomy"]["reference_lagna_display_offset_deg"] == 0.182
@@ -43,6 +51,10 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["astronomy"]["guru_sidereal_deg"] == 7.04
     assert snapshot["astronomy"]["shukra_sidereal_deg"] == 120.92
     assert snapshot["astronomy"]["shani_sidereal_deg"] == 20.65
+    assert snapshot["astronomy"]["rahu_sidereal_deg"] == 110.78
+    assert snapshot["astronomy"]["ketu_sidereal_deg"] == 290.78
+    assert snapshot["astronomy"]["spashth_rahu_sidereal_deg"] == 109.38
+    assert snapshot["astronomy"]["spashth_ketu_sidereal_deg"] == 289.38
     assert snapshot["vedic"]["sun_rashi"] == "Mitu"
     assert snapshot["vedic"]["moon_rashi"] == "Kumb"
     assert snapshot["vedic"]["lagna_rashi"] == "Kany"
@@ -51,6 +63,10 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["vedic"]["guru_rashi"] == "Mesh"
     assert snapshot["vedic"]["shukra_rashi"] == "Simh"
     assert snapshot["vedic"]["shani_rashi"] == "Mesh"
+    assert snapshot["vedic"]["rahu_rashi"] == "Kark"
+    assert snapshot["vedic"]["ketu_rashi"] == "Maka"
+    assert snapshot["vedic"]["spashth_rahu_rashi"] == "Kark"
+    assert snapshot["vedic"]["spashth_ketu_rashi"] == "Maka"
     assert snapshot["vedic"]["sun_nakshatra"] == "Ardra"
     assert snapshot["vedic"]["sun_pada"] == 4
     assert snapshot["vedic"]["moon_nakshatra"] == "P Bhadrapada"
@@ -67,6 +83,14 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["vedic"]["shukra_pada"] == 1
     assert snapshot["vedic"]["shani_nakshatra"] == "Bharani"
     assert snapshot["vedic"]["shani_pada"] == 3
+    assert snapshot["vedic"]["rahu_nakshatra"] == "Ashlesha"
+    assert snapshot["vedic"]["rahu_pada"] == 2
+    assert snapshot["vedic"]["ketu_nakshatra"] == "Shravana"
+    assert snapshot["vedic"]["ketu_pada"] == 4
+    assert snapshot["vedic"]["spashth_rahu_nakshatra"] == "Ashlesha"
+    assert snapshot["vedic"]["spashth_rahu_pada"] == 1
+    assert snapshot["vedic"]["spashth_ketu_nakshatra"] == "Shravana"
+    assert snapshot["vedic"]["spashth_ketu_pada"] == 3
 
 
 def test_calculator_computes_for_non_canonical_case() -> None:

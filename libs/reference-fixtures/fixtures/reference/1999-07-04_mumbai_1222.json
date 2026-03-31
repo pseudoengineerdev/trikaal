@@ -28,6 +28,10 @@
       "guru_sidereal_deg": 7.04,
       "shukra_sidereal_deg": 120.92,
       "shani_sidereal_deg": 20.65,
+      "rahu_sidereal_deg": 110.78,
+      "ketu_sidereal_deg": 290.78,
+      "spashth_rahu_sidereal_deg": 109.38,
+      "spashth_ketu_sidereal_deg": 289.38,
       "lagna_sidereal_deg": 163.65
     },
     "vedic": {
@@ -39,6 +43,10 @@
       "guru_rashi": "Mesh",
       "shukra_rashi": "Simh",
       "shani_rashi": "Mesh",
+      "rahu_rashi": "Kark",
+      "ketu_rashi": "Maka",
+      "spashth_rahu_rashi": "Kark",
+      "spashth_ketu_rashi": "Maka",
       "sun_nakshatra": "Ardra",
       "sun_pada": 4,
       "moon_nakshatra": "P Bhadrapada",
@@ -54,7 +62,15 @@
       "shukra_nakshatra": "Magha",
       "shukra_pada": 1,
       "shani_nakshatra": "Bharani",
-      "shani_pada": 3
+      "shani_pada": 3,
+      "rahu_nakshatra": "Ashlesha",
+      "rahu_pada": 2,
+      "ketu_nakshatra": "Shravana",
+      "ketu_pada": 4,
+      "spashth_rahu_nakshatra": "Ashlesha",
+      "spashth_rahu_pada": 1,
+      "spashth_ketu_nakshatra": "Shravana",
+      "spashth_ketu_pada": 3
     }
   },
   "comparison_rules": {
