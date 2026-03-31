@@ -45,6 +45,19 @@ class PlaceChartResponse(BaseModel):
     snapshot: dict[str, Any]
 
 
+class ComputeChartRequest(BaseModel):
+    date_of_birth: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    time_of_birth: str = Field(pattern=r"^\d{2}:\d{2}$")
+    place_of_birth: str = Field(min_length=1)
+
+
+class ComputeChartResponse(BaseModel):
+    profile: dict[str, Any]
+    normalized_input: dict[str, str]
+    resolved_place: dict[str, Any]
+    snapshot: dict[str, Any]
+
+
 def generate_chart_snapshot(request: ChartRequest) -> ChartResponse:
     _ensure_timezone_exists(request.timezone)
 
@@ -90,6 +103,26 @@ def generate_chart_snapshot_from_place(request: PlaceChartRequest) -> PlaceChart
         input=request.model_dump(),
         resolved_place=_place_as_dict(place),
         snapshot=chart_response.snapshot,
+    )
+
+
+def compute_chart(request: ComputeChartRequest) -> ComputeChartResponse:
+    place_request = PlaceChartRequest(
+        local_date=request.date_of_birth,
+        local_time=request.time_of_birth,
+        place_query=request.place_of_birth,
+    )
+    place_response = generate_chart_snapshot_from_place(place_request)
+
+    return ComputeChartResponse(
+        profile=place_response.profile,
+        normalized_input={
+            "local_date": place_request.local_date,
+            "local_time": place_request.local_time,
+            "place_query": " ".join(place_request.place_query.split()),
+        },
+        resolved_place=place_response.resolved_place,
+        snapshot=place_response.snapshot,
     )
 
 
