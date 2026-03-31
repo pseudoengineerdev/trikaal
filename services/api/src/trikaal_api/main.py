@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from trikaal_api.canonical import CanonicalPreview, build_canonical_preview
 from trikaal_api.parity import ParityResult, run_canonical_drik_parity_check
 
 
@@ -18,3 +19,8 @@ def health() -> dict[str, str]:
 @app.get("/v1/engine/parity/canonical-drik", response_model=ParityResult)
 def canonical_drik_parity() -> ParityResult:
     return run_canonical_drik_parity_check()
+
+
+@app.get("/v1/engine/canonical-preview", response_model=CanonicalPreview)
+def canonical_preview() -> CanonicalPreview:
+    return build_canonical_preview()
