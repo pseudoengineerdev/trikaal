@@ -1,6 +1,7 @@
 from zoneinfo import ZoneInfoNotFoundError
 
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 
 from trikaal_api.canonical import CanonicalPreview, build_canonical_preview
 from trikaal_api.chart import (
@@ -12,14 +13,19 @@ from trikaal_api.chart import (
     generate_chart_snapshot_from_place,
 )
 from trikaal_api.parity import ParityResult, run_canonical_drik_parity_check
-from trikaal_api.resolver import PlaceNotFoundError
-
+from trikaal_api.resolver import PlaceNotFoundError, search_places
 
 app = FastAPI(
     title="Trikaal API",
     version="0.1.0",
     summary="Backend API for Vedic astrology calculations and reports.",
 )
+
+
+class PlaceSearchResponse(BaseModel):
+    query: str
+    count: int
+    matches: list[dict[str, str | float]]
 
 
 @app.get("/health")
@@ -42,7 +48,10 @@ def chart(request: ChartRequest) -> ChartResponse:
     try:
         return generate_chart_snapshot(request)
     except ZoneInfoNotFoundError as exc:
-        raise HTTPException(status_code=422, detail=f"Unknown timezone: {request.timezone}") from exc
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unknown timezone: {request.timezone}",
+        ) from exc
 
 
 @app.post("/v1/engine/chart-from-place", response_model=PlaceChartResponse)
@@ -51,3 +60,18 @@ def chart_from_place(request: PlaceChartRequest) -> PlaceChartResponse:
         return generate_chart_snapshot_from_place(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/v1/places/search", response_model=PlaceSearchResponse)
+def place_search(query: str) -> PlaceSearchResponse:
+    matches = [
+        {
+            "place_label": place.place_label,
+            "latitude": place.latitude,
+            "longitude": place.longitude,
+            "timezone": place.timezone,
+            "elevation_m": place.elevation_m,
+        }
+        for place in search_places(query)
+    ]
+    return PlaceSearchResponse(query=query, count=len(matches), matches=matches)
