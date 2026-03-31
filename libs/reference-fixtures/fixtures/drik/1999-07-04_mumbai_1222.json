@@ -26,6 +26,9 @@
       "lagna_sidereal_deg": 163.65
     },
     "vedic": {
+      "sun_rashi": "Mitu",
+      "moon_rashi": "Kumb",
+      "lagna_rashi": "Kany",
       "sun_nakshatra": "Ardra",
       "sun_pada": 4,
       "moon_nakshatra": "P Bhadrapada",

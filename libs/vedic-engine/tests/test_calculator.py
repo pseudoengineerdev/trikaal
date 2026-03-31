@@ -28,6 +28,9 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert isinstance(snapshot["astronomy"]["lagna_sidereal_deg_raw"], float)
     assert snapshot["astronomy"]["drik_display_offset_deg"] == 0.013
     assert snapshot["astronomy"]["drik_lagna_display_offset_deg"] == 0.182
+    assert snapshot["vedic"]["sun_rashi"] == "Mitu"
+    assert snapshot["vedic"]["moon_rashi"] == "Kumb"
+    assert snapshot["vedic"]["lagna_rashi"] == "Kany"
     assert snapshot["vedic"]["sun_nakshatra"] == "Ardra"
     assert snapshot["vedic"]["sun_pada"] == 4
     assert snapshot["vedic"]["moon_nakshatra"] == "P Bhadrapada"

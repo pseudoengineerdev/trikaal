@@ -35,6 +35,9 @@ Captured reference for this repo (as of 2026-03-31):
 - Sun (Surya) full degree: `78.02`
 - Moon (Chandra) full degree: `320.35`
 - Lagna full degree: `163.65`
+- Sun Rashi: `Mitu`
+- Moon Rashi: `Kumb`
+- Lagna Rashi: `Kany`
 - Sun Nakshatra/Pada: `Ardra / 4`
 - Moon Nakshatra/Pada: `P Bhadrapada / 1`
 - Lagna Nakshatra/Pada: `Hasta / 2`
