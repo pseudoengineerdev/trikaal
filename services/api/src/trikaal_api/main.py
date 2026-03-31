@@ -7,8 +7,11 @@ from trikaal_api.canonical import CanonicalPreview, build_canonical_preview
 from trikaal_api.chart import (
     ChartRequest,
     ChartResponse,
+    ComputeChartRequest,
+    ComputeChartResponse,
     PlaceChartRequest,
     PlaceChartResponse,
+    compute_chart,
     generate_chart_snapshot,
     generate_chart_snapshot_from_place,
 )
@@ -58,6 +61,14 @@ def chart(request: ChartRequest) -> ChartResponse:
 def chart_from_place(request: PlaceChartRequest) -> PlaceChartResponse:
     try:
         return generate_chart_snapshot_from_place(request)
+    except PlaceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/v1/charts/compute", response_model=ComputeChartResponse)
+def charts_compute(request: ComputeChartRequest) -> ComputeChartResponse:
+    try:
+        return compute_chart(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
