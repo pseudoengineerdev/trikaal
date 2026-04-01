@@ -1,3 +1,5 @@
+import '../../../../app/models/custom_place_payload.dart';
+
 class DashaSummary {
   const DashaSummary({
     required this.system,
@@ -29,17 +31,20 @@ class DashaComputeRequest {
     required this.dateOfBirth,
     required this.timeOfBirth,
     required this.placeOfBirth,
+    this.customPlace,
   });
 
   final String dateOfBirth;
   final String timeOfBirth;
   final String placeOfBirth;
+  final CustomPlacePayload? customPlace;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'date_of_birth': dateOfBirth,
       'time_of_birth': timeOfBirth,
       'place_of_birth': placeOfBirth,
+      if (customPlace != null) 'custom_place': customPlace!.toJson(),
     };
   }
 }

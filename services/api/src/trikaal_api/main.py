@@ -65,6 +65,8 @@ def chart_from_place(request: PlaceChartRequest) -> PlaceChartResponse:
         return generate_chart_snapshot_from_place(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
 
 
 @app.post("/v1/charts/compute", response_model=ComputeChartResponse)
@@ -73,6 +75,8 @@ def charts_compute(request: ComputeChartRequest) -> ComputeChartResponse:
         return compute_chart(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
 
 
 @app.post("/v1/dasha/compute", response_model=DashaComputeResponse)
@@ -81,6 +85,8 @@ def dasha_compute(request: DashaComputeRequest) -> DashaComputeResponse:
         return compute_dasha(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
 
 
 @app.get("/v1/places/search", response_model=PlaceSearchResponse)

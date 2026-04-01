@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 from pydantic import BaseModel, Field
 
 from trikaal_api.canonical import VEDIC_ENGINE_SRC
+from trikaal_api.place_models import CustomPlaceInput
 
 if str(VEDIC_ENGINE_SRC) not in sys.path:
     sys.path.insert(0, str(VEDIC_ENGINE_SRC))
@@ -36,6 +37,7 @@ class PlaceChartRequest(BaseModel):
     local_date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     local_time: str = Field(pattern=r"^\d{2}:\d{2}$")
     place_query: str = Field(min_length=1)
+    custom_place: CustomPlaceInput | None = None
 
 
 class PlaceChartResponse(BaseModel):
@@ -49,6 +51,7 @@ class ComputeChartRequest(BaseModel):
     date_of_birth: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     time_of_birth: str = Field(pattern=r"^\d{2}:\d{2}$")
     place_of_birth: str = Field(min_length=1)
+    custom_place: CustomPlaceInput | None = None
 
 
 class ComputeChartResponse(BaseModel):
@@ -86,7 +89,10 @@ def generate_chart_snapshot(request: ChartRequest) -> ChartResponse:
 
 
 def generate_chart_snapshot_from_place(request: PlaceChartRequest) -> PlaceChartResponse:
-    place = resolve_place(request.place_query)
+    place = _resolve_place_input(
+        place_query=request.place_query,
+        custom_place=request.custom_place,
+    )
     chart_request = ChartRequest(
         local_date=request.local_date,
         local_time=request.local_time,
@@ -111,6 +117,7 @@ def compute_chart(request: ComputeChartRequest) -> ComputeChartResponse:
         local_date=request.date_of_birth,
         local_time=request.time_of_birth,
         place_query=request.place_of_birth,
+        custom_place=request.custom_place,
     )
     place_response = generate_chart_snapshot_from_place(place_request)
 
@@ -128,6 +135,15 @@ def compute_chart(request: ComputeChartRequest) -> ComputeChartResponse:
 
 def _ensure_timezone_exists(timezone_name: str) -> None:
     ZoneInfo(timezone_name)
+
+
+def _resolve_place_input(
+    place_query: str,
+    custom_place: CustomPlaceInput | None,
+) -> PlaceResolution:
+    if custom_place is not None:
+        return custom_place.to_place_resolution()
+    return resolve_place(place_query)
 
 
 def _place_as_dict(place: PlaceResolution) -> dict[str, Any]:

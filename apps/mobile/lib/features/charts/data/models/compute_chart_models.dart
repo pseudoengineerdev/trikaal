@@ -1,19 +1,24 @@
+import '../../../../app/models/custom_place_payload.dart';
+
 class ComputeChartRequest {
   const ComputeChartRequest({
     required this.dateOfBirth,
     required this.timeOfBirth,
     required this.placeOfBirth,
+    this.customPlace,
   });
 
   final String dateOfBirth;
   final String timeOfBirth;
   final String placeOfBirth;
+  final CustomPlacePayload? customPlace;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'date_of_birth': dateOfBirth,
       'time_of_birth': timeOfBirth,
       'place_of_birth': placeOfBirth,
+      if (customPlace != null) 'custom_place': customPlace!.toJson(),
     };
   }
 }
@@ -55,6 +60,16 @@ class ResolvedPlace {
   final double longitude;
   final String timezone;
   final double elevationM;
+
+  CustomPlacePayload toCustomPlacePayload() {
+    return CustomPlacePayload(
+      placeLabel: placeLabel,
+      latitude: latitude,
+      longitude: longitude,
+      timezone: timezone,
+      elevationM: elevationM,
+    );
+  }
 
   factory ResolvedPlace.fromJson(Map<String, dynamic> json) {
     return ResolvedPlace(

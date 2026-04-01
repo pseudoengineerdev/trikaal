@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../app/models/custom_place_payload.dart';
 import '../../data/chart_api_client.dart';
 import '../../data/models/compute_chart_models.dart';
 import '../../data/models/place_search_models.dart';
@@ -32,6 +33,7 @@ class BirthChartController extends ChangeNotifier {
     required String dateOfBirth,
     required String timeOfBirth,
     required String placeOfBirth,
+    CustomPlacePayload? customPlace,
   }) async {
     loading = true;
     error = null;
@@ -43,6 +45,7 @@ class BirthChartController extends ChangeNotifier {
           dateOfBirth: dateOfBirth,
           timeOfBirth: timeOfBirth,
           placeOfBirth: placeOfBirth,
+          customPlace: customPlace,
         ),
       );
       result = response;
@@ -82,12 +85,18 @@ class BirthChartController extends ChangeNotifier {
       if (requestId != _placeSearchRequestId) {
         return;
       }
-      placeSuggestions = response.matches;
+      placeSuggestions = _withCustomSuggestion(
+        query: query,
+        matches: response.matches,
+      );
     } catch (_) {
       if (requestId != _placeSearchRequestId) {
         return;
       }
-      placeSuggestions = <PlaceMatch>[];
+      placeSuggestions = _withCustomSuggestion(
+        query: query,
+        matches: const <PlaceMatch>[],
+      );
     } finally {
       if (requestId == _placeSearchRequestId) {
         loadingPlaceSuggestions = false;
@@ -99,5 +108,26 @@ class BirthChartController extends ChangeNotifier {
   void clearPlaceSuggestions() {
     placeSuggestions = <PlaceMatch>[];
     notifyListeners();
+  }
+
+  List<PlaceMatch> _withCustomSuggestion({
+    required String query,
+    required List<PlaceMatch> matches,
+  }) {
+    final normalizedQuery = _normalize(query);
+    final hasExact = matches.any((PlaceMatch match) {
+      return _normalize(match.placeLabel) == normalizedQuery;
+    });
+    if (hasExact) {
+      return matches;
+    }
+    return <PlaceMatch>[
+      ...matches,
+      PlaceMatch.custom(query),
+    ];
+  }
+
+  String _normalize(String value) {
+    return value.toLowerCase().trim();
   }
 }

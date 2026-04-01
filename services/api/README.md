@@ -106,8 +106,38 @@ curl "http://127.0.0.1:8000/v1/places/search?query=mum"
 
 Resolver behavior:
 
-- Uses a global city dataset (30k+ cities) for worldwide lookup.
+- Uses a global GeoNames city dataset (`cities500`, 2,20,000+ cities) for worldwide lookup.
 - Keeps curated aliases (for example, `Bombay` -> `Mumbai, India`) for compatibility.
+- Falls back to external geocoding (Mapbox/Google/Nominatim) when a city is not in local index.
+
+### Optional Custom Place Payload
+
+When the client already has precise coordinates + timezone, send `custom_place`
+to bypass name resolution ambiguity:
+
+```json
+{
+  "date_of_birth": "1999-07-04",
+  "time_of_birth": "12:22",
+  "place_of_birth": "Typed by user",
+  "custom_place": {
+    "place_label": "Custom City, Testland",
+    "latitude": 19.076,
+    "longitude": 72.8777,
+    "timezone": "Asia/Kolkata",
+    "elevation_m": 14.0
+  }
+}
+```
+
+### Geocoding Environment Variables
+
+- `TRIKAAL_GEONAMES_MIN_CITY_POPULATION` default `500`.
+- `TRIKAAL_ENABLE_FALLBACK_GEOCODING` default `1`.
+- `TRIKAAL_MAPBOX_ACCESS_TOKEN` optional (preferred fallback when set).
+- `TRIKAAL_GOOGLE_MAPS_API_KEY` optional (fallback when set).
+- `TRIKAAL_NOMINATIM_EMAIL` optional (recommended for Nominatim policy).
+- `TRIKAAL_GEOCODER_TIMEOUT_SECONDS` default `2.5`.
 
 ## Dasha Compute
 

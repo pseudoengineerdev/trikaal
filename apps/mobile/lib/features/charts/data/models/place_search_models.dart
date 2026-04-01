@@ -28,6 +28,7 @@ class PlaceMatch {
     required this.longitude,
     required this.timezone,
     required this.elevationM,
+    this.isCustom = false,
   });
 
   final String placeLabel;
@@ -35,6 +36,7 @@ class PlaceMatch {
   final double longitude;
   final String timezone;
   final double elevationM;
+  final bool isCustom;
 
   factory PlaceMatch.fromJson(Map<String, dynamic> json) {
     return PlaceMatch(
@@ -43,6 +45,18 @@ class PlaceMatch {
       longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
       timezone: (json['timezone'] as String?) ?? '',
       elevationM: (json['elevation_m'] as num?)?.toDouble() ?? 0.0,
+      isCustom: (json['is_custom'] as bool?) ?? false,
+    );
+  }
+
+  factory PlaceMatch.custom(String rawQuery) {
+    return PlaceMatch(
+      placeLabel: rawQuery,
+      latitude: 0.0,
+      longitude: 0.0,
+      timezone: 'Resolve automatically at compute time',
+      elevationM: 0.0,
+      isCustom: true,
     );
   }
 }

@@ -22,12 +22,19 @@ class PlaceSuggestionList extends StatelessWidget {
       ),
       child: Column(
         children: suggestions
-            .take(5)
+            .take(6)
             .map(
               (place) => ListTile(
                 dense: true,
+                leading: Icon(
+                  place.isCustom ? Icons.edit_location_alt : Icons.location_on,
+                ),
                 title: Text(place.placeLabel),
-                subtitle: Text(place.timezone),
+                subtitle: Text(
+                  place.isCustom
+                      ? 'Use as entered (custom place)'
+                      : place.timezone,
+                ),
                 onTap: () => onTap(place),
               ),
             )

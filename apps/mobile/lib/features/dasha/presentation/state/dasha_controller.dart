@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../../app/models/custom_place_payload.dart';
 import '../../data/dasha_api_client.dart';
 import '../../data/models/dasha_models.dart';
 
@@ -24,6 +25,7 @@ class DashaController extends ChangeNotifier {
     required String dateOfBirth,
     required String timeOfBirth,
     required String placeOfBirth,
+    CustomPlacePayload? customPlace,
   }) async {
     loading = true;
     error = null;
@@ -35,6 +37,7 @@ class DashaController extends ChangeNotifier {
           dateOfBirth: dateOfBirth,
           timeOfBirth: timeOfBirth,
           placeOfBirth: placeOfBirth,
+          customPlace: customPlace,
         ),
       );
       summary = response.dasha;

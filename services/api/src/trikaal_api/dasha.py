@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from trikaal_api.canonical import VEDIC_ENGINE_SRC
+from trikaal_api.place_models import CustomPlaceInput
 from trikaal_api.resolver import PlaceResolution, resolve_place
 
 if str(VEDIC_ENGINE_SRC) not in sys.path:
@@ -18,6 +19,7 @@ class DashaComputeRequest(BaseModel):
     date_of_birth: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
     time_of_birth: str = Field(pattern=r"^\d{2}:\d{2}$")
     place_of_birth: str = Field(min_length=1)
+    custom_place: CustomPlaceInput | None = None
 
 
 class DashaComputeResponse(BaseModel):
@@ -28,7 +30,10 @@ class DashaComputeResponse(BaseModel):
 
 
 def compute_dasha(request: DashaComputeRequest) -> DashaComputeResponse:
-    place = resolve_place(request.place_of_birth)
+    place = _resolve_place_input(
+        place_query=request.place_of_birth,
+        custom_place=request.custom_place,
+    )
     profile = CalculationProfile()
     birth_event = BirthEvent(
         local_date=request.date_of_birth,
@@ -69,3 +74,12 @@ def _place_as_dict(place: PlaceResolution) -> dict[str, Any]:
         "timezone": place.timezone,
         "elevation_m": place.elevation_m,
     }
+
+
+def _resolve_place_input(
+    place_query: str,
+    custom_place: CustomPlaceInput | None,
+) -> PlaceResolution:
+    if custom_place is not None:
+        return custom_place.to_place_resolution()
+    return resolve_place(place_query)
