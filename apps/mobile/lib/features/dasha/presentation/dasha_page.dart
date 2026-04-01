@@ -12,6 +12,9 @@ class DashaPage extends StatefulWidget {
 
 class _DashaPageState extends State<DashaPage> {
   final _controller = DashaController();
+  static const _sampleDob = '1999-07-04';
+  static const _sampleTime = '12:22';
+  static const _samplePlace = 'Mumbai';
 
   @override
   void dispose() {
@@ -22,7 +25,7 @@ class _DashaPageState extends State<DashaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dasha (Preview)')),
+      appBar: AppBar(title: const Text('Dasha')),
       body: AnimatedBuilder(
         animation: _controller,
         builder: (BuildContext context, Widget? child) {
@@ -32,7 +35,7 @@ class _DashaPageState extends State<DashaPage> {
           if (_controller.error != null) {
             return DashaErrorState(
               message: _controller.error!,
-              onRetry: _controller.loadPreview,
+              onRetry: _loadSampleDasha,
             );
           }
           if (_controller.summary == null) {
@@ -42,10 +45,18 @@ class _DashaPageState extends State<DashaPage> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _controller.loading ? null : _controller.loadPreview,
-        label: const Text('Load Preview'),
+        onPressed: _controller.loading ? null : _loadSampleDasha,
+        label: const Text('Compute Dasha'),
         icon: const Icon(Icons.play_arrow),
       ),
+    );
+  }
+
+  Future<void> _loadSampleDasha() {
+    return _controller.loadCurrentDasha(
+      dateOfBirth: _sampleDob,
+      timeOfBirth: _sampleTime,
+      placeOfBirth: _samplePlace,
     );
   }
 }

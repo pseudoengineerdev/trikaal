@@ -8,7 +8,7 @@ class DashaEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('Tap "Load Preview" to fetch Dasha placeholder data.'),
+      child: Text('Tap "Compute Dasha" to fetch Vimshottari Dasha.'),
     );
   }
 }
@@ -74,7 +74,7 @@ class DashaSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Dasha Preview (${summary.system})',
+              'Current Dasha (${summary.system})',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),

@@ -13,19 +13,28 @@ class DashaController extends ChangeNotifier {
   String? error;
   DashaSummary? summary;
 
-  Future<void> loadPreview() async {
+  Future<void> loadCurrentDasha({
+    required String dateOfBirth,
+    required String timeOfBirth,
+    required String placeOfBirth,
+  }) async {
     loading = true;
     error = null;
     notifyListeners();
 
     try {
-      summary = await _apiClient.fetchCurrentDasha(
-        dateOfBirth: '1999-07-04',
-        timeOfBirth: '12:22',
-        placeOfBirth: 'Mumbai',
+      final response = await _apiClient.computeDasha(
+        DashaComputeRequest(
+          dateOfBirth: dateOfBirth,
+          timeOfBirth: timeOfBirth,
+          placeOfBirth: placeOfBirth,
+        ),
       );
+      summary = response.dasha;
+    } on DashaApiException catch (exception) {
+      error = exception.message;
     } catch (_) {
-      error = 'Unable to load Dasha preview right now.';
+      error = 'Unable to compute Dasha right now.';
     } finally {
       loading = false;
       notifyListeners();
