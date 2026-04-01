@@ -101,6 +101,28 @@ Response shape (trimmed):
     "meta": {
       "status": "computed"
     },
+    "panchanga": {
+      "tithi": {
+        "name_vedic": "Krishna Shashthi",
+        "name_english": "Waning Shashthi"
+      },
+      "vara": {
+        "name_vedic": "Ravivara",
+        "name_english": "Sunday"
+      },
+      "nakshatra": {
+        "name_vedic": "P Bhadrapada",
+        "pada": 1
+      },
+      "yoga": {
+        "name_vedic": "Ayushman"
+      },
+      "karana": {
+        "name_vedic": "Garija"
+      },
+      "sunrise": { "local_time": "06:03" },
+      "sunset": { "local_time": "19:13" }
+    },
     "varga": {
       "d1": { "lagna_rashi": "Kany" },
       "d9": { "lagna_rashi": "Maka" }

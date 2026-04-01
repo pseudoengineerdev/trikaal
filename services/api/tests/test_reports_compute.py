@@ -20,6 +20,11 @@ def test_reports_compute_returns_chart_and_dasha_in_one_response() -> None:
     assert payload["resolved_place"]["place_label"] == "Mumbai, Maharashtra, India"
     assert payload["snapshot"]["meta"]["status"] == "computed"
     assert payload["dasha"]["system"] == "Vimshottari"
+    assert payload["snapshot"]["panchanga"]["vara"]["name_vedic"] == "Ravivara"
+    assert payload["snapshot"]["panchanga"]["tithi"]["name_vedic"] == "Krishna Shashthi"
+    assert payload["snapshot"]["panchanga"]["nakshatra"]["name_vedic"] == "P Bhadrapada"
+    assert payload["snapshot"]["panchanga"]["yoga"]["name_vedic"] == "Ayushman"
+    assert payload["snapshot"]["panchanga"]["karana"]["name_vedic"] == "Garija"
     assert len(payload["dasha"]["maha_timeline"]) == 9
     assert len(payload["dasha"]["antar_timeline_current_maha"]) == 9
 
