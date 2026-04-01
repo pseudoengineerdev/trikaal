@@ -1,6 +1,6 @@
 [
   {
-    "place_label": "Mumbai, India",
+    "place_label": "Mumbai, Maharashtra, India",
     "latitude": 19.076,
     "longitude": 72.8777,
     "timezone": "Asia/Kolkata",
@@ -8,7 +8,7 @@
     "aliases": ["mumbai", "mumbai india", "bombay"]
   },
   {
-    "place_label": "Delhi, India",
+    "place_label": "Delhi, Delhi, India",
     "latitude": 28.6139,
     "longitude": 77.209,
     "timezone": "Asia/Kolkata",
@@ -16,7 +16,7 @@
     "aliases": ["delhi", "new delhi", "delhi india", "new delhi india"]
   },
   {
-    "place_label": "Bengaluru, India",
+    "place_label": "Bengaluru, Karnataka, India",
     "latitude": 12.9716,
     "longitude": 77.5946,
     "timezone": "Asia/Kolkata",
@@ -24,7 +24,7 @@
     "aliases": ["bengaluru", "bangalore", "bengaluru india", "bangalore india"]
   },
   {
-    "place_label": "Kolkata, India",
+    "place_label": "Kolkata, West Bengal, India",
     "latitude": 22.5726,
     "longitude": 88.3639,
     "timezone": "Asia/Kolkata",
@@ -32,7 +32,7 @@
     "aliases": ["kolkata", "calcutta", "kolkata india", "calcutta india"]
   },
   {
-    "place_label": "Chennai, India",
+    "place_label": "Chennai, Tamil Nadu, India",
     "latitude": 13.0827,
     "longitude": 80.2707,
     "timezone": "Asia/Kolkata",
@@ -40,7 +40,7 @@
     "aliases": ["chennai", "madras", "chennai india", "madras india"]
   },
   {
-    "place_label": "Hyderabad, India",
+    "place_label": "Hyderabad, Telangana, India",
     "latitude": 17.385,
     "longitude": 78.4867,
     "timezone": "Asia/Kolkata",
@@ -48,7 +48,7 @@
     "aliases": ["hyderabad", "hyderabad india"]
   },
   {
-    "place_label": "Pune, India",
+    "place_label": "Pune, Maharashtra, India",
     "latitude": 18.5204,
     "longitude": 73.8567,
     "timezone": "Asia/Kolkata",
@@ -56,7 +56,7 @@
     "aliases": ["pune", "pune india", "poona", "poona india"]
   },
   {
-    "place_label": "Ahmedabad, India",
+    "place_label": "Ahmedabad, Gujarat, India",
     "latitude": 23.0225,
     "longitude": 72.5714,
     "timezone": "Asia/Kolkata",
