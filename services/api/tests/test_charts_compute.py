@@ -19,7 +19,7 @@ def test_charts_compute_returns_snapshot_for_simple_birth_input() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["profile"]["profile_id"] == "vedic_drik_lahiri_v1"
-    assert payload["resolved_place"]["place_label"] == "Mumbai, India"
+    assert payload["resolved_place"]["place_label"] == "Mumbai, Maharashtra, India"
     assert payload["snapshot"]["meta"]["status"] == "computed"
     assert payload["snapshot"]["vedic"]["sun_rashi"] == "Mitu"
 

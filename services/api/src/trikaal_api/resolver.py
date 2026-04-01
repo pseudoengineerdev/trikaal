@@ -98,12 +98,17 @@ def _search_local_places(query: str, limit: int) -> list[PlaceResolution]:
 
     results: list[PlaceResolution] = []
     seen: set[tuple[str, float, float, str]] = set()
+    seen_labels: set[str] = set()
     for _, record in scored:
         candidate = _as_resolution(record)
         dedupe_key = _place_key(candidate)
+        label_key = _normalize_key(candidate.place_label)
+        if label_key in seen_labels:
+            continue
         if dedupe_key in seen:
             continue
         seen.add(dedupe_key)
+        seen_labels.add(label_key)
         results.append(candidate)
         if len(results) >= limit:
             break
@@ -113,11 +118,16 @@ def _search_local_places(query: str, limit: int) -> list[PlaceResolution]:
 def _merge_unique_places(candidates: list[PlaceResolution], limit: int) -> list[PlaceResolution]:
     merged: list[PlaceResolution] = []
     seen: set[tuple[str, float, float, str]] = set()
+    seen_labels: set[str] = set()
     for candidate in candidates:
         key = _place_key(candidate)
+        label_key = _normalize_key(candidate.place_label)
+        if label_key in seen_labels:
+            continue
         if key in seen:
             continue
         seen.add(key)
+        seen_labels.add(label_key)
         merged.append(candidate)
         if len(merged) >= limit:
             break

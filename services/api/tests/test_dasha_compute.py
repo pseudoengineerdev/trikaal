@@ -17,7 +17,7 @@ def test_dasha_compute_returns_vimshottari_result() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["profile"]["profile_id"] == "vedic_drik_lahiri_v1"
-    assert payload["resolved_place"]["place_label"] == "Mumbai, India"
+    assert payload["resolved_place"]["place_label"] == "Mumbai, Maharashtra, India"
     assert payload["dasha"]["system"] == "Vimshottari"
     assert isinstance(payload["dasha"]["current_maha_dasha"], str)
     assert isinstance(payload["dasha"]["current_antar_dasha"], str)

@@ -12,7 +12,7 @@ def test_place_search_returns_mumbai_match() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["count"] >= 1
-    assert payload["matches"][0]["place_label"] == "Mumbai, India"
+    assert payload["matches"][0]["place_label"] == "Mumbai, Maharashtra, India"
 
 
 def test_place_search_returns_empty_for_unknown_query() -> None:
@@ -42,7 +42,7 @@ def test_place_search_prioritizes_curated_alias_match() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["count"] >= 1
-    assert payload["matches"][0]["place_label"] == "Mumbai, India"
+    assert payload["matches"][0]["place_label"] == "Mumbai, Maharashtra, India"
 
 
 def test_place_search_uses_external_fallback_when_enabled(monkeypatch) -> None:

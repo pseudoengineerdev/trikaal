@@ -82,7 +82,7 @@ Response shape (trimmed):
     "place_query": "Mumbai"
   },
   "resolved_place": {
-    "place_label": "Mumbai, India",
+    "place_label": "Mumbai, Maharashtra, India",
     "latitude": 19.076,
     "longitude": 72.8777,
     "timezone": "Asia/Kolkata",
@@ -108,7 +108,7 @@ Resolver behavior:
 
 - Uses a global GeoNames city dataset (`cities500`, 2,20,000+ cities) for worldwide lookup.
 - Uses GeoNames `admin1CodesASCII` mapping for global region/state labels (for example `City, State/Region, Country`).
-- Keeps curated aliases (for example, `Bombay` -> `Mumbai, India`) for compatibility.
+- Keeps curated aliases (for example, `Bombay` -> `Mumbai, Maharashtra, India`) for compatibility.
 - Falls back to external geocoding (Mapbox/Google/Nominatim) when a city is not in local index.
 
 Data attribution: [GeoNames](https://www.geonames.org/) (cities and admin1 region codes).

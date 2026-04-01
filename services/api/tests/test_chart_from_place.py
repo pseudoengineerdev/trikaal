@@ -16,7 +16,7 @@ def test_chart_from_place_endpoint_resolves_mumbai() -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["resolved_place"]["place_label"] == "Mumbai, India"
+    assert payload["resolved_place"]["place_label"] == "Mumbai, Maharashtra, India"
     assert payload["resolved_place"]["timezone"] == "Asia/Kolkata"
     assert payload["snapshot"]["vedic"]["lagna_rashi"] == "Kany"
 
@@ -34,7 +34,7 @@ def test_chart_from_place_endpoint_resolves_alias_bombay() -> None:
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["resolved_place"]["place_label"] == "Mumbai, India"
+    assert payload["resolved_place"]["place_label"] == "Mumbai, Maharashtra, India"
     assert payload["resolved_place"]["timezone"] == "Asia/Kolkata"
 
 
