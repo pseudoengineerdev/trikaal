@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/state/birth_input_state.dart';
 import 'state/dasha_controller.dart';
 import 'widgets/dasha_state_widgets.dart';
 
 class DashaPage extends StatefulWidget {
-  const DashaPage({super.key});
+  const DashaPage({
+    required this.birthInputState,
+    super.key,
+  });
+
+  final BirthInputState birthInputState;
 
   @override
   State<DashaPage> createState() => _DashaPageState();
@@ -12,9 +18,6 @@ class DashaPage extends StatefulWidget {
 
 class _DashaPageState extends State<DashaPage> {
   final _controller = DashaController();
-  static const _sampleDob = '1999-07-04';
-  static const _sampleTime = '12:22';
-  static const _samplePlace = 'Mumbai';
 
   @override
   void dispose() {
@@ -27,7 +30,10 @@ class _DashaPageState extends State<DashaPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Dasha')),
       body: AnimatedBuilder(
-        animation: _controller,
+        animation: Listenable.merge(<Listenable>[
+          _controller,
+          widget.birthInputState,
+        ]),
         builder: (BuildContext context, Widget? child) {
           if (_controller.loading) {
             return const DashaLoadingState();
@@ -39,9 +45,18 @@ class _DashaPageState extends State<DashaPage> {
             );
           }
           if (_controller.summary == null) {
-            return const DashaEmptyState();
+            return DashaEmptyState(
+              dateOfBirth: widget.birthInputState.dateOfBirth,
+              timeOfBirth: widget.birthInputState.timeOfBirth,
+              placeOfBirth: widget.birthInputState.placeOfBirth,
+            );
           }
-          return DashaSummaryCard(summary: _controller.summary!);
+          return DashaSummaryCard(
+            summary: _controller.summary!,
+            dateOfBirth: widget.birthInputState.dateOfBirth,
+            timeOfBirth: widget.birthInputState.timeOfBirth,
+            placeOfBirth: widget.birthInputState.placeOfBirth,
+          );
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -54,9 +69,9 @@ class _DashaPageState extends State<DashaPage> {
 
   Future<void> _loadSampleDasha() {
     return _controller.loadCurrentDasha(
-      dateOfBirth: _sampleDob,
-      timeOfBirth: _sampleTime,
-      placeOfBirth: _samplePlace,
+      dateOfBirth: widget.birthInputState.dateOfBirth,
+      timeOfBirth: widget.birthInputState.timeOfBirth,
+      placeOfBirth: widget.birthInputState.placeOfBirth,
     );
   }
 }
