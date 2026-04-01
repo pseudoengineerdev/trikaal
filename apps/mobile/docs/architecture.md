@@ -30,6 +30,7 @@ Path map:
   - Reusable UI blocks for result and state rendering
   - Includes Detailed Kundli sections (graha table, house placements, dignity)
   - Includes tap-to-expand graha deep-view drawer from the graha table
+  - Includes explainable Interpretation cards (what + why + impact)
 
 ## Saved Profiles Flow
 

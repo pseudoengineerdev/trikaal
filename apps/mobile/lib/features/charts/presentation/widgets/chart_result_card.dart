@@ -79,6 +79,16 @@ class ChartResultCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _SectionCard(
+          title: 'Interpretations (Explainable)',
+          children: <Widget>[
+            _InterpretationsSection(
+              cards: result.interpretations.cards,
+              mode: mode,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _SectionCard(
           title: 'Panchanga',
           children: <Widget>[
             _PanchangaSection(
@@ -139,6 +149,201 @@ class ChartResultCard extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _InterpretationsSection extends StatelessWidget {
+  const _InterpretationsSection({
+    required this.cards,
+    required this.mode,
+  });
+
+  final List<ReportInterpretationCard> cards;
+  final TerminologyMode mode;
+
+  @override
+  Widget build(BuildContext context) {
+    if (cards.isEmpty) {
+      return const Text(
+        'No interpretations available yet for this chart.',
+      );
+    }
+    return Column(
+      children: cards
+          .map(
+            (ReportInterpretationCard card) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: _InterpretationCardTile(
+                card: card,
+                mode: mode,
+              ),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class _InterpretationCardTile extends StatelessWidget {
+  const _InterpretationCardTile({
+    required this.card,
+    required this.mode,
+  });
+
+  final ReportInterpretationCard card;
+  final TerminologyMode mode;
+
+  @override
+  Widget build(BuildContext context) {
+    final scorePercent = (card.strengthScore * 100).round().clamp(0, 100);
+    final confidenceLabel = switch (card.confidence) {
+      'high' => 'High confidence',
+      'medium' => 'Medium confidence',
+      _ => 'Emerging signal',
+    };
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                _CategoryChip(category: card.category),
+                _ConfidenceChip(
+                  confidence: card.confidence,
+                  label: '$confidenceLabel ($scorePercent%)',
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              _localizedTextForMode(card.title, mode),
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 6),
+            Text(_localizedTextForMode(card.summary, mode)),
+            const SizedBox(height: 8),
+            Text(
+              'Why this appears',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            ...card.evidence.map(
+              (ReportLocalizedText line) => Padding(
+                padding: const EdgeInsets.only(bottom: 3),
+                child: Text(
+                  '• ${_localizedTextForMode(line, mode)}',
+                  style: const TextStyle(fontSize: 13),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'What it may indicate',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(_localizedTextForMode(card.impact, mode)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({
+    required this.category,
+  });
+
+  final String category;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = switch (category) {
+      'aspects' => 'Aspects / Drishti',
+      'yoga' => 'Yoga',
+      'house_lord' => 'House Lord Logic',
+      _ => category,
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ConfidenceChip extends StatelessWidget {
+  const _ConfidenceChip({
+    required this.confidence,
+    required this.label,
+  });
+
+  final String confidence;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final (Color background, Color foreground) = switch (confidence) {
+      'high' => (
+          colorScheme.tertiaryContainer,
+          colorScheme.onTertiaryContainer,
+        ),
+      'medium' => (
+          colorScheme.primaryContainer,
+          colorScheme.onPrimaryContainer,
+        ),
+      _ => (
+          colorScheme.surfaceContainerHighest,
+          colorScheme.onSurfaceVariant,
+        ),
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: foreground,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -855,6 +1060,16 @@ class _KeyValueRow extends StatelessWidget {
       ),
     );
   }
+}
+
+String _localizedTextForMode(
+  ReportLocalizedText text,
+  TerminologyMode mode,
+) {
+  if (mode == TerminologyMode.vedic) {
+    return text.vedic;
+  }
+  return text.english;
 }
 
 String _pickPanchangaName({

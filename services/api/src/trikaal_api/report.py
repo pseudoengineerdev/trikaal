@@ -6,10 +6,12 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from trikaal_api.canonical import VEDIC_ENGINE_SRC
+from trikaal_api.interpretation import build_interpretations
 from trikaal_api.place_models import CustomPlaceInput
 from trikaal_api.report_contract import (
     ComputeReportResponseContract,
     DashaContract,
+    InterpretationsContract,
     SnapshotContract,
 )
 from trikaal_api.resolver import PlaceResolution, resolve_place
@@ -61,6 +63,9 @@ def compute_report(request: ComputeReportRequest) -> ComputeReportResponse:
     )
     snapshot_contract = SnapshotContract.model_validate(snapshot)
     dasha_contract = DashaContract.model_validate(dasha)
+    interpretations_contract = InterpretationsContract.model_validate(
+        build_interpretations(snapshot_contract)
+    )
 
     return ComputeReportResponse(
         profile=_profile_as_dict(profile),
@@ -72,6 +77,7 @@ def compute_report(request: ComputeReportRequest) -> ComputeReportResponse:
         resolved_place=_place_as_dict(place),
         snapshot=snapshot_contract,
         dasha=dasha_contract,
+        interpretations=interpretations_contract,
     )
 
 

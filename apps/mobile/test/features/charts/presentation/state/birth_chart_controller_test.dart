@@ -540,5 +540,34 @@ ComputeReportResponse _sampleComputeReportResponse() {
       mahaTimeline: <DashaPeriod>[],
       antarTimelineCurrentMaha: <DashaPeriod>[],
     ),
+    interpretations: ReportInterpretations(
+      version: 'v1',
+      cards: <ReportInterpretationCard>[
+        ReportInterpretationCard(
+          cardId: 'yoga_budha_aditya',
+          category: 'yoga',
+          confidence: 'high',
+          strengthScore: 0.86,
+          title: ReportLocalizedText(
+            english: 'Budha-Aditya Yoga pattern detected',
+            vedic: 'Budha-Aditya yoga pattern detected',
+          ),
+          summary: ReportLocalizedText(
+            english: 'Sun and Mercury are in the same house.',
+            vedic: 'Surya and Budha are in the same bhava.',
+          ),
+          impact: ReportLocalizedText(
+            english: 'This can support clear expression and planning.',
+            vedic: 'This can support buddhi and articulate speech.',
+          ),
+          evidence: <ReportLocalizedText>[
+            ReportLocalizedText(
+              english: 'Sun and Mercury both occupy H10.',
+              vedic: 'Surya and Budha both occupy 10th Bhava.',
+            ),
+          ],
+        ),
+      ],
+    ),
   );
 }

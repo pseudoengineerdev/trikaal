@@ -26,6 +26,9 @@ void main() {
       ),
     );
 
+    expect(find.text('Interpretations (Explainable)'), findsOneWidget);
+    expect(find.text('Budha-Aditya Yoga pattern detected'), findsOneWidget);
+
     const sunRowKey = ValueKey<String>('graha-row-sun');
     final verticalScrollable = find
         .byWidgetPredicate(
@@ -186,6 +189,10 @@ ComputeReportResponse _sampleReport() {
       'maha_timeline': _sampleTimeline(),
       'antar_timeline_current_maha': _sampleTimeline(),
     },
+    'interpretations': <String, dynamic>{
+      'version': 'v1',
+      'cards': _sampleInterpretationCards(),
+    },
   });
 }
 
@@ -334,4 +341,33 @@ List<Map<String, dynamic>> _sampleTimeline() {
       'active': index == 0,
     },
   );
+}
+
+List<Map<String, dynamic>> _sampleInterpretationCards() {
+  return <Map<String, dynamic>>[
+    <String, dynamic>{
+      'card_id': 'yoga_budha_aditya',
+      'category': 'yoga',
+      'confidence': 'high',
+      'strength_score': 0.86,
+      'title': <String, dynamic>{
+        'english': 'Budha-Aditya Yoga pattern detected',
+        'vedic': 'Budha-Aditya yoga pattern detected',
+      },
+      'summary': <String, dynamic>{
+        'english': 'Sun and Mercury are in the same house.',
+        'vedic': 'Surya and Budha are in the same bhava.',
+      },
+      'impact': <String, dynamic>{
+        'english': 'This can support clear expression and planning.',
+        'vedic': 'This can support buddhi and articulate speech.',
+      },
+      'evidence': <Map<String, dynamic>>[
+        <String, dynamic>{
+          'english': 'Sun and Mercury both occupy H10.',
+          'vedic': 'Surya and Budha both occupy 10th Bhava.',
+        },
+      ],
+    },
+  ];
 }

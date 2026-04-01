@@ -97,6 +97,35 @@ Response shape (trimmed):
     "maha_timeline": [],
     "antar_timeline_current_maha": []
   },
+  "interpretations": {
+    "version": "v1",
+    "cards": [
+      {
+        "card_id": "yoga_budha_aditya",
+        "category": "yoga",
+        "confidence": "high",
+        "strength_score": 0.86,
+        "title": {
+          "english": "Budha-Aditya Yoga pattern detected",
+          "vedic": "Budha-Aditya yoga pattern detected"
+        },
+        "summary": {
+          "english": "Sun and Mercury are in the same house.",
+          "vedic": "Surya and Budha are in the same bhava."
+        },
+        "impact": {
+          "english": "This can support clear expression and planning.",
+          "vedic": "This can support buddhi and articulate speech."
+        },
+        "evidence": [
+          {
+            "english": "Sun and Mercury both occupy H10.",
+            "vedic": "Surya and Budha both occupy 10th Bhava."
+          }
+        ]
+      }
+    ]
+  },
   "snapshot": {
     "meta": {
       "status": "computed"

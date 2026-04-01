@@ -281,9 +281,45 @@ class DashaContract(StrictModel):
         return self
 
 
+class LocalizedTextContract(StrictModel):
+    english: str
+    vedic: str
+
+
+class InterpretationCardContract(StrictModel):
+    card_id: str
+    category: str
+    confidence: str
+    strength_score: float
+    title: LocalizedTextContract
+    summary: LocalizedTextContract
+    impact: LocalizedTextContract
+    evidence: list[LocalizedTextContract]
+
+    @model_validator(mode="after")
+    def validate_card(self) -> Self:
+        allowed_categories = {"aspects", "yoga", "house_lord"}
+        if self.category not in allowed_categories:
+            raise ValueError(f"Unsupported interpretation category: {self.category}")
+        allowed_confidence = {"high", "medium", "emerging"}
+        if self.confidence not in allowed_confidence:
+            raise ValueError(f"Unsupported interpretation confidence: {self.confidence}")
+        if not (0.0 <= self.strength_score <= 1.0):
+            raise ValueError("strength_score must be between 0 and 1")
+        if not self.evidence:
+            raise ValueError("evidence must contain at least one line")
+        return self
+
+
+class InterpretationsContract(StrictModel):
+    version: str
+    cards: list[InterpretationCardContract]
+
+
 class ComputeReportResponseContract(StrictModel):
     profile: ProfileContract
     normalized_input: NormalizedInputContract
     resolved_place: ResolvedPlaceContract
     snapshot: SnapshotContract
     dasha: DashaContract
+    interpretations: InterpretationsContract
