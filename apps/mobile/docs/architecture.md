@@ -29,6 +29,7 @@ Path map:
 - `lib/features/charts/presentation/widgets/*`
   - Reusable UI blocks for result and state rendering
   - Includes Detailed Kundli sections (graha table, house placements, dignity)
+  - Includes tap-to-expand graha deep-view drawer from the graha table
 
 ## Saved Profiles Flow
 

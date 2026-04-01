@@ -416,67 +416,278 @@ class _GrahaTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        headingRowHeight: 36,
-        dataRowMinHeight: 34,
-        dataRowMaxHeight: 42,
-        columns: const <DataColumn>[
-          DataColumn(label: Text('Graha')),
-          DataColumn(label: Text('Deg')),
-          DataColumn(label: Text('Speed')),
-          DataColumn(label: Text('D1')),
-          DataColumn(label: Text('Nakshatra')),
-          DataColumn(label: Text('Pada')),
-          DataColumn(label: Text('House')),
-          DataColumn(label: Text('D9')),
-          DataColumn(label: Text('D9 H')),
-          DataColumn(label: Text('Retro')),
-          DataColumn(label: Text('Comb')),
-          DataColumn(label: Text('Dignity')),
-        ],
-        rows: rows.map((ReportGrahaEntry row) {
-          final dignity = evaluateGrahaDignity(
-            grahaKey: row.key,
-            rashiKey: row.rashi,
-          );
-          return DataRow(
-            cells: <DataCell>[
-              DataCell(
-                Text(localizeGraha(row.key, mode, termsState: termsState)),
-              ),
-              DataCell(Text(row.siderealDeg.toStringAsFixed(2))),
-              DataCell(Text(row.speedDegPerDay.toStringAsFixed(3))),
-              DataCell(
-                Text(localizeRashi(row.rashi, mode, termsState: termsState)),
-              ),
-              DataCell(
-                Text(
-                  localizeNakshatra(
-                    row.nakshatra,
-                    mode,
-                    termsState: termsState,
-                  ),
-                ),
-              ),
-              DataCell(Text(row.pada.toString())),
-              DataCell(Text(row.house.toString())),
-              DataCell(
-                Text(localizeRashi(row.d9Rashi, mode, termsState: termsState)),
-              ),
-              DataCell(Text(row.d9House.toString())),
-              DataCell(Text(row.retrograde ? 'Yes' : 'No')),
-              DataCell(Text(row.combust ? 'Yes' : 'No')),
-              DataCell(
-                _DignityBadge(
-                  result: dignity,
-                  mode: mode,
-                ),
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Tap any graha row to open deep details.',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            headingRowHeight: 36,
+            dataRowMinHeight: 34,
+            dataRowMaxHeight: 42,
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Graha')),
+              DataColumn(label: Text('Deg')),
+              DataColumn(label: Text('Speed')),
+              DataColumn(label: Text('D1')),
+              DataColumn(label: Text('Nakshatra')),
+              DataColumn(label: Text('Pada')),
+              DataColumn(label: Text('House')),
+              DataColumn(label: Text('D9')),
+              DataColumn(label: Text('D9 H')),
+              DataColumn(label: Text('Retro')),
+              DataColumn(label: Text('Comb')),
+              DataColumn(label: Text('Dignity')),
             ],
+            rows: rows.map((ReportGrahaEntry row) {
+              final dignity = evaluateGrahaDignity(
+                grahaKey: row.key,
+                rashiKey: row.rashi,
+              );
+              void openDetails() {
+                _showGrahaDetailDrawer(
+                  context: context,
+                  row: row,
+                  mode: mode,
+                  termsState: termsState,
+                  dignity: dignity,
+                );
+              }
+
+              DataCell cell(Widget child) =>
+                  DataCell(child, onTap: openDetails);
+
+              return DataRow(
+                onSelectChanged: (bool? _) => openDetails(),
+                cells: <DataCell>[
+                  cell(
+                    Text(
+                      localizeGraha(row.key, mode, termsState: termsState),
+                      key: ValueKey<String>('graha-row-${row.key}'),
+                    ),
+                  ),
+                  cell(Text(row.siderealDeg.toStringAsFixed(2))),
+                  cell(Text(row.speedDegPerDay.toStringAsFixed(3))),
+                  cell(
+                    Text(
+                        localizeRashi(row.rashi, mode, termsState: termsState)),
+                  ),
+                  cell(
+                    Text(
+                      localizeNakshatra(
+                        row.nakshatra,
+                        mode,
+                        termsState: termsState,
+                      ),
+                    ),
+                  ),
+                  cell(Text(row.pada.toString())),
+                  cell(Text(row.house.toString())),
+                  cell(
+                    Text(
+                      localizeRashi(row.d9Rashi, mode, termsState: termsState),
+                    ),
+                  ),
+                  cell(Text(row.d9House.toString())),
+                  cell(Text(row.retrograde ? 'Yes' : 'No')),
+                  cell(Text(row.combust ? 'Yes' : 'No')),
+                  cell(
+                    _DignityBadge(
+                      result: dignity,
+                      mode: mode,
+                    ),
+                  ),
+                ],
+              );
+            }).toList(growable: false),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+void _showGrahaDetailDrawer({
+  required BuildContext context,
+  required ReportGrahaEntry row,
+  required TerminologyMode mode,
+  required AstrologyTermsState termsState,
+  required GrahaDignityResult dignity,
+}) {
+  final motionLabel = row.retrograde ? 'Retrograde' : 'Direct';
+  final combustLabel = row.combust ? 'Combust' : 'Not Combust';
+
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (BuildContext context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.74,
+        minChildSize: 0.50,
+        maxChildSize: 0.92,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              localizeGraha(
+                                row.key,
+                                mode,
+                                termsState: termsState,
+                              ),
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Graha Deep View',
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Close',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      _DignityBadge(result: dignity, mode: mode),
+                      _DetailFlagPill(label: motionLabel),
+                      _DetailFlagPill(label: combustLabel),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Column(
+                        children: <Widget>[
+                          _KeyValueRow(
+                            label: 'D1 Rashi',
+                            value: localizeRashi(
+                              row.rashi,
+                              mode,
+                              termsState: termsState,
+                            ),
+                          ),
+                          _KeyValueRow(
+                            label: 'D1 House',
+                            value: 'H${row.house}',
+                          ),
+                          _KeyValueRow(
+                            label: 'D9 Rashi',
+                            value: localizeRashi(
+                              row.d9Rashi,
+                              mode,
+                              termsState: termsState,
+                            ),
+                          ),
+                          _KeyValueRow(
+                            label: 'D9 House',
+                            value: 'H${row.d9House}',
+                          ),
+                          _KeyValueRow(
+                            label: 'Nakshatra',
+                            value: localizeNakshatra(
+                              row.nakshatra,
+                              mode,
+                              termsState: termsState,
+                            ),
+                          ),
+                          _KeyValueRow(
+                            label: 'Pada',
+                            value: row.pada.toString(),
+                          ),
+                          _KeyValueRow(
+                            label: 'Sidereal Deg',
+                            value: '${row.siderealDeg.toStringAsFixed(4)}°',
+                          ),
+                          _KeyValueRow(
+                            label: 'Raw Deg',
+                            value: '${row.siderealDegRaw.toStringAsFixed(4)}°',
+                          ),
+                          _KeyValueRow(
+                            label: 'Speed',
+                            value:
+                                '${row.speedDegPerDay.toStringAsFixed(4)}°/day',
+                          ),
+                          _KeyValueRow(
+                            label: 'Retrograde',
+                            value: row.retrograde ? 'Yes' : 'No',
+                          ),
+                          _KeyValueRow(
+                            label: 'Combust',
+                            value: row.combust ? 'Yes' : 'No',
+                          ),
+                          const SizedBox(height: 4),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
-        }).toList(growable: false),
+        },
+      );
+    },
+  );
+}
+
+class _DetailFlagPill extends StatelessWidget {
+  const _DetailFlagPill({
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
     );
   }
