@@ -75,6 +75,20 @@ Additional verified captures (from Drik sidereal pages, 2026-04-01):
 - `drik_tokyo_2005_06_21_1510_v1`
 - `drik_sydney_2010_01_01_0405_v1`
 - `drik_berlin_2020_10_25_0130_v1`
+- `drik_los_angeles_2021_03_14_1230_v1`
+- `drik_los_angeles_2021_11_07_1230_v1`
+- `drik_toronto_2020_03_08_1230_v1`
+- `drik_toronto_2020_11_01_1230_v1`
+- `drik_paris_2019_03_31_1230_v1`
+- `drik_paris_2019_10_27_1230_v1`
+- `drik_london_2018_03_25_1230_v1`
+- `drik_london_2018_10_28_1230_v1`
+- `drik_sydney_2022_04_03_1230_v1`
+- `drik_sydney_2022_10_02_1230_v1`
+- `drik_auckland_2023_04_02_1230_v1`
+- `drik_auckland_2023_09_24_1230_v1`
+- `drik_sao_paulo_2018_11_04_1230_v1`
+- `drik_moscow_2011_03_27_1230_v1`
 
 Captured URLs:
 
@@ -86,10 +100,24 @@ Captured URLs:
 - `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=1850147&date=21/06/2005&time=15:10:00&lang=en`
 - `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2147714&date=01/01/2010&time=04:05:00&lang=en`
 - `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2950159&date=25/10/2020&time=01:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=5368361&date=14/03/2021&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=5368361&date=07/11/2021&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=6167865&date=08/03/2020&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=6167865&date=01/11/2020&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2988507&date=31/03/2019&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2988507&date=27/10/2019&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2643743&date=25/03/2018&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2643743&date=28/10/2018&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2147714&date=03/04/2022&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2147714&date=02/10/2022&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2193733&date=02/04/2023&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2193733&date=24/09/2023&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=3448439&date=04/11/2018&time=12:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=524901&date=27/03/2011&time=12:30:00&lang=en`
 
 Suite status:
 
-- Verified Drik fixtures: `11`
+- Verified Drik fixtures: `25`
 - Provisional fixtures: `0`
 
 Capture note for historical pages crawled without exact seconds in fixture schema:

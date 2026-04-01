@@ -1,0 +1,46 @@
+{
+  "fixture_id": "drik_toronto_2020_11_01_1230_v1",
+  "source": "drik_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "drik_captured",
+  "birth_input": {
+    "local_date": "2020-11-01",
+    "local_time": "12:30",
+    "timezone": "America/Toronto",
+    "latitude": 43.70643,
+    "longitude": -79.39864,
+    "elevation_m": 0.0,
+    "place_label": "Toronto, Ontario, Canada"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 195.59,
+      "moon_sidereal_deg": 27.67
+    },
+    "vedic": {
+      "sun_rashi": "Tula",
+      "moon_rashi": "Mesh",
+      "lagna_rashi": "Dhanu",
+      "sun_nakshatra": "Swati",
+      "sun_pada": 3,
+      "moon_nakshatra": "Krittika",
+      "moon_pada": 1,
+      "lagna_nakshatra": "P Ashadha",
+      "lagna_pada": 4
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

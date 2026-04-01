@@ -1,0 +1,46 @@
+{
+  "fixture_id": "drik_sydney_2022_04_03_1230_v1",
+  "source": "drik_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "drik_captured",
+  "birth_input": {
+    "local_date": "2022-04-03",
+    "local_time": "12:30",
+    "timezone": "Australia/Sydney",
+    "latitude": -33.86785,
+    "longitude": 151.20732,
+    "elevation_m": 0.0,
+    "place_label": "Sydney, New South Wales, Australia"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 349.14,
+      "moon_sidereal_deg": 10.91
+    },
+    "vedic": {
+      "sun_rashi": "Meen",
+      "moon_rashi": "Mesh",
+      "lagna_rashi": "Mitu",
+      "sun_nakshatra": "Revati",
+      "sun_pada": 1,
+      "moon_nakshatra": "Ashwini",
+      "moon_pada": 4,
+      "lagna_nakshatra": "Ardra",
+      "lagna_pada": 1
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

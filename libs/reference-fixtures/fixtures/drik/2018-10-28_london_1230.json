@@ -1,0 +1,46 @@
+{
+  "fixture_id": "drik_london_2018_10_28_1230_v1",
+  "source": "drik_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "drik_captured",
+  "birth_input": {
+    "local_date": "2018-10-28",
+    "local_time": "12:30",
+    "timezone": "Europe/London",
+    "latitude": 51.50853,
+    "longitude": -0.12574,
+    "elevation_m": 0.0,
+    "place_label": "London, England, United Kingdom"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 190.9,
+      "moon_sidereal_deg": 59.49
+    },
+    "vedic": {
+      "sun_rashi": "Tula",
+      "moon_rashi": "Vrish",
+      "lagna_rashi": "Dhanu",
+      "sun_nakshatra": "Swati",
+      "sun_pada": 2,
+      "moon_nakshatra": "Mrigashirsha",
+      "moon_pada": 2,
+      "lagna_nakshatra": "P Ashadha",
+      "lagna_pada": 2
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}
