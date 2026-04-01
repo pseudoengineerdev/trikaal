@@ -107,8 +107,11 @@ curl "http://127.0.0.1:8000/v1/places/search?query=mum"
 Resolver behavior:
 
 - Uses a global GeoNames city dataset (`cities500`, 2,20,000+ cities) for worldwide lookup.
+- Uses GeoNames `admin1CodesASCII` mapping for global region/state labels (for example `City, State/Region, Country`).
 - Keeps curated aliases (for example, `Bombay` -> `Mumbai, India`) for compatibility.
 - Falls back to external geocoding (Mapbox/Google/Nominatim) when a city is not in local index.
+
+Data attribution: [GeoNames](https://www.geonames.org/) (cities and admin1 region codes).
 
 ### Optional Custom Place Payload
 

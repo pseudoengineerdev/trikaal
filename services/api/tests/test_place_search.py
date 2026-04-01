@@ -84,6 +84,17 @@ def test_place_search_includes_state_for_same_name_us_cities() -> None:
     assert any("Pasadena, California, United States" == label for label in labels)
 
 
+def test_place_search_includes_region_for_non_us_cities() -> None:
+    client = TestClient(app)
+    response = client.get("/v1/places/search", params={"query": "london"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    labels = [item["place_label"] for item in payload["matches"]]
+    assert any("London, England, United Kingdom" == label for label in labels)
+    assert any("London, Ontario, Canada" == label for label in labels)
+
+
 def test_place_search_can_prefer_external_results(monkeypatch) -> None:
     class _FakeGeocoder:
         def search_places(self, query: str, limit: int = 5) -> list[ExternalPlaceCandidate]:
