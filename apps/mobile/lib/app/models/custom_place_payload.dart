@@ -13,6 +13,16 @@ class CustomPlacePayload {
   final String timezone;
   final double elevationM;
 
+  factory CustomPlacePayload.fromJson(Map<String, dynamic> json) {
+    return CustomPlacePayload(
+      placeLabel: (json['place_label'] as String?) ?? '',
+      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
+      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      timezone: (json['timezone'] as String?) ?? '',
+      elevationM: (json['elevation_m'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'place_label': placeLabel,

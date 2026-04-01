@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/models/custom_place_payload.dart';
+import '../../../app/models/saved_birth_profile.dart';
 import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
@@ -31,6 +32,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
   late final TextEditingController _dateController;
   late final TextEditingController _timeController;
   late final TextEditingController _placeController;
+  late final VoidCallback _birthInputStateListener;
   final _controller = BirthChartController();
 
   @override
@@ -42,10 +44,13 @@ class _BirthInputPageState extends State<BirthInputPage> {
         TextEditingController(text: widget.birthInputState.timeOfBirth);
     _placeController =
         TextEditingController(text: widget.birthInputState.placeOfBirth);
+    _birthInputStateListener = _onBirthInputStateChanged;
+    widget.birthInputState.addListener(_birthInputStateListener);
   }
 
   @override
   void dispose() {
+    widget.birthInputState.removeListener(_birthInputStateListener);
     _dateController.dispose();
     _timeController.dispose();
     _placeController.dispose();
@@ -67,8 +72,10 @@ class _BirthInputPageState extends State<BirthInputPage> {
     );
     if (_controller.result != null && _controller.error == null) {
       final resolvedPlace = _controller.result!.resolvedPlace;
-      widget.birthInputState
-          .setResolvedPlace(resolvedPlace.toCustomPlacePayload());
+      widget.birthInputState.setResolvedPlace(
+        resolvedPlace.toCustomPlacePayload(),
+        preserveActiveProfile: true,
+      );
       _placeController.text = resolvedPlace.placeLabel;
       _placeController.selection = TextSelection.collapsed(
         offset: _placeController.text.length,
@@ -87,6 +94,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           _controller,
+          widget.birthInputState,
           widget.terminologyModeState,
           widget.astrologyTermsState,
         ]),
@@ -100,6 +108,20 @@ class _BirthInputPageState extends State<BirthInputPage> {
                   TerminologyToggle(
                     mode: widget.terminologyModeState.mode,
                     onChanged: widget.terminologyModeState.setMode,
+                  ),
+                  const SizedBox(height: 12),
+                  _SavedProfilesCard(
+                    profilesLoaded: widget.birthInputState.profilesLoaded,
+                    profilesLoading: widget.birthInputState.profilesLoading,
+                    profilesError: widget.birthInputState.profilesError,
+                    profiles: widget.birthInputState.savedProfiles,
+                    activeProfileId: widget.birthInputState.activeProfileId,
+                    onSaveNew: _onSaveNewProfile,
+                    onUseProfile: _onUseProfile,
+                    onRenameProfile: _onRenameProfile,
+                    onSetDefaultProfile: _onSetDefaultProfile,
+                    onUpdateProfileFromCurrent: _onUpdateProfileFromCurrent,
+                    onDeleteProfile: _onDeleteProfile,
                   ),
                   const SizedBox(height: 12),
                   Form(
@@ -233,6 +255,231 @@ class _BirthInputPageState extends State<BirthInputPage> {
     _controller.clearPlaceSuggestions();
   }
 
+  void _onBirthInputStateChanged() {
+    _syncController(_dateController, widget.birthInputState.dateOfBirth);
+    _syncController(_timeController, widget.birthInputState.timeOfBirth);
+    _syncController(_placeController, widget.birthInputState.placeOfBirth);
+  }
+
+  void _syncController(
+    TextEditingController controller,
+    String nextValue,
+  ) {
+    if (controller.text == nextValue) {
+      return;
+    }
+    controller.text = nextValue;
+    controller.selection = TextSelection.collapsed(
+      offset: controller.text.length,
+    );
+  }
+
+  Future<void> _onSaveNewProfile() async {
+    if (!widget.birthInputState.canSaveCurrentAsProfile) {
+      _showInfo(
+        'Enter date, time, and place first. Then save this as a profile.',
+      );
+      return;
+    }
+    final profileName = await _showNameDialog(
+      title: 'Save Profile',
+      hintText: 'Profile name',
+      initialValue: _suggestProfileName(),
+      confirmLabel: 'Save',
+    );
+    if (profileName == null) {
+      return;
+    }
+
+    final didSave =
+        await widget.birthInputState.createProfile(name: profileName);
+    if (!mounted) {
+      return;
+    }
+    if (didSave) {
+      _showInfo('Profile saved.');
+      return;
+    }
+    _showInfo(
+        widget.birthInputState.profilesError ?? 'Could not save profile.');
+  }
+
+  void _onUseProfile(String profileId) {
+    widget.birthInputState.applyProfile(profileId);
+    _controller.clearPlaceSuggestions();
+  }
+
+  Future<void> _onRenameProfile(SavedBirthProfile profile) async {
+    final nextName = await _showNameDialog(
+      title: 'Rename Profile',
+      hintText: 'Profile name',
+      initialValue: profile.name,
+      confirmLabel: 'Rename',
+    );
+    if (nextName == null) {
+      return;
+    }
+
+    final didRename = await widget.birthInputState.renameProfile(
+      profileId: profile.id,
+      name: nextName,
+    );
+    if (!mounted) {
+      return;
+    }
+    if (didRename) {
+      _showInfo('Profile renamed.');
+      return;
+    }
+    _showInfo(
+        widget.birthInputState.profilesError ?? 'Could not rename profile.');
+  }
+
+  Future<void> _onSetDefaultProfile(SavedBirthProfile profile) async {
+    final didSet = await widget.birthInputState.setDefaultProfile(profile.id);
+    if (!mounted) {
+      return;
+    }
+    if (didSet) {
+      _showInfo('Default profile updated.');
+      return;
+    }
+    _showInfo('Could not update default profile.');
+  }
+
+  Future<void> _onUpdateProfileFromCurrent(SavedBirthProfile profile) async {
+    if (!widget.birthInputState.canSaveCurrentAsProfile) {
+      _showInfo('Enter date, time, and place before updating this profile.');
+      return;
+    }
+
+    final didUpdate =
+        await widget.birthInputState.updateProfileFromCurrent(profile.id);
+    if (!mounted) {
+      return;
+    }
+    if (didUpdate) {
+      _showInfo('Profile updated with current form values.');
+      return;
+    }
+    _showInfo(
+        widget.birthInputState.profilesError ?? 'Could not update profile.');
+  }
+
+  Future<void> _onDeleteProfile(SavedBirthProfile profile) async {
+    final shouldDelete = await _showDeleteConfirmation(profile.name);
+    if (!mounted || !shouldDelete) {
+      return;
+    }
+
+    final didDelete = await widget.birthInputState.deleteProfile(profile.id);
+    if (!mounted) {
+      return;
+    }
+    if (didDelete) {
+      _showInfo('Profile deleted.');
+      return;
+    }
+    _showInfo('Could not delete profile.');
+  }
+
+  Future<String?> _showNameDialog({
+    required String title,
+    required String hintText,
+    required String initialValue,
+    required String confirmLabel,
+  }) async {
+    final controller = TextEditingController(text: initialValue);
+    final value = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(hintText: hintText),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) {
+              final text = controller.text.trim();
+              if (text.isNotEmpty) {
+                Navigator.of(context).pop(text);
+              }
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                final text = controller.text.trim();
+                if (text.isEmpty) {
+                  return;
+                }
+                Navigator.of(context).pop(text);
+              },
+              child: Text(confirmLabel),
+            ),
+          ],
+        );
+      },
+    );
+    controller.dispose();
+    return value?.trim();
+  }
+
+  Future<bool> _showDeleteConfirmation(String profileName) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Profile'),
+          content: Text(
+            'Delete "$profileName"? This cannot be undone.',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+    return shouldDelete ?? false;
+  }
+
+  String _suggestProfileName() {
+    final place = _placeController.text.trim();
+    final date = _dateController.text.trim();
+    if (place.isNotEmpty && date.isNotEmpty) {
+      return '$place • $date';
+    }
+    if (place.isNotEmpty) {
+      return place;
+    }
+    if (date.isNotEmpty) {
+      return 'Profile $date';
+    }
+    return 'My Profile';
+  }
+
+  void _showInfo(String message) {
+    if (!mounted) {
+      return;
+    }
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   String? _validateDate(String? value) {
     final input = value?.trim() ?? '';
     final ok = RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(input);
@@ -332,4 +579,199 @@ class _BirthInputPageState extends State<BirthInputPage> {
   }
 
   String _two(int value) => value.toString().padLeft(2, '0');
+}
+
+class _SavedProfilesCard extends StatelessWidget {
+  const _SavedProfilesCard({
+    required this.profilesLoaded,
+    required this.profilesLoading,
+    required this.profilesError,
+    required this.profiles,
+    required this.activeProfileId,
+    required this.onSaveNew,
+    required this.onUseProfile,
+    required this.onRenameProfile,
+    required this.onSetDefaultProfile,
+    required this.onUpdateProfileFromCurrent,
+    required this.onDeleteProfile,
+  });
+
+  final bool profilesLoaded;
+  final bool profilesLoading;
+  final String? profilesError;
+  final List<SavedBirthProfile> profiles;
+  final String? activeProfileId;
+  final Future<void> Function() onSaveNew;
+  final void Function(String profileId) onUseProfile;
+  final Future<void> Function(SavedBirthProfile profile) onRenameProfile;
+  final Future<void> Function(SavedBirthProfile profile) onSetDefaultProfile;
+  final Future<void> Function(SavedBirthProfile profile)
+      onUpdateProfileFromCurrent;
+  final Future<void> Function(SavedBirthProfile profile) onDeleteProfile;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                const Icon(Icons.bookmark_outline),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Saved Profiles',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    onSaveNew();
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Save New'),
+                ),
+              ],
+            ),
+            if (profilesLoading && !profilesLoaded) ...<Widget>[
+              const SizedBox(height: 8),
+              const LinearProgressIndicator(minHeight: 2),
+            ],
+            if (profilesError != null) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                profilesError!,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+            ],
+            if (profilesLoaded && profiles.isEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                'Save your frequently used birth details once, then load them in one tap.',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+            if (profiles.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              for (final profile in profiles)
+                _SavedProfileListTile(
+                  profile: profile,
+                  isActive: activeProfileId == profile.id,
+                  onTap: () => onUseProfile(profile.id),
+                  onActionSelected: (action) async {
+                    switch (action) {
+                      case _ProfileAction.setDefault:
+                        await onSetDefaultProfile(profile);
+                      case _ProfileAction.updateFromCurrent:
+                        await onUpdateProfileFromCurrent(profile);
+                      case _ProfileAction.rename:
+                        await onRenameProfile(profile);
+                      case _ProfileAction.delete:
+                        await onDeleteProfile(profile);
+                    }
+                  },
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SavedProfileListTile extends StatelessWidget {
+  const _SavedProfileListTile({
+    required this.profile,
+    required this.isActive,
+    required this.onTap,
+    required this.onActionSelected,
+  });
+
+  final SavedBirthProfile profile;
+  final bool isActive;
+  final VoidCallback onTap;
+  final Future<void> Function(_ProfileAction action) onActionSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(top: 8),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: isActive
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.outlineVariant,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Icon(
+          profile.isDefault ? Icons.star : Icons.person_outline,
+          color:
+              profile.isDefault ? Theme.of(context).colorScheme.primary : null,
+        ),
+        title: Row(
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                profile.name,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+            if (isActive)
+              Chip(
+                label: const Text('Active'),
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+          ],
+        ),
+        subtitle: Text(
+          '${profile.dateOfBirth} • ${profile.timeOfBirth}\n${profile.placeOfBirth}',
+        ),
+        isThreeLine: true,
+        trailing: PopupMenuButton<_ProfileAction>(
+          tooltip: 'Profile actions',
+          onSelected: (value) {
+            onActionSelected(value);
+          },
+          itemBuilder: (BuildContext context) {
+            return <PopupMenuEntry<_ProfileAction>>[
+              const PopupMenuItem<_ProfileAction>(
+                value: _ProfileAction.setDefault,
+                child: Text('Set as default'),
+              ),
+              const PopupMenuItem<_ProfileAction>(
+                value: _ProfileAction.updateFromCurrent,
+                child: Text('Update from current form'),
+              ),
+              const PopupMenuItem<_ProfileAction>(
+                value: _ProfileAction.rename,
+                child: Text('Rename'),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem<_ProfileAction>(
+                value: _ProfileAction.delete,
+                child: Text('Delete'),
+              ),
+            ];
+          },
+        ),
+      ),
+    );
+  }
+}
+
+enum _ProfileAction {
+  setDefault,
+  updateFromCurrent,
+  rename,
+  delete,
 }

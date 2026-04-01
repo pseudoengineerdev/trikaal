@@ -23,6 +23,7 @@ class _HomeShellPageState extends State<HomeShellPage> {
   void initState() {
     super.initState();
     _astrologyTermsState.load();
+    _birthInputState.loadSavedProfiles();
   }
 
   @override

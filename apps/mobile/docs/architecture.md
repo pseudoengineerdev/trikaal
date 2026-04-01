@@ -29,6 +29,19 @@ Path map:
 - `lib/features/charts/presentation/widgets/*`
   - Reusable UI blocks for result and state rendering
 
+## Saved Profiles Flow
+
+Path map:
+
+- `lib/app/models/saved_birth_profile.dart`
+  - Saved profile contract for DOB/time/place and optional resolved place payload
+- `lib/app/data/saved_profiles_repository.dart`
+  - Local persistence adapter (`SharedPreferences`)
+- `lib/app/state/birth_input_state.dart`
+  - Profile lifecycle: load/create/apply/rename/default/update/delete
+- `lib/features/charts/presentation/birth_input_page.dart`
+  - Saved Profiles UI section and profile actions
+
 ## State Ownership Rule
 
 - Controller owns async/business state (`loading`, `error`, `result`, `suggestions`)
