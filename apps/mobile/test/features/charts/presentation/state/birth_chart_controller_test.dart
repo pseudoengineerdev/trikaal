@@ -540,5 +540,68 @@ ComputeReportResponse _sampleComputeReportResponse() {
       mahaTimeline: <DashaPeriod>[],
       antarTimelineCurrentMaha: <DashaPeriod>[],
     ),
+    interpretations: ReportInterpretations(
+      version: 'v1',
+      cards: <ReportInterpretationCard>[
+        ReportInterpretationCard(
+          cardId: 'yoga_budha_aditya',
+          category: 'yoga',
+          confidence: 'high',
+          strengthScore: 0.86,
+          title: ReportLocalizedText(
+            english: 'Budha-Aditya Yoga pattern detected',
+            vedic: 'Budha-Aditya yoga pattern detected',
+          ),
+          summary: ReportLocalizedText(
+            english: 'Sun and Mercury are in the same house.',
+            vedic: 'Surya and Budha are in the same bhava.',
+          ),
+          impact: ReportLocalizedText(
+            english: 'This can support clear expression and planning.',
+            vedic: 'This can support buddhi and articulate speech.',
+          ),
+          evidence: <ReportLocalizedText>[
+            ReportLocalizedText(
+              english: 'Sun and Mercury both occupy H10.',
+              vedic: 'Surya and Budha both occupy 10th Bhava.',
+            ),
+          ],
+        ),
+      ],
+    ),
+    dailyTransit: ReportDailyTransitBrief(
+      version: 'v1',
+      asOfLocalIso: '2026-04-01T09:15+05:30',
+      timezone: 'Asia/Kolkata',
+      cards: <ReportDailyTransitCard>[
+        ReportDailyTransitCard(
+          cardId: 'daily_transit_moon',
+          transitGrahaKey: 'moon',
+          transitHouseFromLagna: 6,
+          transitRashi: 'Kumb',
+          focusTag: 'Emotions',
+          title: ReportLocalizedText(
+            english: 'Transit Moon focus for today',
+            vedic: 'Daily Chandra transit focus',
+          ),
+          summary: ReportLocalizedText(
+            english: 'Transit Moon is in H6 today.',
+            vedic: 'Transit Chandra is in 6th Bhava today.',
+          ),
+          doItems: <ReportLocalizedText>[
+            ReportLocalizedText(
+              english: 'Review emotional decisions after one day.',
+              vedic: 'Review emotional decisions after one day.',
+            ),
+          ],
+          watchItems: <ReportLocalizedText>[
+            ReportLocalizedText(
+              english: 'Avoid overreaction to temporary mood shifts.',
+              vedic: 'Avoid overreaction to temporary mood shifts.',
+            ),
+          ],
+        ),
+      ],
+    ),
   );
 }
