@@ -72,7 +72,10 @@ class _BirthInputPageState extends State<BirthInputPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Trikaal Birth Chart')),
       body: AnimatedBuilder(
-        animation: _controller,
+        animation: Listenable.merge(<Listenable>[
+          _controller,
+          widget.terminologyModeState,
+        ]),
         builder: (BuildContext context, Widget? _) {
           return SafeArea(
             child: SingleChildScrollView(
