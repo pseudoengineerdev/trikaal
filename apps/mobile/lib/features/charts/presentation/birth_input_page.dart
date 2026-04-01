@@ -56,6 +56,11 @@ class _BirthInputPageState extends State<BirthInputPage> {
       timeOfBirth: _timeController.text.trim(),
       placeOfBirth: _placeController.text.trim(),
     );
+    if (_controller.result != null && _controller.error == null) {
+      widget.birthInputState.markChartComputed();
+    } else {
+      widget.birthInputState.clearComputedChart();
+    }
   }
 
   @override
