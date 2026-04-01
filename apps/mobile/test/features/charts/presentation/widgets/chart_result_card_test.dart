@@ -94,6 +94,40 @@ void main() {
     expect(find.text('Raw Deg'), findsOneWidget);
     expect(find.text('78.0300°'), findsOneWidget);
   });
+
+  testWidgets('tapping interpretation card opens practical guidance drawer',
+      (WidgetTester tester) async {
+    final report = _sampleReport();
+    final termsState = AstrologyTermsState();
+    addTearDown(termsState.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ChartResultCard(
+              result: report,
+              mode: TerminologyMode.english,
+              termsState: termsState,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const interpretationKey =
+        ValueKey<String>('interpretation-card-yoga_budha_aditya');
+    await tester.tap(find.byKey(interpretationKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Practical Interpretation Guide'), findsOneWidget);
+    expect(find.text('Current Dasha Lens'), findsOneWidget);
+    expect(find.text('What to do now'), findsOneWidget);
+    expect(find.text('What to watch'), findsOneWidget);
+    expect(find.text('Timing checkpoint'), findsOneWidget);
+    expect(find.text('Maha Dasha'), findsOneWidget);
+    expect(find.text('Antar Dasha'), findsOneWidget);
+  });
 }
 
 ComputeReportResponse _sampleReport() {

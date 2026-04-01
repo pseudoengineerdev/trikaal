@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/state/astrology_terms_state.dart';
 import '../../../../app/state/terminology_mode_state.dart';
+import '../../../dasha/data/models/dasha_models.dart';
 import '../../../shared/astrology/term_localizer.dart';
 import '../../data/models/compute_report_models.dart';
 import '../astrology/kundli_dignity.dart';
@@ -84,6 +85,8 @@ class ChartResultCard extends StatelessWidget {
             _InterpretationsSection(
               cards: result.interpretations.cards,
               mode: mode,
+              dasha: result.dasha,
+              termsState: termsState,
             ),
           ],
         ),
@@ -157,10 +160,14 @@ class _InterpretationsSection extends StatelessWidget {
   const _InterpretationsSection({
     required this.cards,
     required this.mode,
+    required this.dasha,
+    required this.termsState,
   });
 
   final List<ReportInterpretationCard> cards;
   final TerminologyMode mode;
+  final DashaSummary dasha;
+  final AstrologyTermsState termsState;
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +184,8 @@ class _InterpretationsSection extends StatelessWidget {
               child: _InterpretationCardTile(
                 card: card,
                 mode: mode,
+                dasha: dasha,
+                termsState: termsState,
               ),
             ),
           )
@@ -189,10 +198,14 @@ class _InterpretationCardTile extends StatelessWidget {
   const _InterpretationCardTile({
     required this.card,
     required this.mode,
+    required this.dasha,
+    required this.termsState,
   });
 
   final ReportInterpretationCard card;
   final TerminologyMode mode;
+  final DashaSummary dasha;
+  final AstrologyTermsState termsState;
 
   @override
   Widget build(BuildContext context) {
@@ -203,68 +216,322 @@ class _InterpretationCardTile extends StatelessWidget {
       _ => 'Emerging signal',
     };
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: ValueKey<String>('interpretation-card-${card.cardId}'),
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
+        onTap: () {
+          _showInterpretationDetailDrawer(
+            context: context,
+            card: card,
+            mode: mode,
+            dasha: dasha,
+            termsState: termsState,
+          );
+        },
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border:
+                Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _CategoryChip(category: card.category),
-                _ConfidenceChip(
-                  confidence: card.confidence,
-                  label: '$confidenceLabel ($scorePercent%)',
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: <Widget>[
+                    _CategoryChip(category: card.category),
+                    _ConfidenceChip(
+                      confidence: card.confidence,
+                      label: '$confidenceLabel ($scorePercent%)',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _localizedTextForMode(card.title, mode),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 6),
+                Text(_localizedTextForMode(card.summary, mode)),
+                const SizedBox(height: 8),
+                Text(
+                  'Why this appears',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                ...card.evidence.map(
+                  (ReportLocalizedText line) => Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Text(
+                      '• ${_localizedTextForMode(line, mode)}',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'What it may indicate',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(_localizedTextForMode(card.impact, mode)),
+                const SizedBox(height: 8),
+                Text(
+                  'Tap for practical guidance',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              _localizedTextForMode(card.title, mode),
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 6),
-            Text(_localizedTextForMode(card.summary, mode)),
-            const SizedBox(height: 8),
-            Text(
-              'Why this appears',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            ...card.evidence.map(
-              (ReportLocalizedText line) => Padding(
-                padding: const EdgeInsets.only(bottom: 3),
-                child: Text(
-                  '• ${_localizedTextForMode(line, mode)}',
-                  style: const TextStyle(fontSize: 13),
-                ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'What it may indicate',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(_localizedTextForMode(card.impact, mode)),
-          ],
+          ),
         ),
       ),
     );
   }
+}
+
+void _showInterpretationDetailDrawer({
+  required BuildContext context,
+  required ReportInterpretationCard card,
+  required TerminologyMode mode,
+  required DashaSummary dasha,
+  required AstrologyTermsState termsState,
+}) {
+  final guidance = _guidanceForInterpretation(
+    card: card,
+    dasha: dasha,
+    mode: mode,
+    termsState: termsState,
+  );
+  final mahaLabel = _localizeDashaLord(
+    dasha.currentMahaDasha,
+    mode,
+    termsState: termsState,
+  );
+  final antarLabel = _localizeDashaLord(
+    dasha.currentAntarDasha,
+    mode,
+    termsState: termsState,
+  );
+
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    builder: (BuildContext context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.78,
+        minChildSize: 0.55,
+        maxChildSize: 0.94,
+        builder: (BuildContext context, ScrollController scrollController) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              _localizedTextForMode(card.title, mode),
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Practical Interpretation Guide',
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: 'Close',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: <Widget>[
+                      _CategoryChip(category: card.category),
+                      _ConfidenceChip(
+                        confidence: card.confidence,
+                        label:
+                            '${card.confidence.toUpperCase()} (${(card.strengthScore * 100).round()}%)',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            _localizedTextForMode(card.summary, mode),
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            'Current Dasha Lens',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          _KeyValueRow(
+                            label: 'System',
+                            value: dasha.system,
+                          ),
+                          _KeyValueRow(
+                            label: 'Maha Dasha',
+                            value: mahaLabel,
+                          ),
+                          _KeyValueRow(
+                            label: 'Antar Dasha',
+                            value: antarLabel,
+                          ),
+                          _KeyValueRow(
+                            label: 'Active Window',
+                            value:
+                                '${_shortDate(dasha.activeFrom)} → ${_shortDate(dasha.activeUntil)}',
+                          ),
+                          _KeyValueRow(
+                            label: 'Maha Window',
+                            value:
+                                '${_shortDate(dasha.currentMahaStart)} → ${_shortDate(dasha.currentMahaEnd)}',
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'What to do now',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          ...guidance.doItems.map(
+                            (ReportLocalizedText line) => _GuidanceBullet(
+                              text: _localizedTextForMode(line, mode),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'What to watch',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          ...guidance.watchItems.map(
+                            (ReportLocalizedText line) => _GuidanceBullet(
+                              text: _localizedTextForMode(line, mode),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Timing checkpoint',
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                              _localizedTextForMode(guidance.checkpoint, mode)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
+class _GuidanceBullet extends StatelessWidget {
+  const _GuidanceBullet({
+    required this.text,
+  });
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: Text('• '),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InterpretationGuidance {
+  const _InterpretationGuidance({
+    required this.doItems,
+    required this.watchItems,
+    required this.checkpoint,
+  });
+
+  final List<ReportLocalizedText> doItems;
+  final List<ReportLocalizedText> watchItems;
+  final ReportLocalizedText checkpoint;
 }
 
 class _CategoryChip extends StatelessWidget {
@@ -1070,6 +1337,160 @@ String _localizedTextForMode(
     return text.vedic;
   }
   return text.english;
+}
+
+_InterpretationGuidance _guidanceForInterpretation({
+  required ReportInterpretationCard card,
+  required DashaSummary dasha,
+  required TerminologyMode mode,
+  required AstrologyTermsState termsState,
+}) {
+  final maha = _localizeDashaLord(
+    dasha.currentMahaDasha,
+    mode,
+    termsState: termsState,
+  );
+  final antar = _localizeDashaLord(
+    dasha.currentAntarDasha,
+    mode,
+    termsState: termsState,
+  );
+
+  switch (card.category) {
+    case 'yoga':
+      return _InterpretationGuidance(
+        doItems: <ReportLocalizedText>[
+          ReportLocalizedText(
+            english:
+                'Use this period ($maha / $antar) to execute planned decisions instead of overthinking.',
+            vedic:
+                'Use this period ($maha / $antar) for planned action with clarity and steadiness.',
+          ),
+          const ReportLocalizedText(
+            english:
+                'Track one measurable life goal weekly so this yoga becomes visible in real outcomes.',
+            vedic:
+                'Track one measurable sankalpa weekly so this yoga reflects in lived karma.',
+          ),
+        ],
+        watchItems: const <ReportLocalizedText>[
+          ReportLocalizedText(
+            english:
+                'Avoid ego-driven shortcuts; yoga strength drops when discipline is ignored.',
+            vedic:
+                'Avoid ahankara-driven shortcuts; yoga support weakens without niyam.',
+          ),
+          ReportLocalizedText(
+            english:
+                'Do not interpret one yoga alone as destiny; always balance with dasha and house context.',
+            vedic:
+                'Do not read one yoga in isolation; always check dasha and bhava context.',
+          ),
+        ],
+        checkpoint: ReportLocalizedText(
+          english:
+              'Review progress near ${_shortDate(dasha.activeUntil)} to validate if this yoga is translating into real changes.',
+          vedic:
+              'Recheck near ${_shortDate(dasha.activeUntil)} and see whether this yoga is expressing through practical results.',
+        ),
+      );
+    case 'house_lord':
+      return _InterpretationGuidance(
+        doItems: const <ReportLocalizedText>[
+          ReportLocalizedText(
+            english:
+                'Focus effort on the linked life areas shown in this card and plan concrete weekly actions.',
+            vedic:
+                'Focus on the linked bhava themes and convert them into practical weekly action.',
+          ),
+          ReportLocalizedText(
+            english:
+                'Keep family/career/relationship routines stable; house-lord results improve with consistency.',
+            vedic:
+                'Maintain stable routines; bhava-lord results improve with steadiness.',
+          ),
+        ],
+        watchItems: const <ReportLocalizedText>[
+          ReportLocalizedText(
+            english:
+                'Avoid scattering attention across too many priorities at once.',
+            vedic:
+                'Avoid splitting shakti across too many tracks at the same time.',
+          ),
+          ReportLocalizedText(
+            english:
+                'If stress rises, reduce commitments before making major life decisions.',
+            vedic:
+                'When pressure rises, simplify commitments before big karma choices.',
+          ),
+        ],
+        checkpoint: ReportLocalizedText(
+          english:
+              'Use $maha / $antar timeline checkpoints every 30 days to monitor whether these linked houses are improving together.',
+          vedic:
+              'Under $maha / $antar, review every 30 days to check if linked bhava themes are rising together.',
+        ),
+      );
+    default:
+      return _InterpretationGuidance(
+        doItems: const <ReportLocalizedText>[
+          ReportLocalizedText(
+            english:
+                'Channel this influence into structured decisions, not emotional reactions.',
+            vedic:
+                'Channel this drishti into structured karma, not emotional reactivity.',
+          ),
+          ReportLocalizedText(
+            english:
+                'Write down one action per affected house and execute it this week.',
+            vedic:
+                'Assign one practical action to each affected bhava and execute this week.',
+          ),
+        ],
+        watchItems: const <ReportLocalizedText>[
+          ReportLocalizedText(
+            english:
+                'Do not force outcomes immediately; aspects often unfold in stages.',
+            vedic:
+                'Do not force instant outcomes; drishti effects unfold gradually.',
+          ),
+          ReportLocalizedText(
+            english: 'Watch overreaction in the most activated house areas.',
+            vedic: 'Watch overreaction in the most activated bhava themes.',
+          ),
+        ],
+        checkpoint: ReportLocalizedText(
+          english:
+              'Track behavioral changes until ${_shortDate(dasha.activeUntil)} while $maha / $antar remains active.',
+          vedic:
+              'Track response patterns until ${_shortDate(dasha.activeUntil)} while $maha / $antar is active.',
+        ),
+      );
+  }
+}
+
+String _localizeDashaLord(
+  String lord,
+  TerminologyMode mode, {
+  required AstrologyTermsState termsState,
+}) {
+  final trimmed = lord.trim();
+  if (trimmed.isEmpty) {
+    return '-';
+  }
+  return localizeGraha(trimmed, mode, termsState: termsState);
+}
+
+String _shortDate(String isoValue) {
+  final trimmed = isoValue.trim();
+  if (trimmed.isEmpty) {
+    return '-';
+  }
+  final datePart = trimmed.split('T').first.trim();
+  if (datePart.length >= 10) {
+    return datePart.substring(0, 10);
+  }
+  return datePart;
 }
 
 String _pickPanchangaName({

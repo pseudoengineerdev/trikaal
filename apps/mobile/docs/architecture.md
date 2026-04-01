@@ -31,6 +31,7 @@ Path map:
   - Includes Detailed Kundli sections (graha table, house placements, dignity)
   - Includes tap-to-expand graha deep-view drawer from the graha table
   - Includes explainable Interpretation cards (what + why + impact)
+  - Includes interpretation card detail drawer with dasha-tied action guidance
 
 ## Saved Profiles Flow
 
