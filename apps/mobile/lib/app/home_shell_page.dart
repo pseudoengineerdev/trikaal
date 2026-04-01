@@ -13,13 +13,7 @@ class HomeShellPage extends StatefulWidget {
 
 class _HomeShellPageState extends State<HomeShellPage> {
   int _selectedIndex = 0;
-  late final BirthInputState _birthInputState;
-
-  @override
-  void initState() {
-    super.initState();
-    _birthInputState = BirthInputState();
-  }
+  final BirthInputState _birthInputState = BirthInputState();
 
   @override
   void dispose() {
