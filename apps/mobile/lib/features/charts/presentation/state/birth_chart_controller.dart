@@ -79,6 +79,8 @@ class BirthChartController extends ChangeNotifier {
   }
 
   void clearComputedResult() {
+    loading = false;
+    error = null;
     result = null;
     dashaResult = null;
     notifyListeners();

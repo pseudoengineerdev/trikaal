@@ -224,6 +224,74 @@ void main() {
       expect(state.savedProfiles, isEmpty);
       expect(state.profilesError, isNull);
     });
+
+    test('deleting active profile switches input to fallback profile',
+        () async {
+      final repository = _MemorySavedProfilesRepository(
+        initialProfiles: <SavedBirthProfile>[
+          _profile(
+            id: 'p1',
+            name: 'Primary',
+            date: '1999-07-04',
+            time: '12:22',
+            place: 'Mumbai, Maharashtra, India',
+            timezone: 'Asia/Kolkata',
+            isDefault: true,
+          ),
+          _profile(
+            id: 'p2',
+            name: 'Secondary',
+            date: '2006-07-31',
+            time: '12:22',
+            place: 'Mumbai, Maharashtra, India',
+            timezone: 'Asia/Kolkata',
+          ),
+        ],
+      );
+      final state = BirthInputState(profilesRepository: repository);
+      await state.loadSavedProfiles();
+      state.applyProfile('p2');
+
+      final didDelete = await state.deleteProfile('p2');
+
+      expect(didDelete, isTrue);
+      expect(state.savedProfiles.length, 1);
+      expect(state.activeProfileId, 'p1');
+      expect(state.dateOfBirth, '1999-07-04');
+      expect(state.timeOfBirth, '12:22');
+      expect(state.placeOfBirth, 'Mumbai, Maharashtra, India');
+    });
+
+    test('deleting last active profile clears current input values', () async {
+      final repository = _MemorySavedProfilesRepository(
+        initialProfiles: <SavedBirthProfile>[
+          _profile(
+            id: 'p1',
+            name: 'Only',
+            date: '1999-07-04',
+            time: '12:22',
+            place: 'Mumbai, Maharashtra, India',
+            timezone: 'Asia/Kolkata',
+            isDefault: true,
+          ),
+        ],
+      );
+      final state = BirthInputState(profilesRepository: repository);
+      await state.loadSavedProfiles();
+      state.applyProfile('p1');
+
+      final didDelete = await state.deleteProfile('p1');
+
+      expect(didDelete, isTrue);
+      expect(state.savedProfiles, isEmpty);
+      expect(state.activeProfileId, isNull);
+      expect(state.dateOfBirth, isEmpty);
+      expect(state.timeOfBirth, isEmpty);
+      expect(state.placeOfBirth, isEmpty);
+      expect(state.customPlace, isNull);
+      expect(state.hasComputedChart, isFalse);
+      expect(state.computedDasha, isNull);
+    });
   });
 }
 

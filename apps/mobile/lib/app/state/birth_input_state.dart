@@ -261,6 +261,7 @@ class BirthInputState extends ChangeNotifier {
     if (!hadProfile) {
       return false;
     }
+    final wasActiveProfile = _activeProfileId == profileId;
 
     _savedProfiles =
         _savedProfiles.where((item) => item.id != profileId).toList();
@@ -268,10 +269,19 @@ class BirthInputState extends ChangeNotifier {
         _savedProfiles.every((item) => !item.isDefault)) {
       _savedProfiles[0] = _savedProfiles[0].copyWith(isDefault: true);
     }
-    if (_activeProfileId == profileId) {
-      _activeProfileId = null;
-    }
     _savedProfiles = _sortProfiles(_savedProfiles);
+
+    if (wasActiveProfile) {
+      if (_savedProfiles.isEmpty) {
+        _clearCurrentInput();
+      } else {
+        final fallbackProfile = _savedProfiles.firstWhere(
+          (SavedBirthProfile profile) => profile.isDefault,
+          orElse: () => _savedProfiles.first,
+        );
+        _applyProfile(fallbackProfile, notify: false);
+      }
+    }
     return _persistProfiles();
   }
 
@@ -366,5 +376,14 @@ class BirthInputState extends ChangeNotifier {
   void _clearComputedState() {
     _hasComputedChart = false;
     _computedDasha = null;
+  }
+
+  void _clearCurrentInput() {
+    _dateOfBirth = '';
+    _timeOfBirth = '';
+    _placeOfBirth = '';
+    _customPlace = null;
+    _activeProfileId = null;
+    _clearComputedState();
   }
 }
