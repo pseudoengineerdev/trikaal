@@ -1,0 +1,54 @@
+{
+  "fixture_id": "reference_chennai_2018_01_04_1744_v1",
+  "source": "reference_panchang_archived_export",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "birth_input": {
+    "local_date": "2018-01-04",
+    "local_time": "17:44",
+    "timezone": "Asia/Kolkata",
+    "latitude": 13.0827,
+    "longitude": 80.2707,
+    "elevation_m": 6.0,
+    "place_label": "Chennai, India"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "vedic": {
+      "lagna_rashi": "Mitu",
+      "sun_rashi": "Dhanu",
+      "moon_rashi": "Kark",
+      "mangal_rashi": "Tula",
+      "budha_rashi": "Vrsc",
+      "guru_rashi": "Tula",
+      "shukra_rashi": "Dhanu",
+      "shani_rashi": "Dhanu",
+      "rahu_rashi": "Kark",
+      "ketu_rashi": "Maka"
+    },
+    "bhava": {
+      "lagna_house": 1,
+      "sun_house": 7,
+      "moon_house": 2,
+      "mangal_house": 5,
+      "budha_house": 6,
+      "guru_house": 5,
+      "shukra_house": 7,
+      "shani_house": 7,
+      "rahu_house": 2,
+      "ketu_house": 8
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 1e-06
+  }
+}

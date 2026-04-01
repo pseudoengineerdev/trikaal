@@ -6,7 +6,13 @@ Versioned golden fixtures and comparison rules for validation against external s
 
 - JSON schema for reference fixture payloads
 - Snapshot comparator with exact and tolerance-based diffing
-- Seed canonical fixture for Mumbai (`1999-07-04 12:22`)
+- Multi-case Reference fixture suite (`fixtures/reference/*.json`)
+
+Current suite includes:
+
+- `1999-07-04 12:22` Mumbai (canonical baseline)
+- `1973-04-24 13:00` Mumbai (Sachin reference)
+- `2018-01-04 17:44` Chennai (archived export reference)
 
 ## Local Setup
 
