@@ -24,10 +24,7 @@ class _HomeShellPageState extends State<HomeShellPage> {
   @override
   Widget build(BuildContext context) {
     final pages = <Widget>[
-      BirthInputPage(
-        birthInputState: _birthInputState,
-        onOpenDashaTab: _openDashaTab,
-      ),
+      BirthInputPage(birthInputState: _birthInputState),
       DashaPage(birthInputState: _birthInputState),
     ];
 
@@ -55,11 +52,5 @@ class _HomeShellPageState extends State<HomeShellPage> {
         ],
       ),
     );
-  }
-
-  void _openDashaTab() {
-    setState(() {
-      _selectedIndex = 1;
-    });
   }
 }

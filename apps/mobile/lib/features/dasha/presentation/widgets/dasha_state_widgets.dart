@@ -22,7 +22,7 @@ class DashaEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Text('Tap "Compute Dasha" to fetch Vimshottari Dasha.'),
+            const Text('Dasha will auto-compute from the shared birth input.'),
             const SizedBox(height: 8),
             Text('Using: $dateOfBirth, $timeOfBirth, $placeOfBirth'),
           ],
