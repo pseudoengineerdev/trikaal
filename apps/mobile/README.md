@@ -15,6 +15,10 @@ This folder now includes:
   - `POST /v1/charts/compute`
   - `GET /v1/places/search`
 
+Architecture guide:
+
+- `apps/mobile/docs/architecture.md`
+
 ## Local Run (after Flutter install)
 
 ```bash
