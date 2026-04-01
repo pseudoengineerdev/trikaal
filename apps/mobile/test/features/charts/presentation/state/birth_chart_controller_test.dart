@@ -115,6 +115,43 @@ void main() {
 
       controller.dispose();
     });
+
+    test('applyComputedResult hydrates controller without API call', () {
+      final fakeApiClient = _FakeChartApiClient(
+        computeReportResponse: _sampleComputeReportResponse(),
+      );
+      final controller = BirthChartController(apiClient: fakeApiClient);
+      controller.error = 'old';
+      controller.loading = true;
+
+      controller.applyComputedResult(
+        report: _sampleComputeReportResponse(),
+        dasha: _sampleComputeReportResponse().dasha,
+      );
+
+      expect(controller.loading, isFalse);
+      expect(controller.error, isNull);
+      expect(controller.result, isNotNull);
+      expect(controller.dashaResult, isNotNull);
+      expect(fakeApiClient.computeCalls, 0);
+
+      controller.dispose();
+    });
+
+    test('clearComputedResult removes cached report and dasha', () {
+      final fakeApiClient = _FakeChartApiClient(
+        computeReportResponse: _sampleComputeReportResponse(),
+      );
+      final controller = BirthChartController(apiClient: fakeApiClient);
+      controller.result = _sampleComputeReportResponse();
+      controller.dashaResult = _sampleComputeReportResponse().dasha;
+
+      controller.clearComputedResult();
+
+      expect(controller.result, isNull);
+      expect(controller.dashaResult, isNull);
+      controller.dispose();
+    });
   });
 }
 
