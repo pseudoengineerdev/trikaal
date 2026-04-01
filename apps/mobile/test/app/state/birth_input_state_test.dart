@@ -211,6 +211,19 @@ void main() {
       expect(secondAttempt, isTrue);
       expect(state.profilesError, isNull);
     });
+
+    test('load failure falls back without persistent banner error', () async {
+      final state = BirthInputState(
+        profilesRepository: _ThrowingLoadSavedProfilesRepository(),
+      );
+
+      await state.loadSavedProfiles();
+
+      expect(state.profilesLoaded, isTrue);
+      expect(state.profilesLoading, isFalse);
+      expect(state.savedProfiles, isEmpty);
+      expect(state.profilesError, isNull);
+    });
   });
 }
 
@@ -247,6 +260,16 @@ class _FlakySavedProfilesRepository extends _MemorySavedProfilesRepository {
     }
     await super.saveProfiles(profiles);
   }
+}
+
+class _ThrowingLoadSavedProfilesRepository implements SavedProfilesRepository {
+  @override
+  Future<List<SavedBirthProfile>> loadProfiles() async {
+    throw Exception('load failed');
+  }
+
+  @override
+  Future<void> saveProfiles(List<SavedBirthProfile> profiles) async {}
 }
 
 SavedBirthProfile _profile({
