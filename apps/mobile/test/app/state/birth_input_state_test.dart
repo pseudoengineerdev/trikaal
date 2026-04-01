@@ -187,6 +187,111 @@ void main() {
         'Australia/Sydney',
       );
     });
+
+    test('successful retry clears stale persistence error', () async {
+      final repository = _FlakySavedProfilesRepository();
+      final state = BirthInputState(profilesRepository: repository);
+      state.updateDateOfBirth('1999-07-04');
+      state.updateTimeOfBirth('12:22');
+      state.setResolvedPlace(
+        const CustomPlacePayload(
+          placeLabel: 'Mumbai, Maharashtra, India',
+          latitude: 19.076,
+          longitude: 72.8777,
+          timezone: 'Asia/Kolkata',
+          elevationM: 14,
+        ),
+      );
+
+      final firstAttempt = await state.createProfile(name: 'First');
+      expect(firstAttempt, isFalse);
+      expect(state.profilesError, 'Unable to save profile changes right now.');
+
+      final secondAttempt = await state.createProfile(name: 'Second');
+      expect(secondAttempt, isTrue);
+      expect(state.profilesError, isNull);
+    });
+
+    test('load failure falls back without persistent banner error', () async {
+      final state = BirthInputState(
+        profilesRepository: _ThrowingLoadSavedProfilesRepository(),
+      );
+
+      await state.loadSavedProfiles();
+
+      expect(state.profilesLoaded, isTrue);
+      expect(state.profilesLoading, isFalse);
+      expect(state.savedProfiles, isEmpty);
+      expect(state.profilesError, isNull);
+    });
+
+    test('deleting active profile switches input to fallback profile',
+        () async {
+      final repository = _MemorySavedProfilesRepository(
+        initialProfiles: <SavedBirthProfile>[
+          _profile(
+            id: 'p1',
+            name: 'Primary',
+            date: '1999-07-04',
+            time: '12:22',
+            place: 'Mumbai, Maharashtra, India',
+            timezone: 'Asia/Kolkata',
+            isDefault: true,
+          ),
+          _profile(
+            id: 'p2',
+            name: 'Secondary',
+            date: '2006-07-31',
+            time: '12:22',
+            place: 'Mumbai, Maharashtra, India',
+            timezone: 'Asia/Kolkata',
+          ),
+        ],
+      );
+      final state = BirthInputState(profilesRepository: repository);
+      await state.loadSavedProfiles();
+      state.applyProfile('p2');
+
+      final didDelete = await state.deleteProfile('p2');
+
+      expect(didDelete, isTrue);
+      expect(state.savedProfiles.length, 1);
+      expect(state.activeProfileId, 'p1');
+      expect(state.dateOfBirth, '1999-07-04');
+      expect(state.timeOfBirth, '12:22');
+      expect(state.placeOfBirth, 'Mumbai, Maharashtra, India');
+    });
+
+    test('deleting last active profile clears current input values', () async {
+      final repository = _MemorySavedProfilesRepository(
+        initialProfiles: <SavedBirthProfile>[
+          _profile(
+            id: 'p1',
+            name: 'Only',
+            date: '1999-07-04',
+            time: '12:22',
+            place: 'Mumbai, Maharashtra, India',
+            timezone: 'Asia/Kolkata',
+            isDefault: true,
+          ),
+        ],
+      );
+      final state = BirthInputState(profilesRepository: repository);
+      await state.loadSavedProfiles();
+      state.applyProfile('p1');
+
+      final didDelete = await state.deleteProfile('p1');
+
+      expect(didDelete, isTrue);
+      expect(state.savedProfiles, isEmpty);
+      expect(state.activeProfileId, isNull);
+      expect(state.dateOfBirth, isEmpty);
+      expect(state.timeOfBirth, isEmpty);
+      expect(state.placeOfBirth, isEmpty);
+      expect(state.customPlace, isNull);
+      expect(state.hasComputedChart, isFalse);
+      expect(state.computedDasha, isNull);
+    });
   });
 }
 
@@ -210,6 +315,29 @@ class _MemorySavedProfilesRepository implements SavedProfilesRepository {
     saveCalls += 1;
     _profiles = List<SavedBirthProfile>.from(profiles);
   }
+}
+
+class _FlakySavedProfilesRepository extends _MemorySavedProfilesRepository {
+  bool _failedOnce = false;
+
+  @override
+  Future<void> saveProfiles(List<SavedBirthProfile> profiles) async {
+    if (!_failedOnce) {
+      _failedOnce = true;
+      throw Exception('disk locked');
+    }
+    await super.saveProfiles(profiles);
+  }
+}
+
+class _ThrowingLoadSavedProfilesRepository implements SavedProfilesRepository {
+  @override
+  Future<List<SavedBirthProfile>> loadProfiles() async {
+    throw Exception('load failed');
+  }
+
+  @override
+  Future<void> saveProfiles(List<SavedBirthProfile> profiles) async {}
 }
 
 SavedBirthProfile _profile({
