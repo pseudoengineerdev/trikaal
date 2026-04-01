@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../app/models/custom_place_payload.dart';
+import '../../../dasha/data/models/dasha_models.dart';
 import '../../data/chart_api_client.dart';
 import '../../data/models/compute_chart_models.dart';
 import '../../data/models/place_search_models.dart';
@@ -17,6 +18,7 @@ class BirthChartController extends ChangeNotifier {
   bool loadingPlaceSuggestions = false;
   String? error;
   ComputeChartResponse? result;
+  DashaSummary? dashaResult;
   List<PlaceMatch> placeSuggestions = <PlaceMatch>[];
 
   Timer? _placeSearchDebounce;
@@ -40,7 +42,8 @@ class BirthChartController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await _apiClient.computeChart(
+      dashaResult = null;
+      final response = await _apiClient.computeReport(
         ComputeChartRequest(
           dateOfBirth: dateOfBirth,
           timeOfBirth: timeOfBirth,
@@ -48,11 +51,14 @@ class BirthChartController extends ChangeNotifier {
           customPlace: customPlace,
         ),
       );
-      result = response;
+      result = response.chart;
+      dashaResult = response.dasha;
       placeSuggestions = <PlaceMatch>[];
     } on ChartApiException catch (exception) {
+      dashaResult = null;
       error = exception.message;
     } catch (_) {
+      dashaResult = null;
       error = 'Something went wrong. Please try again.';
     } finally {
       loading = false;
