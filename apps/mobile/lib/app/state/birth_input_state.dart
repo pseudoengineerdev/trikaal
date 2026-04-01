@@ -125,8 +125,17 @@ class BirthInputState extends ChangeNotifier {
         );
         _applyProfile(preferredProfile, notify: false);
       }
-    } catch (_) {
-      _profilesError = 'Unable to load saved profiles right now.';
+    } catch (error, stackTrace) {
+      assert(() {
+        debugPrint(
+          'Saved profile load failed. Continuing without persisted data: '
+          '$error\n$stackTrace',
+        );
+        return true;
+      }());
+      _savedProfiles = <SavedBirthProfile>[];
+      _profilesLoaded = true;
+      _profilesError = null;
     } finally {
       _profilesLoading = false;
       notifyListeners();
@@ -134,6 +143,7 @@ class BirthInputState extends ChangeNotifier {
   }
 
   void applyProfile(String profileId) {
+    _profilesError = null;
     final profile = _savedProfiles.where((item) => item.id == profileId);
     if (profile.isEmpty) {
       return;
@@ -145,6 +155,7 @@ class BirthInputState extends ChangeNotifier {
     required String name,
     bool setAsDefault = false,
   }) async {
+    _profilesError = null;
     final profileName = name.trim();
     if (profileName.isEmpty || !canSaveCurrentAsProfile) {
       _profilesError = 'Enter complete birth details before saving a profile.';
@@ -184,6 +195,7 @@ class BirthInputState extends ChangeNotifier {
     required String profileId,
     required String name,
   }) async {
+    _profilesError = null;
     final profileName = name.trim();
     if (profileName.isEmpty) {
       _profilesError = 'Profile name cannot be empty.';
@@ -203,6 +215,7 @@ class BirthInputState extends ChangeNotifier {
   }
 
   Future<bool> updateProfileFromCurrent(String profileId) async {
+    _profilesError = null;
     if (!canSaveCurrentAsProfile) {
       _profilesError = 'Enter complete birth details before updating profile.';
       notifyListeners();
@@ -227,6 +240,7 @@ class BirthInputState extends ChangeNotifier {
   }
 
   Future<bool> setDefaultProfile(String profileId) async {
+    _profilesError = null;
     if (_savedProfiles.every((item) => item.id != profileId)) {
       return false;
     }
@@ -242,10 +256,12 @@ class BirthInputState extends ChangeNotifier {
   }
 
   Future<bool> deleteProfile(String profileId) async {
+    _profilesError = null;
     final hadProfile = _savedProfiles.any((item) => item.id == profileId);
     if (!hadProfile) {
       return false;
     }
+    final wasActiveProfile = _activeProfileId == profileId;
 
     _savedProfiles =
         _savedProfiles.where((item) => item.id != profileId).toList();
@@ -253,10 +269,19 @@ class BirthInputState extends ChangeNotifier {
         _savedProfiles.every((item) => !item.isDefault)) {
       _savedProfiles[0] = _savedProfiles[0].copyWith(isDefault: true);
     }
-    if (_activeProfileId == profileId) {
-      _activeProfileId = null;
-    }
     _savedProfiles = _sortProfiles(_savedProfiles);
+
+    if (wasActiveProfile) {
+      if (_savedProfiles.isEmpty) {
+        _clearCurrentInput();
+      } else {
+        final fallbackProfile = _savedProfiles.firstWhere(
+          (SavedBirthProfile profile) => profile.isDefault,
+          orElse: () => _savedProfiles.first,
+        );
+        _applyProfile(fallbackProfile, notify: false);
+      }
+    }
     return _persistProfiles();
   }
 
@@ -335,7 +360,13 @@ class BirthInputState extends ChangeNotifier {
       _profilesError = null;
       notifyListeners();
       return true;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      assert(() {
+        debugPrint(
+          'Saved profile persist failed: $error\n$stackTrace',
+        );
+        return true;
+      }());
       _profilesError = 'Unable to save profile changes right now.';
       notifyListeners();
       return false;
@@ -345,5 +376,14 @@ class BirthInputState extends ChangeNotifier {
   void _clearComputedState() {
     _hasComputedChart = false;
     _computedDasha = null;
+  }
+
+  void _clearCurrentInput() {
+    _dateOfBirth = '';
+    _timeOfBirth = '';
+    _placeOfBirth = '';
+    _customPlace = null;
+    _activeProfileId = null;
+    _clearComputedState();
   }
 }
