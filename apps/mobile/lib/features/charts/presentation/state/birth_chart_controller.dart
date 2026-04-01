@@ -6,6 +6,7 @@ import '../../../../app/models/custom_place_payload.dart';
 import '../../../dasha/data/models/dasha_models.dart';
 import '../../data/chart_api_client.dart';
 import '../../data/models/compute_chart_models.dart';
+import '../../data/models/compute_report_models.dart';
 import '../../data/models/place_search_models.dart';
 
 class BirthChartController extends ChangeNotifier {
@@ -17,7 +18,7 @@ class BirthChartController extends ChangeNotifier {
   bool loading = false;
   bool loadingPlaceSuggestions = false;
   String? error;
-  ComputeChartResponse? result;
+  ComputeReportResponse? result;
   DashaSummary? dashaResult;
   List<PlaceMatch> placeSuggestions = <PlaceMatch>[];
 
@@ -51,7 +52,7 @@ class BirthChartController extends ChangeNotifier {
           customPlace: customPlace,
         ),
       );
-      result = response.chart;
+      result = response;
       dashaResult = response.dasha;
       placeSuggestions = <PlaceMatch>[];
     } on ChartApiException catch (exception) {
