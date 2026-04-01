@@ -104,6 +104,11 @@ Use this for city autocomplete in Flutter before compute:
 curl "http://127.0.0.1:8000/v1/places/search?query=mum"
 ```
 
+Resolver behavior:
+
+- Uses a global city dataset (30k+ cities) for worldwide lookup.
+- Keeps curated aliases (for example, `Bombay` -> `Mumbai, India`) for compatibility.
+
 ## Dasha Compute
 
 Use this for current Vimshottari dasha calculation:

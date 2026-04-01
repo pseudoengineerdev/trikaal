@@ -45,7 +45,7 @@ def test_chart_from_place_endpoint_returns_not_found_for_unknown_city() -> None:
         json={
             "local_date": "1999-07-04",
             "local_time": "12:22",
-            "place_query": "Atlantis",
+            "place_query": "zzzzzzzzzz",
         },
     )
 
