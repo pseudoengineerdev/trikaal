@@ -59,6 +59,11 @@ Captured reference for this repo (as of 2026-03-31):
 - Ketu Rashi/Nakshatra/Pada: `Maka / Shravana / 4`
 - Spashth Rahu Rashi/Nakshatra/Pada: `Kark / Ashlesha / 1`
 - Spashth Ketu Rashi/Nakshatra/Pada: `Maka / Shravana / 3`
+- Vara: `Ravivara`
+- Tithi: `Krishna Shashthi`
+- Nakshatra/Pada: `P Bhadrapada / 1`
+- Yoga: `Ayushman`
+- Karana: `Garija`
 
 Current engine output (same input):
 
