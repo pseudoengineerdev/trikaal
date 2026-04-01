@@ -123,6 +123,7 @@ class _DashaPageState extends State<DashaPage> {
       dateOfBirth: widget.birthInputState.dateOfBirth,
       timeOfBirth: widget.birthInputState.timeOfBirth,
       placeOfBirth: widget.birthInputState.placeOfBirth,
+      customPlace: widget.birthInputState.customPlace,
     );
   }
 

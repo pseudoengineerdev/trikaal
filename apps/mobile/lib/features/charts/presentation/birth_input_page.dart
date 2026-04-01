@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/models/custom_place_payload.dart';
 import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
@@ -62,8 +63,16 @@ class _BirthInputPageState extends State<BirthInputPage> {
       dateOfBirth: _dateController.text.trim(),
       timeOfBirth: _timeController.text.trim(),
       placeOfBirth: _placeController.text.trim(),
+      customPlace: widget.birthInputState.customPlace,
     );
     if (_controller.result != null && _controller.error == null) {
+      final resolvedPlace = _controller.result!.resolvedPlace;
+      widget.birthInputState
+          .setResolvedPlace(resolvedPlace.toCustomPlacePayload());
+      _placeController.text = resolvedPlace.placeLabel;
+      _placeController.selection = TextSelection.collapsed(
+        offset: _placeController.text.length,
+      );
       widget.birthInputState.markChartComputed();
     } else {
       widget.birthInputState.clearComputedChart();
@@ -207,7 +216,19 @@ class _BirthInputPageState extends State<BirthInputPage> {
     _placeController.selection = TextSelection.collapsed(
       offset: _placeController.text.length,
     );
-    widget.birthInputState.updatePlaceOfBirth(_placeController.text);
+    if (place.isCustom) {
+      widget.birthInputState.updatePlaceOfBirth(_placeController.text);
+    } else {
+      widget.birthInputState.setResolvedPlace(
+        CustomPlacePayload(
+          placeLabel: place.placeLabel,
+          latitude: place.latitude,
+          longitude: place.longitude,
+          timezone: place.timezone,
+          elevationM: place.elevationM,
+        ),
+      );
+    }
     _controller.clearPlaceSuggestions();
   }
 

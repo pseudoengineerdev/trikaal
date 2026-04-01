@@ -1,5 +1,7 @@
 from fastapi.testclient import TestClient
 
+from trikaal_api import resolver
+from trikaal_api.geocoding import ExternalPlaceCandidate
 from trikaal_api.main import app
 
 
@@ -48,3 +50,60 @@ def test_charts_compute_rejects_invalid_time_format() -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_charts_compute_accepts_custom_place_payload() -> None:
+    client = TestClient(app)
+    response = client.post(
+        "/v1/charts/compute",
+        json={
+            "date_of_birth": "1999-07-04",
+            "time_of_birth": "12:22",
+            "place_of_birth": "Custom City",
+            "custom_place": {
+                "place_label": "Custom City, Testland",
+                "latitude": 19.076,
+                "longitude": 72.8777,
+                "timezone": "Asia/Kolkata",
+                "elevation_m": 14.0,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["resolved_place"]["place_label"] == "Custom City, Testland"
+    assert payload["resolved_place"]["timezone"] == "Asia/Kolkata"
+    assert payload["snapshot"]["meta"]["status"] == "computed"
+
+
+def test_charts_compute_uses_external_fallback_when_enabled(monkeypatch) -> None:
+    class _FakeGeocoder:
+        def search_places(self, query: str, limit: int = 5) -> list[ExternalPlaceCandidate]:
+            return []
+
+        def resolve_place(self, query: str) -> ExternalPlaceCandidate | None:
+            return ExternalPlaceCandidate(
+                place_label="Mystic City, Wonderland",
+                latitude=19.076,
+                longitude=72.8777,
+                timezone="Asia/Kolkata",
+            )
+
+    monkeypatch.setenv("TRIKAAL_ENABLE_FALLBACK_GEOCODING", "1")
+    resolver._fallback_resolve.cache_clear()
+    monkeypatch.setattr(resolver, "_external_geocoder", lambda: _FakeGeocoder())
+
+    client = TestClient(app)
+    response = client.post(
+        "/v1/charts/compute",
+        json={
+            "date_of_birth": "1999-07-04",
+            "time_of_birth": "12:22",
+            "place_of_birth": "rarecustomcity",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["resolved_place"]["place_label"] == "Mystic City, Wonderland"

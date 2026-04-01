@@ -105,8 +105,10 @@ void main() {
 
       expect(fakeApiClient.searchCalls, 1);
       expect(controller.loadingPlaceSuggestions, isFalse);
-      expect(controller.placeSuggestions.length, 1);
+      expect(controller.placeSuggestions.length, 2);
       expect(controller.placeSuggestions.first.placeLabel, 'Mumbai, India');
+      expect(controller.placeSuggestions.last.isCustom, isTrue);
+      expect(controller.placeSuggestions.last.placeLabel, 'mum');
 
       controller.dispose();
     });
