@@ -4,6 +4,22 @@ import '../../../../app/state/astrology_terms_state.dart';
 import '../../../../app/state/terminology_mode_state.dart';
 import '../../../shared/astrology/term_localizer.dart';
 import '../../data/models/compute_report_models.dart';
+import '../astrology/kundli_dignity.dart';
+
+const List<String> _kundliGrahaRowOrder = <String>[
+  'sun',
+  'moon',
+  'mangal',
+  'budha',
+  'guru',
+  'shukra',
+  'shani',
+  'rahu',
+  'ketu',
+  'spashth_rahu',
+  'spashth_ketu',
+  'lagna',
+];
 
 class ChartResultCard extends StatelessWidget {
   const ChartResultCard({
@@ -22,6 +38,9 @@ class ChartResultCard extends StatelessWidget {
     final snapshot = result.snapshot;
     final d1 = snapshot.varga.d1;
     final d9 = snapshot.varga.d9;
+    final grahaRows = _kundliGrahaRowOrder
+        .map((String key) => snapshot.grahaTable.entryByKey(key))
+        .toList(growable: false);
 
     return Column(
       children: <Widget>[
@@ -71,6 +90,23 @@ class ChartResultCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _SectionCard(
+          title: 'Detailed Kundli',
+          children: <Widget>[
+            _KundliHighlights(
+              rows: grahaRows,
+              mode: mode,
+              termsState: termsState,
+            ),
+            const SizedBox(height: 10),
+            _HousePlacementsTable(
+              rows: grahaRows,
+              mode: mode,
+              termsState: termsState,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _SectionCard(
           title: 'Rashi Chart (D1)',
           children: <Widget>[
             _DivisionalChartGrid(
@@ -96,7 +132,7 @@ class ChartResultCard extends StatelessWidget {
           title: 'Graha Table',
           children: <Widget>[
             _GrahaTable(
-              grahaTable: snapshot.grahaTable,
+              rows: grahaRows,
               mode: mode,
               termsState: termsState,
             ),
@@ -252,36 +288,134 @@ class _DivisionalChartGrid extends StatelessWidget {
   }
 }
 
-class _GrahaTable extends StatelessWidget {
-  const _GrahaTable({
-    required this.grahaTable,
+class _KundliHighlights extends StatelessWidget {
+  const _KundliHighlights({
+    required this.rows,
     required this.mode,
     required this.termsState,
   });
 
-  final ReportGrahaTable grahaTable;
+  final List<ReportGrahaEntry> rows;
   final TerminologyMode mode;
   final AstrologyTermsState termsState;
 
-  static const List<String> _rowOrder = <String>[
-    'sun',
-    'moon',
-    'mangal',
-    'budha',
-    'guru',
-    'shukra',
-    'shani',
-    'rahu',
-    'ketu',
-    'lagna',
-  ];
+  @override
+  Widget build(BuildContext context) {
+    final retro = _joinGrahaNames(
+      rows.where((row) => row.retrograde),
+      mode: mode,
+      termsState: termsState,
+    );
+    final combust = _joinGrahaNames(
+      rows.where((row) => row.combust),
+      mode: mode,
+      termsState: termsState,
+    );
+    final exalted = _joinGrahaNames(
+      rows.where(
+        (row) =>
+            evaluateGrahaDignity(
+              grahaKey: row.key,
+              rashiKey: row.rashi,
+            ).dignity ==
+            GrahaDignity.exalted,
+      ),
+      mode: mode,
+      termsState: termsState,
+    );
+    final debilitated = _joinGrahaNames(
+      rows.where(
+        (row) =>
+            evaluateGrahaDignity(
+              grahaKey: row.key,
+              rashiKey: row.rashi,
+            ).dignity ==
+            GrahaDignity.debilitated,
+      ),
+      mode: mode,
+      termsState: termsState,
+    );
+
+    return Column(
+      children: <Widget>[
+        _KeyValueRow(label: 'Retrograde', value: retro),
+        _KeyValueRow(label: 'Combust', value: combust),
+        _KeyValueRow(label: 'Exalted', value: exalted),
+        _KeyValueRow(label: 'Debilitated', value: debilitated),
+      ],
+    );
+  }
+}
+
+class _HousePlacementsTable extends StatelessWidget {
+  const _HousePlacementsTable({
+    required this.rows,
+    required this.mode,
+    required this.termsState,
+  });
+
+  final List<ReportGrahaEntry> rows;
+  final TerminologyMode mode;
+  final AstrologyTermsState termsState;
 
   @override
   Widget build(BuildContext context) {
-    final rows = _rowOrder
-        .map((String key) => grahaTable.entryByKey(key))
-        .toList(growable: false);
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        headingRowHeight: 36,
+        dataRowMinHeight: 34,
+        dataRowMaxHeight: 42,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Graha')),
+          DataColumn(label: Text('House')),
+          DataColumn(label: Text('Rashi')),
+          DataColumn(label: Text('Nakshatra')),
+          DataColumn(label: Text('Pada')),
+          DataColumn(label: Text('Retro')),
+        ],
+        rows: rows.map((ReportGrahaEntry row) {
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(
+                Text(localizeGraha(row.key, mode, termsState: termsState)),
+              ),
+              DataCell(Text(row.house.toString())),
+              DataCell(
+                Text(localizeRashi(row.rashi, mode, termsState: termsState)),
+              ),
+              DataCell(
+                Text(
+                  localizeNakshatra(
+                    row.nakshatra,
+                    mode,
+                    termsState: termsState,
+                  ),
+                ),
+              ),
+              DataCell(Text(row.pada.toString())),
+              DataCell(Text(row.retrograde ? 'Yes' : 'No')),
+            ],
+          );
+        }).toList(growable: false),
+      ),
+    );
+  }
+}
 
+class _GrahaTable extends StatelessWidget {
+  const _GrahaTable({
+    required this.rows,
+    required this.mode,
+    required this.termsState,
+  });
+
+  final List<ReportGrahaEntry> rows;
+  final TerminologyMode mode;
+  final AstrologyTermsState termsState;
+
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
@@ -291,6 +425,7 @@ class _GrahaTable extends StatelessWidget {
         columns: const <DataColumn>[
           DataColumn(label: Text('Graha')),
           DataColumn(label: Text('Deg')),
+          DataColumn(label: Text('Speed')),
           DataColumn(label: Text('D1')),
           DataColumn(label: Text('Nakshatra')),
           DataColumn(label: Text('Pada')),
@@ -299,14 +434,20 @@ class _GrahaTable extends StatelessWidget {
           DataColumn(label: Text('D9 H')),
           DataColumn(label: Text('Retro')),
           DataColumn(label: Text('Comb')),
+          DataColumn(label: Text('Dignity')),
         ],
         rows: rows.map((ReportGrahaEntry row) {
+          final dignity = evaluateGrahaDignity(
+            grahaKey: row.key,
+            rashiKey: row.rashi,
+          );
           return DataRow(
             cells: <DataCell>[
               DataCell(
                 Text(localizeGraha(row.key, mode, termsState: termsState)),
               ),
               DataCell(Text(row.siderealDeg.toStringAsFixed(2))),
+              DataCell(Text(row.speedDegPerDay.toStringAsFixed(3))),
               DataCell(
                 Text(localizeRashi(row.rashi, mode, termsState: termsState)),
               ),
@@ -327,12 +468,87 @@ class _GrahaTable extends StatelessWidget {
               DataCell(Text(row.d9House.toString())),
               DataCell(Text(row.retrograde ? 'Yes' : 'No')),
               DataCell(Text(row.combust ? 'Yes' : 'No')),
+              DataCell(
+                _DignityBadge(
+                  result: dignity,
+                  mode: mode,
+                ),
+              ),
             ],
           );
         }).toList(growable: false),
       ),
     );
   }
+}
+
+class _DignityBadge extends StatelessWidget {
+  const _DignityBadge({
+    required this.result,
+    required this.mode,
+  });
+
+  final GrahaDignityResult result;
+  final TerminologyMode mode;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final (Color background, Color foreground) = switch (result.dignity) {
+      GrahaDignity.exalted => (
+          colorScheme.tertiaryContainer,
+          colorScheme.onTertiaryContainer,
+        ),
+      GrahaDignity.debilitated => (
+          colorScheme.errorContainer,
+          colorScheme.onErrorContainer,
+        ),
+      GrahaDignity.ownSign => (
+          colorScheme.secondaryContainer,
+          colorScheme.onSecondaryContainer,
+        ),
+      GrahaDignity.neutral => (
+          colorScheme.surfaceContainerHighest,
+          colorScheme.onSurface,
+        ),
+      GrahaDignity.notApplicable => (
+          colorScheme.surfaceContainerHighest,
+          colorScheme.onSurfaceVariant,
+        ),
+    };
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text(
+          result.labelForMode(mode),
+          style: TextStyle(
+            color: foreground,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _joinGrahaNames(
+  Iterable<ReportGrahaEntry> rows, {
+  required TerminologyMode mode,
+  required AstrologyTermsState termsState,
+}) {
+  final names = rows
+      .map((row) => localizeGraha(row.key, mode, termsState: termsState))
+      .toList(growable: false);
+  if (names.isEmpty) {
+    return 'None';
+  }
+  return names.join(', ');
 }
 
 class _SectionCard extends StatelessWidget {

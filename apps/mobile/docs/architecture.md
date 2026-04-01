@@ -28,6 +28,7 @@ Path map:
   - Screen composition and input handling
 - `lib/features/charts/presentation/widgets/*`
   - Reusable UI blocks for result and state rendering
+  - Includes Detailed Kundli sections (graha table, house placements, dignity)
 
 ## Saved Profiles Flow
 
