@@ -18,6 +18,10 @@ void main() {
               currentAntarDasha: 'Shani',
               activeFrom: '2026-01-01',
               activeUntil: '2027-03-01',
+              currentMahaStart: '2024-06-01',
+              currentMahaEnd: '2040-06-01',
+              mahaTimeline: <DashaPeriod>[],
+              antarTimelineCurrentMaha: <DashaPeriod>[],
             ),
           ),
         ),
@@ -75,6 +79,10 @@ class _FakeDashaApiClient extends DashaApiClient {
             currentAntarDasha: 'Placeholder',
             activeFrom: 'TBD',
             activeUntil: 'TBD',
+            currentMahaStart: 'TBD',
+            currentMahaEnd: 'TBD',
+            mahaTimeline: <DashaPeriod>[],
+            antarTimelineCurrentMaha: <DashaPeriod>[],
           ),
         );
   }

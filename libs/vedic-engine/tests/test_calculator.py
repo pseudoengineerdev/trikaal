@@ -103,6 +103,20 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["bhava"]["ketu_house"] == 5
     assert snapshot["bhava"]["spashth_rahu_house"] == 11
     assert snapshot["bhava"]["spashth_ketu_house"] == 5
+    assert snapshot["varga"]["d1"]["lagna_rashi"] == "Kany"
+    assert snapshot["varga"]["d9"]["lagna_rashi"] == snapshot["graha_table"]["lagna"]["d9_rashi"]
+    assert len(snapshot["varga"]["d1"]["houses"]) == 12
+    assert len(snapshot["varga"]["d9"]["houses"]) == 12
+    assert isinstance(snapshot["varga"]["d1"]["houses"]["1"]["occupants"], list)
+    assert "lagna" in snapshot["varga"]["d1"]["houses"]["1"]["occupants"]
+    assert snapshot["graha_table"]["sun"]["rashi"] == "Mitu"
+    assert snapshot["graha_table"]["sun"]["house"] == 10
+    assert snapshot["graha_table"]["sun"]["nakshatra"] == "Ardra"
+    assert isinstance(snapshot["graha_table"]["sun"]["sidereal_deg"], float)
+    assert isinstance(snapshot["graha_table"]["sun"]["retrograde"], bool)
+    assert isinstance(snapshot["graha_table"]["sun"]["combust"], bool)
+    assert isinstance(snapshot["graha_table"]["sun"]["d9_rashi"], str)
+    assert isinstance(snapshot["graha_table"]["sun"]["d9_house"], int)
 
 
 def test_calculator_computes_for_non_canonical_case() -> None:

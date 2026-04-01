@@ -108,39 +108,55 @@ class DashaSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Current Dasha (${summary.system})',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            _row('Birth Input', '$dateOfBirth, $timeOfBirth'),
-            _row('Place', placeOfBirth),
-            _row(
-              'Maha Dasha',
-              localizeGraha(
-                summary.currentMahaDasha,
-                mode,
-                termsState: termsState,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Current Dasha (${summary.system})',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-            ),
-            _row(
-              'Antar Dasha',
-              localizeGraha(
-                summary.currentAntarDasha,
-                mode,
-                termsState: termsState,
+              const SizedBox(height: 12),
+              _row('Birth Input', '$dateOfBirth, $timeOfBirth'),
+              _row('Place', placeOfBirth),
+              _row(
+                'Maha Dasha',
+                localizeGraha(
+                  summary.currentMahaDasha,
+                  mode,
+                  termsState: termsState,
+                ),
               ),
-            ),
-            _row('Active From', summary.activeFrom),
-            _row('Active Until', summary.activeUntil),
-          ],
+              _row(
+                'Antar Dasha',
+                localizeGraha(
+                  summary.currentAntarDasha,
+                  mode,
+                  termsState: termsState,
+                ),
+              ),
+              _row('Active From', _formatIso(summary.activeFrom)),
+              _row('Active Until', _formatIso(summary.activeUntil)),
+              const SizedBox(height: 16),
+              Text(
+                'Mahadasha Timeline',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              ...summary.mahaTimeline.map(_periodTile),
+              const SizedBox(height: 16),
+              Text(
+                'Antardasha Timeline (Current Maha)',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 8),
+              ...summary.antarTimelineCurrentMaha.map(_periodTile),
+            ],
+          ),
         ),
       ),
     );
@@ -156,5 +172,51 @@ class DashaSummaryCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _periodTile(DashaPeriod period) {
+    final title = localizeGraha(period.lord, mode, termsState: termsState);
+    final subtitle = '${_formatIso(period.start)} → ${_formatIso(period.end)}';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: period.active ? const Color(0x3329B6A8) : null,
+        border: Border.all(color: const Color(0x1A000000)),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          if (period.active)
+            const Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Icon(Icons.check_circle, size: 16),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _formatIso(String raw) {
+    if (raw.trim().isEmpty) {
+      return '-';
+    }
+    return raw.replaceFirst('T', ' ').split('.').first;
   }
 }

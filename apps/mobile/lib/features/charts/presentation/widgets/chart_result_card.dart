@@ -19,9 +19,11 @@ class ChartResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vedic = _asMap(result.snapshot['vedic']);
     final meta = _asMap(result.snapshot['meta']);
-    final bhava = _asMap(result.snapshot['bhava']);
+    final varga = _asMap(result.snapshot['varga']);
+    final d1 = _asMap(varga['d1']);
+    final d9 = _asMap(varga['d9']);
+    final grahaTable = _asMap(result.snapshot['graha_table']);
 
     return Column(
       children: <Widget>[
@@ -36,175 +38,231 @@ class ChartResultCard extends StatelessWidget {
               label: 'Timezone',
               value: result.resolvedPlace.timezone,
             ),
-            _KeyValueRow(label: 'Status', value: '${meta['status'] ?? '-'}'),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _SectionCard(
-          title: 'Lagna Overview',
-          children: <Widget>[
             _KeyValueRow(
-              label:
-                  '${localizeGraha('lagna', mode, termsState: termsState)} Rashi',
+              label: 'Status',
+              value: '${meta['status'] ?? '-'}',
+            ),
+            _KeyValueRow(
+              label: 'Lagna (D1)',
               value: localizeRashi(
-                '${vedic['lagna_rashi'] ?? '-'}',
+                '${d1['lagna_rashi'] ?? '-'}',
                 mode,
                 termsState: termsState,
               ),
             ),
             _KeyValueRow(
-              label:
-                  '${localizeGraha('lagna', mode, termsState: termsState)} Nakshatra',
-              value: _formatNakshatra(
-                '${vedic['lagna_nakshatra'] ?? '-'}',
-                '${vedic['lagna_pada'] ?? '-'}',
+              label: 'Lagna (D9)',
+              value: localizeRashi(
+                '${d9['lagna_rashi'] ?? '-'}',
+                mode,
+                termsState: termsState,
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
         _SectionCard(
-          title: 'Graha Highlights',
+          title: 'Rashi Chart (D1)',
           children: <Widget>[
-            _KeyValueRow(
-              label: localizeGraha('sun', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['sun_rashi'] ?? '-'}',
-                nakshatra: '${vedic['sun_nakshatra'] ?? '-'}',
-                pada: '${vedic['sun_pada'] ?? '-'}',
-              ),
-            ),
-            _KeyValueRow(
-              label: localizeGraha('moon', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['moon_rashi'] ?? '-'}',
-                nakshatra: '${vedic['moon_nakshatra'] ?? '-'}',
-                pada: '${vedic['moon_pada'] ?? '-'}',
-              ),
-            ),
-            _KeyValueRow(
-              label: localizeGraha('mangal', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['mangal_rashi'] ?? '-'}',
-                nakshatra: '${vedic['mangal_nakshatra'] ?? '-'}',
-                pada: '${vedic['mangal_pada'] ?? '-'}',
-              ),
-            ),
-            _KeyValueRow(
-              label: localizeGraha('budha', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['budha_rashi'] ?? '-'}',
-                nakshatra: '${vedic['budha_nakshatra'] ?? '-'}',
-                pada: '${vedic['budha_pada'] ?? '-'}',
-              ),
-            ),
-            _KeyValueRow(
-              label: localizeGraha('guru', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['guru_rashi'] ?? '-'}',
-                nakshatra: '${vedic['guru_nakshatra'] ?? '-'}',
-                pada: '${vedic['guru_pada'] ?? '-'}',
-              ),
-            ),
-            _KeyValueRow(
-              label: localizeGraha('shukra', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['shukra_rashi'] ?? '-'}',
-                nakshatra: '${vedic['shukra_nakshatra'] ?? '-'}',
-                pada: '${vedic['shukra_pada'] ?? '-'}',
-              ),
-            ),
-            _KeyValueRow(
-              label: localizeGraha('shani', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['shani_rashi'] ?? '-'}',
-                nakshatra: '${vedic['shani_nakshatra'] ?? '-'}',
-                pada: '${vedic['shani_pada'] ?? '-'}',
-              ),
-            ),
-            _KeyValueRow(
-              label: localizeGraha('rahu', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['rahu_rashi'] ?? '-'}',
-                nakshatra: '${vedic['rahu_nakshatra'] ?? '-'}',
-                pada: '${vedic['rahu_pada'] ?? '-'}',
-              ),
-            ),
-            _KeyValueRow(
-              label: localizeGraha('ketu', mode, termsState: termsState),
-              value: _formatGrahaLine(
-                rashi: '${vedic['ketu_rashi'] ?? '-'}',
-                nakshatra: '${vedic['ketu_nakshatra'] ?? '-'}',
-                pada: '${vedic['ketu_pada'] ?? '-'}',
-              ),
+            _DivisionalChartGrid(
+              chart: d1,
+              mode: mode,
+              termsState: termsState,
             ),
           ],
         ),
         const SizedBox(height: 12),
         _SectionCard(
-          title: 'Bhava (House Placements)',
+          title: 'Navamsa Chart (D9)',
           children: <Widget>[
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('sun', mode, termsState: termsState)} House',
-              value: '${bhava['sun_house'] ?? '-'}',
+            _DivisionalChartGrid(
+              chart: d9,
+              mode: mode,
+              termsState: termsState,
             ),
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('moon', mode, termsState: termsState)} House',
-              value: '${bhava['moon_house'] ?? '-'}',
-            ),
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('mangal', mode, termsState: termsState)} House',
-              value: '${bhava['mangal_house'] ?? '-'}',
-            ),
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('budha', mode, termsState: termsState)} House',
-              value: '${bhava['budha_house'] ?? '-'}',
-            ),
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('guru', mode, termsState: termsState)} House',
-              value: '${bhava['guru_house'] ?? '-'}',
-            ),
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('shukra', mode, termsState: termsState)} House',
-              value: '${bhava['shukra_house'] ?? '-'}',
-            ),
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('shani', mode, termsState: termsState)} House',
-              value: '${bhava['shani_house'] ?? '-'}',
-            ),
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('rahu', mode, termsState: termsState)} House',
-              value: '${bhava['rahu_house'] ?? '-'}',
-            ),
-            _KeyValueRow(
-              label:
-                  '${localizeGraha('ketu', mode, termsState: termsState)} House',
-              value: '${bhava['ketu_house'] ?? '-'}',
+          ],
+        ),
+        const SizedBox(height: 12),
+        _SectionCard(
+          title: 'Graha Table',
+          children: <Widget>[
+            _GrahaTable(
+              grahaTable: grahaTable,
+              mode: mode,
+              termsState: termsState,
             ),
           ],
         ),
       ],
     );
   }
+}
 
-  String _formatGrahaLine({
-    required String rashi,
-    required String nakshatra,
-    required String pada,
-  }) {
-    return '${localizeRashi(rashi, mode, termsState: termsState)} • ${_formatNakshatra(nakshatra, pada)}';
+class _DivisionalChartGrid extends StatelessWidget {
+  const _DivisionalChartGrid({
+    required this.chart,
+    required this.mode,
+    required this.termsState,
+  });
+
+  final Map<String, dynamic> chart;
+  final TerminologyMode mode;
+  final AstrologyTermsState termsState;
+
+  @override
+  Widget build(BuildContext context) {
+    final houses = _parseHouses(chart['houses']);
+    if (houses.isEmpty) {
+      return const Text('Detailed chart data not available yet.');
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: houses.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 1.35,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+      ),
+      itemBuilder: (BuildContext context, int index) {
+        final house = houses[index];
+        final occupants = house.occupants
+            .map(
+              (String graha) => localizeGraha(
+                graha,
+                mode,
+                termsState: termsState,
+              ),
+            )
+            .toList(growable: false);
+
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            border:
+                Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  'H${house.house}',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  localizeRashi(house.rashi, mode, termsState: termsState),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Expanded(
+                  child: Text(
+                    occupants.isEmpty ? '—' : occupants.join(', '),
+                    style: const TextStyle(fontSize: 12),
+                    overflow: TextOverflow.fade,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
+}
 
-  String _formatNakshatra(String nakshatra, String pada) {
-    return '${localizeNakshatra(nakshatra, mode, termsState: termsState)} ($pada)';
+class _GrahaTable extends StatelessWidget {
+  const _GrahaTable({
+    required this.grahaTable,
+    required this.mode,
+    required this.termsState,
+  });
+
+  final Map<String, dynamic> grahaTable;
+  final TerminologyMode mode;
+  final AstrologyTermsState termsState;
+
+  static const List<String> _rowOrder = <String>[
+    'sun',
+    'moon',
+    'mangal',
+    'budha',
+    'guru',
+    'shukra',
+    'shani',
+    'rahu',
+    'ketu',
+    'lagna',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = _rowOrder
+        .where((String key) => grahaTable[key] is Map)
+        .map((String key) => _asMap(grahaTable[key]))
+        .toList(growable: false);
+
+    if (rows.isEmpty) {
+      return const Text('Graha table data not available yet.');
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        headingRowHeight: 36,
+        dataRowMinHeight: 34,
+        dataRowMaxHeight: 42,
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Graha')),
+          DataColumn(label: Text('Deg')),
+          DataColumn(label: Text('D1')),
+          DataColumn(label: Text('Nakshatra')),
+          DataColumn(label: Text('Pada')),
+          DataColumn(label: Text('House')),
+          DataColumn(label: Text('D9')),
+          DataColumn(label: Text('D9 H')),
+          DataColumn(label: Text('Retro')),
+          DataColumn(label: Text('Comb')),
+        ],
+        rows: rows.map((Map<String, dynamic> row) {
+          final key = '${row['key'] ?? ''}';
+          final degree = _num(row['sidereal_deg']);
+          final rashi = '${row['rashi'] ?? '-'}';
+          final nakshatra = '${row['nakshatra'] ?? '-'}';
+          final pada = '${row['pada'] ?? '-'}';
+          final house = '${row['house'] ?? '-'}';
+          final d9Rashi = '${row['d9_rashi'] ?? '-'}';
+          final d9House = '${row['d9_house'] ?? '-'}';
+          final retrograde = (row['retrograde'] as bool?) ?? false;
+          final combust = (row['combust'] as bool?) ?? false;
+
+          return DataRow(
+            cells: <DataCell>[
+              DataCell(Text(localizeGraha(key, mode, termsState: termsState))),
+              DataCell(Text(degree == null ? '-' : degree.toStringAsFixed(2))),
+              DataCell(
+                  Text(localizeRashi(rashi, mode, termsState: termsState))),
+              DataCell(Text(
+                  localizeNakshatra(nakshatra, mode, termsState: termsState))),
+              DataCell(Text(pada)),
+              DataCell(Text(house)),
+              DataCell(
+                  Text(localizeRashi(d9Rashi, mode, termsState: termsState))),
+              DataCell(Text(d9House)),
+              DataCell(Text(retrograde ? 'Yes' : 'No')),
+              DataCell(Text(combust ? 'Yes' : 'No')),
+            ],
+          );
+        }).toList(growable: false),
+      ),
+    );
   }
 }
 
@@ -269,6 +327,42 @@ class _KeyValueRow extends StatelessWidget {
   }
 }
 
+class _HouseCellData {
+  const _HouseCellData({
+    required this.house,
+    required this.rashi,
+    required this.occupants,
+  });
+
+  final int house;
+  final String rashi;
+  final List<String> occupants;
+}
+
+List<_HouseCellData> _parseHouses(Object? raw) {
+  final map = _asMap(raw);
+  final houses = <_HouseCellData>[];
+  for (final MapEntry<String, dynamic> entry in map.entries) {
+    final houseIndex = int.tryParse(entry.key);
+    if (houseIndex == null) {
+      continue;
+    }
+    final value = _asMap(entry.value);
+    final occupants = _asList(value['occupants']).map((Object? value) {
+      return value.toString();
+    }).toList(growable: false);
+    houses.add(
+      _HouseCellData(
+        house: houseIndex,
+        rashi: '${value['rashi'] ?? '-'}',
+        occupants: occupants,
+      ),
+    );
+  }
+  houses.sort((left, right) => left.house.compareTo(right.house));
+  return houses;
+}
+
 Map<String, dynamic> _asMap(Object? raw) {
   if (raw is Map<String, dynamic>) {
     return raw;
@@ -277,4 +371,21 @@ Map<String, dynamic> _asMap(Object? raw) {
     return raw.map((key, value) => MapEntry(key.toString(), value));
   }
   return <String, dynamic>{};
+}
+
+List<Object?> _asList(Object? raw) {
+  if (raw is List<Object?>) {
+    return raw;
+  }
+  if (raw is List) {
+    return raw.cast<Object?>();
+  }
+  return const <Object?>[];
+}
+
+double? _num(Object? raw) {
+  if (raw is num) {
+    return raw.toDouble();
+  }
+  return double.tryParse('${raw ?? ''}');
 }

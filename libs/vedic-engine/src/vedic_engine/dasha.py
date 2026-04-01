@@ -128,6 +128,17 @@ def compute_vimshottari_dasha(
         as_of=as_of_local,
     )
 
+    maha_timeline = _build_maha_timeline(
+        start_lord=starting_lord,
+        start_of_starting_maha=start_of_starting_maha,
+        as_of=as_of_local,
+    )
+    antar_timeline_current_maha = _build_antar_timeline(
+        maha_lord=current_maha["lord_key"],
+        maha_start=current_maha["start"],
+        as_of=as_of_local,
+    )
+
     return {
         "system": "Vimshottari",
         "as_of_iso": as_of_local.isoformat(),
@@ -136,6 +147,10 @@ def compute_vimshottari_dasha(
         "current_antar_dasha": LORD_LABELS[current_antar["lord_key"]],
         "active_from": current_antar["start"].isoformat(),
         "active_until": current_antar["end"].isoformat(),
+        "current_maha_start": current_maha["start"].isoformat(),
+        "current_maha_end": current_maha["end"].isoformat(),
+        "maha_timeline": maha_timeline,
+        "antar_timeline_current_maha": antar_timeline_current_maha,
     }
 
 
@@ -184,6 +199,65 @@ def _find_current_antar(
         current_start = current_end
         sequence_index = (sequence_index + 1) % len(LORD_SEQUENCE_KEYS)
     raise RuntimeError("Unable to determine current Antardasha in bounded iteration.")
+
+
+def _build_maha_timeline(
+    *,
+    start_lord: str,
+    start_of_starting_maha: datetime,
+    as_of: datetime,
+) -> list[dict[str, object]]:
+    timeline: list[dict[str, object]] = []
+    sequence_index = LORD_SEQUENCE_KEYS.index(start_lord)
+    current_start = start_of_starting_maha
+
+    for _ in range(len(LORD_SEQUENCE_KEYS)):
+        lord_key = LORD_SEQUENCE_KEYS[sequence_index]
+        duration = _years_to_timedelta(LORD_YEARS[lord_key])
+        current_end = current_start + duration
+        timeline.append(
+            {
+                "lord_key": lord_key,
+                "lord": LORD_LABELS[lord_key],
+                "start": current_start.isoformat(),
+                "end": current_end.isoformat(),
+                "active": current_start <= as_of < current_end,
+            }
+        )
+        current_start = current_end
+        sequence_index = (sequence_index + 1) % len(LORD_SEQUENCE_KEYS)
+
+    return timeline
+
+
+def _build_antar_timeline(
+    *,
+    maha_lord: str,
+    maha_start: datetime,
+    as_of: datetime,
+) -> list[dict[str, object]]:
+    maha_years = LORD_YEARS[maha_lord]
+    timeline: list[dict[str, object]] = []
+    sequence_index = LORD_SEQUENCE_KEYS.index(maha_lord)
+    current_start = maha_start
+
+    for _ in range(len(LORD_SEQUENCE_KEYS)):
+        lord_key = LORD_SEQUENCE_KEYS[sequence_index]
+        antar_years = (maha_years * LORD_YEARS[lord_key]) / YEARS_IN_CYCLE
+        current_end = current_start + _years_to_timedelta(antar_years)
+        timeline.append(
+            {
+                "lord_key": lord_key,
+                "lord": LORD_LABELS[lord_key],
+                "start": current_start.isoformat(),
+                "end": current_end.isoformat(),
+                "active": current_start <= as_of < current_end,
+            }
+        )
+        current_start = current_end
+        sequence_index = (sequence_index + 1) % len(LORD_SEQUENCE_KEYS)
+
+    return timeline
 
 
 def _years_to_timedelta(years: float) -> timedelta:

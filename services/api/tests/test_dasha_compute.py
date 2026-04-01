@@ -21,6 +21,10 @@ def test_dasha_compute_returns_vimshottari_result() -> None:
     assert payload["dasha"]["system"] == "Vimshottari"
     assert isinstance(payload["dasha"]["current_maha_dasha"], str)
     assert isinstance(payload["dasha"]["current_antar_dasha"], str)
+    assert isinstance(payload["dasha"]["current_maha_start"], str)
+    assert isinstance(payload["dasha"]["current_maha_end"], str)
+    assert len(payload["dasha"]["maha_timeline"]) == 9
+    assert len(payload["dasha"]["antar_timeline_current_maha"]) == 9
 
 
 def test_dasha_compute_returns_not_found_for_unknown_place() -> None:

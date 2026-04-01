@@ -105,6 +105,8 @@ const Map<String, String> _vedicGraha = <String, String>{
   'shani': 'Shani',
   'rahu': 'Rahu',
   'ketu': 'Ketu',
+  'spashth_rahu': 'Spashth Rahu',
+  'spashth_ketu': 'Spashth Ketu',
   'lagna': 'Lagna',
   'Surya': 'Surya',
   'Chandra': 'Chandra',
@@ -115,6 +117,8 @@ const Map<String, String> _vedicGraha = <String, String>{
   'Shani': 'Shani',
   'Rahu': 'Rahu',
   'Ketu': 'Ketu',
+  'Spashth Rahu': 'Spashth Rahu',
+  'Spashth Ketu': 'Spashth Ketu',
   'Lagna': 'Lagna',
 };
 
@@ -128,6 +132,8 @@ const Map<String, String> _englishGraha = <String, String>{
   'shani': 'Saturn',
   'rahu': 'Rahu',
   'ketu': 'Ketu',
+  'spashth_rahu': 'True Rahu',
+  'spashth_ketu': 'True Ketu',
   'lagna': 'Ascendant',
   'Surya': 'Sun',
   'Chandra': 'Moon',
@@ -138,6 +144,8 @@ const Map<String, String> _englishGraha = <String, String>{
   'Shani': 'Saturn',
   'Rahu': 'Rahu',
   'Ketu': 'Ketu',
+  'Spashth Rahu': 'True Rahu',
+  'Spashth Ketu': 'True Ketu',
   'Lagna': 'Ascendant',
 };
 
