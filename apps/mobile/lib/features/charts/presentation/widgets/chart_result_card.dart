@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/state/astrology_terms_state.dart';
 import '../../../../app/state/terminology_mode_state.dart';
-import '../../data/models/compute_chart_models.dart';
 import '../../../shared/astrology/term_localizer.dart';
+import '../../data/models/compute_report_models.dart';
 
 class ChartResultCard extends StatelessWidget {
   const ChartResultCard({
@@ -13,18 +13,15 @@ class ChartResultCard extends StatelessWidget {
     super.key,
   });
 
-  final ComputeChartResponse result;
+  final ComputeReportResponse result;
   final TerminologyMode mode;
   final AstrologyTermsState termsState;
 
   @override
   Widget build(BuildContext context) {
-    final meta = _asMap(result.snapshot['meta']);
-    final panchanga = _asMap(result.snapshot['panchanga']);
-    final varga = _asMap(result.snapshot['varga']);
-    final d1 = _asMap(varga['d1']);
-    final d9 = _asMap(varga['d9']);
-    final grahaTable = _asMap(result.snapshot['graha_table']);
+    final snapshot = result.snapshot;
+    final d1 = snapshot.varga.d1;
+    final d9 = snapshot.varga.d9;
 
     return Column(
       children: <Widget>[
@@ -41,12 +38,12 @@ class ChartResultCard extends StatelessWidget {
             ),
             _KeyValueRow(
               label: 'Status',
-              value: '${meta['status'] ?? '-'}',
+              value: snapshot.meta.status,
             ),
             _KeyValueRow(
               label: 'Lagna (D1)',
               value: localizeRashi(
-                '${d1['lagna_rashi'] ?? '-'}',
+                d1.lagnaRashi,
                 mode,
                 termsState: termsState,
               ),
@@ -54,7 +51,7 @@ class ChartResultCard extends StatelessWidget {
             _KeyValueRow(
               label: 'Lagna (D9)',
               value: localizeRashi(
-                '${d9['lagna_rashi'] ?? '-'}',
+                d9.lagnaRashi,
                 mode,
                 termsState: termsState,
               ),
@@ -66,7 +63,7 @@ class ChartResultCard extends StatelessWidget {
           title: 'Panchanga',
           children: <Widget>[
             _PanchangaSection(
-              panchanga: panchanga,
+              panchanga: snapshot.panchanga,
               mode: mode,
               termsState: termsState,
             ),
@@ -99,7 +96,7 @@ class ChartResultCard extends StatelessWidget {
           title: 'Graha Table',
           children: <Widget>[
             _GrahaTable(
-              grahaTable: grahaTable,
+              grahaTable: snapshot.grahaTable,
               mode: mode,
               termsState: termsState,
             ),
@@ -117,58 +114,61 @@ class _PanchangaSection extends StatelessWidget {
     required this.termsState,
   });
 
-  final Map<String, dynamic> panchanga;
+  final ReportPanchanga panchanga;
   final TerminologyMode mode;
   final AstrologyTermsState termsState;
 
   @override
   Widget build(BuildContext context) {
-    if (panchanga.isEmpty) {
-      return const Text('Panchanga data not available yet.');
-    }
-
-    final tithi = _asMap(panchanga['tithi']);
-    final vara = _asMap(panchanga['vara']);
-    final nakshatra = _asMap(panchanga['nakshatra']);
-    final yoga = _asMap(panchanga['yoga']);
-    final karana = _asMap(panchanga['karana']);
-    final sunrise = _asMap(panchanga['sunrise']);
-    final sunset = _asMap(panchanga['sunset']);
-    final nakshatraName = '${nakshatra['name_vedic'] ?? ''}'.trim();
-
     return Column(
       children: <Widget>[
         _KeyValueRow(
           label: 'Tithi',
-          value: _pickPanchangaName(tithi, mode),
+          value: _pickPanchangaName(
+            vedic: panchanga.tithi.nameVedic,
+            english: panchanga.tithi.nameEnglish,
+            mode: mode,
+          ),
         ),
         _KeyValueRow(
           label: 'Vara',
-          value: _pickPanchangaName(vara, mode),
+          value: _pickPanchangaName(
+            vedic: panchanga.vara.nameVedic,
+            english: panchanga.vara.nameEnglish,
+            mode: mode,
+          ),
         ),
         _KeyValueRow(
           label: 'Nakshatra',
           value: localizeNakshatra(
-            nakshatraName,
+            panchanga.nakshatra.nameVedic,
             mode,
             termsState: termsState,
           ),
         ),
         _KeyValueRow(
           label: 'Yoga',
-          value: _pickPanchangaName(yoga, mode),
+          value: _pickPanchangaName(
+            vedic: panchanga.yoga.nameVedic,
+            english: panchanga.yoga.nameEnglish,
+            mode: mode,
+          ),
         ),
         _KeyValueRow(
           label: 'Karana',
-          value: _pickPanchangaName(karana, mode),
+          value: _pickPanchangaName(
+            vedic: panchanga.karana.nameVedic,
+            english: panchanga.karana.nameEnglish,
+            mode: mode,
+          ),
         ),
         _KeyValueRow(
           label: 'Sunrise',
-          value: '${sunrise['local_time'] ?? '-'}',
+          value: panchanga.sunrise.localTime,
         ),
         _KeyValueRow(
           label: 'Sunset',
-          value: '${sunset['local_time'] ?? '-'}',
+          value: panchanga.sunset.localTime,
         ),
       ],
     );
@@ -182,17 +182,13 @@ class _DivisionalChartGrid extends StatelessWidget {
     required this.termsState,
   });
 
-  final Map<String, dynamic> chart;
+  final ReportDivision chart;
   final TerminologyMode mode;
   final AstrologyTermsState termsState;
 
   @override
   Widget build(BuildContext context) {
-    final houses = _parseHouses(chart['houses']);
-    if (houses.isEmpty) {
-      return const Text('Detailed chart data not available yet.');
-    }
-
+    final houses = chart.sortedHouses;
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -204,7 +200,8 @@ class _DivisionalChartGrid extends StatelessWidget {
         mainAxisSpacing: 8,
       ),
       itemBuilder: (BuildContext context, int index) {
-        final house = houses[index];
+        final houseEntry = houses[index];
+        final house = houseEntry.value;
         final occupants = house.occupants
             .map(
               (String graha) => localizeGraha(
@@ -227,7 +224,7 @@ class _DivisionalChartGrid extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'H${house.house}',
+                  'H${houseEntry.key}',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 2),
@@ -262,7 +259,7 @@ class _GrahaTable extends StatelessWidget {
     required this.termsState,
   });
 
-  final Map<String, dynamic> grahaTable;
+  final ReportGrahaTable grahaTable;
   final TerminologyMode mode;
   final AstrologyTermsState termsState;
 
@@ -282,13 +279,8 @@ class _GrahaTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = _rowOrder
-        .where((String key) => grahaTable[key] is Map)
-        .map((String key) => _asMap(grahaTable[key]))
+        .map((String key) => grahaTable.entryByKey(key))
         .toList(growable: false);
-
-    if (rows.isEmpty) {
-      return const Text('Graha table data not available yet.');
-    }
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -308,33 +300,33 @@ class _GrahaTable extends StatelessWidget {
           DataColumn(label: Text('Retro')),
           DataColumn(label: Text('Comb')),
         ],
-        rows: rows.map((Map<String, dynamic> row) {
-          final key = '${row['key'] ?? ''}';
-          final degree = _num(row['sidereal_deg']);
-          final rashi = '${row['rashi'] ?? '-'}';
-          final nakshatra = '${row['nakshatra'] ?? '-'}';
-          final pada = '${row['pada'] ?? '-'}';
-          final house = '${row['house'] ?? '-'}';
-          final d9Rashi = '${row['d9_rashi'] ?? '-'}';
-          final d9House = '${row['d9_house'] ?? '-'}';
-          final retrograde = (row['retrograde'] as bool?) ?? false;
-          final combust = (row['combust'] as bool?) ?? false;
-
+        rows: rows.map((ReportGrahaEntry row) {
           return DataRow(
             cells: <DataCell>[
-              DataCell(Text(localizeGraha(key, mode, termsState: termsState))),
-              DataCell(Text(degree == null ? '-' : degree.toStringAsFixed(2))),
               DataCell(
-                  Text(localizeRashi(rashi, mode, termsState: termsState))),
-              DataCell(Text(
-                  localizeNakshatra(nakshatra, mode, termsState: termsState))),
-              DataCell(Text(pada)),
-              DataCell(Text(house)),
+                Text(localizeGraha(row.key, mode, termsState: termsState)),
+              ),
+              DataCell(Text(row.siderealDeg.toStringAsFixed(2))),
               DataCell(
-                  Text(localizeRashi(d9Rashi, mode, termsState: termsState))),
-              DataCell(Text(d9House)),
-              DataCell(Text(retrograde ? 'Yes' : 'No')),
-              DataCell(Text(combust ? 'Yes' : 'No')),
+                Text(localizeRashi(row.rashi, mode, termsState: termsState)),
+              ),
+              DataCell(
+                Text(
+                  localizeNakshatra(
+                    row.nakshatra,
+                    mode,
+                    termsState: termsState,
+                  ),
+                ),
+              ),
+              DataCell(Text(row.pada.toString())),
+              DataCell(Text(row.house.toString())),
+              DataCell(
+                Text(localizeRashi(row.d9Rashi, mode, termsState: termsState)),
+              ),
+              DataCell(Text(row.d9House.toString())),
+              DataCell(Text(row.retrograde ? 'Yes' : 'No')),
+              DataCell(Text(row.combust ? 'Yes' : 'No')),
             ],
           );
         }).toList(growable: false),
@@ -404,85 +396,22 @@ class _KeyValueRow extends StatelessWidget {
   }
 }
 
-class _HouseCellData {
-  const _HouseCellData({
-    required this.house,
-    required this.rashi,
-    required this.occupants,
-  });
-
-  final int house;
-  final String rashi;
-  final List<String> occupants;
-}
-
-List<_HouseCellData> _parseHouses(Object? raw) {
-  final map = _asMap(raw);
-  final houses = <_HouseCellData>[];
-  for (final MapEntry<String, dynamic> entry in map.entries) {
-    final houseIndex = int.tryParse(entry.key);
-    if (houseIndex == null) {
-      continue;
-    }
-    final value = _asMap(entry.value);
-    final occupants = _asList(value['occupants']).map((Object? value) {
-      return value.toString();
-    }).toList(growable: false);
-    houses.add(
-      _HouseCellData(
-        house: houseIndex,
-        rashi: '${value['rashi'] ?? '-'}',
-        occupants: occupants,
-      ),
-    );
-  }
-  houses.sort((left, right) => left.house.compareTo(right.house));
-  return houses;
-}
-
-Map<String, dynamic> _asMap(Object? raw) {
-  if (raw is Map<String, dynamic>) {
-    return raw;
-  }
-  if (raw is Map) {
-    return raw.map((key, value) => MapEntry(key.toString(), value));
-  }
-  return <String, dynamic>{};
-}
-
-List<Object?> _asList(Object? raw) {
-  if (raw is List<Object?>) {
-    return raw;
-  }
-  if (raw is List) {
-    return raw.cast<Object?>();
-  }
-  return const <Object?>[];
-}
-
-double? _num(Object? raw) {
-  if (raw is num) {
-    return raw.toDouble();
-  }
-  return double.tryParse('${raw ?? ''}');
-}
-
-String _pickPanchangaName(Map<String, dynamic> section, TerminologyMode mode) {
-  if (section.isEmpty) {
-    return '-';
-  }
+String _pickPanchangaName({
+  required String vedic,
+  required String english,
+  required TerminologyMode mode,
+}) {
   if (mode == TerminologyMode.vedic) {
-    final vedic = '${section['name_vedic'] ?? ''}'.trim();
-    if (vedic.isNotEmpty) {
-      return vedic;
+    final trimmed = vedic.trim();
+    if (trimmed.isNotEmpty) {
+      return trimmed;
     }
   } else {
-    final english = '${section['name_english'] ?? ''}'.trim();
-    if (english.isNotEmpty) {
-      return english;
+    final trimmed = english.trim();
+    if (trimmed.isNotEmpty) {
+      return trimmed;
     }
   }
-  final fallback =
-      '${section['name_vedic'] ?? section['name_english'] ?? '-'}'.trim();
+  final fallback = vedic.trim().isNotEmpty ? vedic.trim() : english.trim();
   return fallback.isEmpty ? '-' : fallback;
 }
