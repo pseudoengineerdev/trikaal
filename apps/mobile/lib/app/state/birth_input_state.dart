@@ -2,9 +2,9 @@ import 'package:flutter/foundation.dart';
 
 class BirthInputState extends ChangeNotifier {
   BirthInputState({
-    String dateOfBirth = '1999-07-04',
-    String timeOfBirth = '12:22',
-    String placeOfBirth = 'Mumbai',
+    String dateOfBirth = '',
+    String timeOfBirth = '',
+    String placeOfBirth = '',
   })  : _dateOfBirth = dateOfBirth,
         _timeOfBirth = timeOfBirth,
         _placeOfBirth = placeOfBirth;
