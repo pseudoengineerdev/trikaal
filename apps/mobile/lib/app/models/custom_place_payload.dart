@@ -13,23 +13,46 @@ class CustomPlacePayload {
   final String timezone;
   final double elevationM;
 
+  CustomPlacePayload sanitized() {
+    return CustomPlacePayload(
+      placeLabel: placeLabel.trim(),
+      latitude: _finiteOrZero(latitude),
+      longitude: _finiteOrZero(longitude),
+      timezone: timezone.trim(),
+      elevationM: _finiteOrZero(elevationM),
+    );
+  }
+
   factory CustomPlacePayload.fromJson(Map<String, dynamic> json) {
     return CustomPlacePayload(
       placeLabel: (json['place_label'] as String?) ?? '',
-      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
-      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      latitude: _asFiniteDouble(json['latitude']),
+      longitude: _asFiniteDouble(json['longitude']),
       timezone: (json['timezone'] as String?) ?? '',
-      elevationM: (json['elevation_m'] as num?)?.toDouble() ?? 0.0,
+      elevationM: _asFiniteDouble(json['elevation_m']),
     );
   }
 
   Map<String, dynamic> toJson() {
+    final safe = sanitized();
     return <String, dynamic>{
-      'place_label': placeLabel,
-      'latitude': latitude,
-      'longitude': longitude,
-      'timezone': timezone,
-      'elevation_m': elevationM,
+      'place_label': safe.placeLabel,
+      'latitude': safe.latitude,
+      'longitude': safe.longitude,
+      'timezone': safe.timezone,
+      'elevation_m': safe.elevationM,
     };
+  }
+
+  static double _asFiniteDouble(Object? value) {
+    final parsed = (value as num?)?.toDouble() ?? 0.0;
+    return _finiteOrZero(parsed);
+  }
+
+  static double _finiteOrZero(double value) {
+    if (!value.isFinite) {
+      return 0.0;
+    }
+    return value;
   }
 }

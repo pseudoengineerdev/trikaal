@@ -134,6 +134,7 @@ class BirthInputState extends ChangeNotifier {
   }
 
   void applyProfile(String profileId) {
+    _profilesError = null;
     final profile = _savedProfiles.where((item) => item.id == profileId);
     if (profile.isEmpty) {
       return;
@@ -145,6 +146,7 @@ class BirthInputState extends ChangeNotifier {
     required String name,
     bool setAsDefault = false,
   }) async {
+    _profilesError = null;
     final profileName = name.trim();
     if (profileName.isEmpty || !canSaveCurrentAsProfile) {
       _profilesError = 'Enter complete birth details before saving a profile.';
@@ -184,6 +186,7 @@ class BirthInputState extends ChangeNotifier {
     required String profileId,
     required String name,
   }) async {
+    _profilesError = null;
     final profileName = name.trim();
     if (profileName.isEmpty) {
       _profilesError = 'Profile name cannot be empty.';
@@ -203,6 +206,7 @@ class BirthInputState extends ChangeNotifier {
   }
 
   Future<bool> updateProfileFromCurrent(String profileId) async {
+    _profilesError = null;
     if (!canSaveCurrentAsProfile) {
       _profilesError = 'Enter complete birth details before updating profile.';
       notifyListeners();
@@ -227,6 +231,7 @@ class BirthInputState extends ChangeNotifier {
   }
 
   Future<bool> setDefaultProfile(String profileId) async {
+    _profilesError = null;
     if (_savedProfiles.every((item) => item.id != profileId)) {
       return false;
     }
@@ -242,6 +247,7 @@ class BirthInputState extends ChangeNotifier {
   }
 
   Future<bool> deleteProfile(String profileId) async {
+    _profilesError = null;
     final hadProfile = _savedProfiles.any((item) => item.id == profileId);
     if (!hadProfile) {
       return false;
@@ -335,7 +341,13 @@ class BirthInputState extends ChangeNotifier {
       _profilesError = null;
       notifyListeners();
       return true;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      assert(() {
+        debugPrint(
+          'Saved profile persist failed: $error\n$stackTrace',
+        );
+        return true;
+      }());
       _profilesError = 'Unable to save profile changes right now.';
       notifyListeners();
       return false;

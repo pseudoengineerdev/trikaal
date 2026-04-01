@@ -49,13 +49,14 @@ class SavedBirthProfile {
   }
 
   Map<String, dynamic> toJson() {
+    final safeCustomPlace = customPlace?.sanitized();
     return <String, dynamic>{
-      'id': id,
-      'name': name,
-      'date_of_birth': dateOfBirth,
-      'time_of_birth': timeOfBirth,
-      'place_of_birth': placeOfBirth,
-      'custom_place': customPlace?.toJson(),
+      'id': id.trim(),
+      'name': name.trim(),
+      'date_of_birth': dateOfBirth.trim(),
+      'time_of_birth': timeOfBirth.trim(),
+      'place_of_birth': placeOfBirth.trim(),
+      'custom_place': safeCustomPlace?.toJson(),
       'is_default': isDefault,
       'created_at_utc_iso': createdAtUtcIso,
       'updated_at_utc_iso': updatedAtUtcIso,

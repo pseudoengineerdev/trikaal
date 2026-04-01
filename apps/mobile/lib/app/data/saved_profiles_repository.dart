@@ -57,6 +57,10 @@ class SharedPreferencesSavedProfilesRepository
   Future<void> saveProfiles(List<SavedBirthProfile> profiles) async {
     final prefs = await _prefsLoader();
     final payload = profiles.map((profile) => profile.toJson()).toList();
-    await prefs.setString(_storageKey, jsonEncode(payload));
+    final encoded = jsonEncode(payload);
+    final didSave = await prefs.setString(_storageKey, encoded);
+    if (!didSave) {
+      throw StateError('SharedPreferences save returned false.');
+    }
   }
 }
