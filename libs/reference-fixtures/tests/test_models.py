@@ -24,8 +24,8 @@ def test_all_drik_fixtures_conform_to_schema() -> None:
         else:
             provisional_count += 1
 
-    assert verified_count >= 5
-    assert provisional_count >= 6
+    assert verified_count >= 11
+    assert provisional_count == 0
 
 
 def test_canonical_fixture_is_present_in_suite() -> None:

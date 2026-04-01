@@ -225,6 +225,11 @@ To include provisional engine-seed fixtures too:
 curl "http://127.0.0.1:8000/v1/engine/parity/drik-suite?include_unverified=true"
 ```
 
+Current suite status:
+
+- All fixtures are verified Drik references (`unverified_fixture_count = 0`).
+- `include_unverified=true` returns the same set until new provisional fixtures are added.
+
 Response includes:
 
 - `available_fixture_count` (verified + provisional)

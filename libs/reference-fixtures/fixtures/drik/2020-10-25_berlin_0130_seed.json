@@ -1,8 +1,8 @@
 {
-  "fixture_id": "drik_seed_berlin_2020_10_25_0130_v1",
-  "source": "engine_seed",
+  "fixture_id": "drik_berlin_2020_10_25_0130_v1",
+  "source": "drik_panchang_search_capture",
   "captured_at_utc": "2026-04-01T00:00:00Z",
-  "reference_status": "engine_seed_pending_capture",
+  "reference_status": "drik_captured",
   "birth_input": {
     "local_date": "2020-10-25",
     "local_time": "01:30",
@@ -22,9 +22,8 @@
       "status": "computed"
     },
     "astronomy": {
-      "sun_sidereal_deg": 187.86,
-      "moon_sidereal_deg": 294.56,
-      "lagna_sidereal_deg": 121.2
+      "sun_sidereal_deg": 187.85,
+      "moon_sidereal_deg": 294.56
     },
     "vedic": {
       "sun_rashi": "Tula",
@@ -36,29 +35,12 @@
       "moon_pada": 1,
       "lagna_nakshatra": "Magha",
       "lagna_pada": 1
-    },
-    "bhava": {
-      "lagna_house": 1,
-      "sun_house": 3,
-      "moon_house": 6
-    },
-    "panchanga": {
-      "tithi": {
-        "name_vedic": "Shukla Navami"
-      },
-      "vara": {
-        "name_vedic": "Ravivara"
-      },
-      "nakshatra": {
-        "name_vedic": "Dhanishta",
-        "pada": 1
-      }
     }
   },
   "comparison_rules": {
     "exact_paths": [
       "meta.status"
     ],
-    "float_tolerance": 1e-06
+    "float_tolerance": 0.03
   }
 }

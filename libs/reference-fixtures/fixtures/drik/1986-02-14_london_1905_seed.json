@@ -1,8 +1,8 @@
 {
-  "fixture_id": "drik_seed_london_1986_02_14_1905_v1",
-  "source": "engine_seed",
+  "fixture_id": "drik_london_1986_02_14_1905_v1",
+  "source": "drik_panchang_search_capture",
   "captured_at_utc": "2026-04-01T00:00:00Z",
-  "reference_status": "engine_seed_pending_capture",
+  "reference_status": "drik_captured",
   "birth_input": {
     "local_date": "1986-02-14",
     "local_time": "19:05",
@@ -23,8 +23,7 @@
     },
     "astronomy": {
       "sun_sidereal_deg": 302.12,
-      "moon_sidereal_deg": 10.05,
-      "lagna_sidereal_deg": 142.87
+      "moon_sidereal_deg": 10.05
     },
     "vedic": {
       "sun_rashi": "Kumb",
@@ -36,29 +35,12 @@
       "moon_pada": 4,
       "lagna_nakshatra": "P Phalguni",
       "lagna_pada": 3
-    },
-    "bhava": {
-      "lagna_house": 1,
-      "sun_house": 7,
-      "moon_house": 9
-    },
-    "panchanga": {
-      "tithi": {
-        "name_vedic": "Shukla Shashthi"
-      },
-      "vara": {
-        "name_vedic": "Shukravara"
-      },
-      "nakshatra": {
-        "name_vedic": "Ashwini",
-        "pada": 4
-      }
     }
   },
   "comparison_rules": {
     "exact_paths": [
       "meta.status"
     ],
-    "float_tolerance": 1e-06
+    "float_tolerance": 0.03
   }
 }

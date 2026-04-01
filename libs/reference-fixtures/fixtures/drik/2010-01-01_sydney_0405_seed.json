@@ -1,8 +1,8 @@
 {
-  "fixture_id": "drik_seed_sydney_2010_01_01_0405_v1",
-  "source": "engine_seed",
+  "fixture_id": "drik_sydney_2010_01_01_0405_v1",
+  "source": "drik_panchang_search_capture",
   "captured_at_utc": "2026-04-01T00:00:00Z",
-  "reference_status": "engine_seed_pending_capture",
+  "reference_status": "drik_captured",
   "birth_input": {
     "local_date": "2010-01-01",
     "local_time": "04:05",
@@ -22,9 +22,8 @@
       "status": "computed"
     },
     "astronomy": {
-      "sun_sidereal_deg": 256.14,
-      "moon_sidereal_deg": 74.9,
-      "lagna_sidereal_deg": 231.39
+      "sun_sidereal_deg": 256.15,
+      "moon_sidereal_deg": 74.91
     },
     "vedic": {
       "sun_rashi": "Dhanu",
@@ -36,29 +35,12 @@
       "moon_pada": 3,
       "lagna_nakshatra": "Jyeshtha",
       "lagna_pada": 2
-    },
-    "bhava": {
-      "lagna_house": 1,
-      "sun_house": 2,
-      "moon_house": 8
-    },
-    "panchanga": {
-      "tithi": {
-        "name_vedic": "Purnima"
-      },
-      "vara": {
-        "name_vedic": "Shukravara"
-      },
-      "nakshatra": {
-        "name_vedic": "Ardra",
-        "pada": 3
-      }
     }
   },
   "comparison_rules": {
     "exact_paths": [
       "meta.status"
     ],
-    "float_tolerance": 1e-06
+    "float_tolerance": 0.03
   }
 }

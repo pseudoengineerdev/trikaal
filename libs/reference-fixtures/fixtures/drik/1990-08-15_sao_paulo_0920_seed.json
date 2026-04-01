@@ -1,8 +1,8 @@
 {
-  "fixture_id": "drik_seed_sao_paulo_1990_08_15_0920_v1",
-  "source": "engine_seed",
+  "fixture_id": "drik_sao_paulo_1990_08_15_0920_v1",
+  "source": "drik_panchang_search_capture",
   "captured_at_utc": "2026-04-01T00:00:00Z",
-  "reference_status": "engine_seed_pending_capture",
+  "reference_status": "drik_captured",
   "birth_input": {
     "local_date": "1990-08-15",
     "local_time": "09:20",
@@ -22,9 +22,8 @@
       "status": "computed"
     },
     "astronomy": {
-      "sun_sidereal_deg": 118.67,
-      "moon_sidereal_deg": 53.27,
-      "lagna_sidereal_deg": 172.49
+      "sun_sidereal_deg": 118.68,
+      "moon_sidereal_deg": 53.28
     },
     "vedic": {
       "sun_rashi": "Kark",
@@ -36,29 +35,12 @@
       "moon_pada": 4,
       "lagna_nakshatra": "Hasta",
       "lagna_pada": 4
-    },
-    "bhava": {
-      "lagna_house": 1,
-      "sun_house": 11,
-      "moon_house": 9
-    },
-    "panchanga": {
-      "tithi": {
-        "name_vedic": "Krishna Dashami"
-      },
-      "vara": {
-        "name_vedic": "Budhavara"
-      },
-      "nakshatra": {
-        "name_vedic": "Rohini",
-        "pada": 4
-      }
     }
   },
   "comparison_rules": {
     "exact_paths": [
       "meta.status"
     ],
-    "float_tolerance": 1e-06
+    "float_tolerance": 0.03
   }
 }

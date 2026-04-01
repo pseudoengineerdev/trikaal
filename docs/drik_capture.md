@@ -69,11 +69,28 @@ Additional verified captures (from Drik sidereal pages, 2026-04-01):
 
 - `drik_jhalawar_1999_07_13_0501_v1`
 - `drik_visakhapatnam_1999_08_04_2216_v1`
+- `drik_london_1986_02_14_1905_v1`
+- `drik_sao_paulo_1990_08_15_0920_v1`
+- `drik_new_york_2001_09_09_0130_v1`
+- `drik_tokyo_2005_06_21_1510_v1`
+- `drik_sydney_2010_01_01_0405_v1`
+- `drik_berlin_2020_10_25_0130_v1`
 
 Captured URLs:
 
 - `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?date=13%2F07%2F1999`
 - `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?date=04%2F08%2F1999&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2643743&date=14/02/1986&time=19:05:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=3448439&date=15/08/1990&time=09:20:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=5128581&date=09/09/2001&time=01:30:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=1850147&date=21/06/2005&time=15:10:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2147714&date=01/01/2010&time=04:05:00&lang=en`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?geoname-id=2950159&date=25/10/2020&time=01:30:00&lang=en`
+
+Suite status:
+
+- Verified Drik fixtures: `11`
+- Provisional fixtures: `0`
 
 Capture note for historical pages crawled without exact seconds in fixture schema:
 
