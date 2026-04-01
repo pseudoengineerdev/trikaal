@@ -3,16 +3,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/state/terminology_mode_state.dart';
+import '../../shared/widgets/terminology_toggle.dart';
 import 'state/dasha_controller.dart';
 import 'widgets/dasha_state_widgets.dart';
 
 class DashaPage extends StatefulWidget {
   const DashaPage({
     required this.birthInputState,
+    required this.terminologyModeState,
     super.key,
   });
 
   final BirthInputState birthInputState;
+  final TerminologyModeState terminologyModeState;
 
   @override
   State<DashaPage> createState() => _DashaPageState();
@@ -45,32 +49,51 @@ class _DashaPageState extends State<DashaPage> {
         animation: Listenable.merge(<Listenable>[
           _controller,
           widget.birthInputState,
+          widget.terminologyModeState,
         ]),
         builder: (BuildContext context, Widget? child) {
-          if (_controller.loading) {
-            return const DashaLoadingState();
-          }
-          if (_controller.error != null) {
-            return DashaErrorState(
-              message: _controller.error!,
-              onRetry: _computeFromSharedInputs,
-            );
-          }
-          if (_controller.summary == null) {
-            return DashaEmptyState(
-              dateOfBirth: widget.birthInputState.dateOfBirth,
-              timeOfBirth: widget.birthInputState.timeOfBirth,
-              placeOfBirth: widget.birthInputState.placeOfBirth,
-            );
-          }
-          return DashaSummaryCard(
-            summary: _controller.summary!,
-            dateOfBirth: widget.birthInputState.dateOfBirth,
-            timeOfBirth: widget.birthInputState.timeOfBirth,
-            placeOfBirth: widget.birthInputState.placeOfBirth,
+          return Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: TerminologyToggle(
+                  mode: widget.terminologyModeState.mode,
+                  onChanged: widget.terminologyModeState.setMode,
+                ),
+              ),
+              Expanded(
+                child: _buildBodyContent(),
+              ),
+            ],
           );
         },
       ),
+    );
+  }
+
+  Widget _buildBodyContent() {
+    if (_controller.loading) {
+      return const DashaLoadingState();
+    }
+    if (_controller.error != null) {
+      return DashaErrorState(
+        message: _controller.error!,
+        onRetry: _computeFromSharedInputs,
+      );
+    }
+    if (_controller.summary == null) {
+      return DashaEmptyState(
+        dateOfBirth: widget.birthInputState.dateOfBirth,
+        timeOfBirth: widget.birthInputState.timeOfBirth,
+        placeOfBirth: widget.birthInputState.placeOfBirth,
+      );
+    }
+    return DashaSummaryCard(
+      summary: _controller.summary!,
+      dateOfBirth: widget.birthInputState.dateOfBirth,
+      timeOfBirth: widget.birthInputState.timeOfBirth,
+      placeOfBirth: widget.birthInputState.placeOfBirth,
+      mode: widget.terminologyModeState.mode,
     );
   }
 
