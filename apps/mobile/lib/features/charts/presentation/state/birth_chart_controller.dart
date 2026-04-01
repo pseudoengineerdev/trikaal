@@ -67,6 +67,23 @@ class BirthChartController extends ChangeNotifier {
     }
   }
 
+  void applyComputedResult({
+    required ComputeReportResponse report,
+    DashaSummary? dasha,
+  }) {
+    result = report;
+    dashaResult = dasha;
+    error = null;
+    loading = false;
+    notifyListeners();
+  }
+
+  void clearComputedResult() {
+    result = null;
+    dashaResult = null;
+    notifyListeners();
+  }
+
   void onPlaceQueryChanged(String value) {
     _placeSearchDebounce?.cancel();
     final query = value.trim();

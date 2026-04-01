@@ -5,6 +5,8 @@ import '../../../app/models/saved_birth_profile.dart';
 import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
+import '../../dasha/data/models/dasha_models.dart';
+import '../data/models/compute_report_models.dart';
 import '../data/models/place_search_models.dart';
 import '../../shared/widgets/terminology_toggle.dart';
 import 'state/birth_chart_controller.dart';
@@ -34,6 +36,10 @@ class _BirthInputPageState extends State<BirthInputPage> {
   late final TextEditingController _placeController;
   late final VoidCallback _birthInputStateListener;
   final _controller = BirthChartController();
+  final Map<String, ComputeReportResponse> _computedReportByProfileId =
+      <String, ComputeReportResponse>{};
+  final Map<String, DashaSummary?> _computedDashaByProfileId =
+      <String, DashaSummary?>{};
   bool _isDisposed = false;
 
   @override
@@ -77,6 +83,10 @@ class _BirthInputPageState extends State<BirthInputPage> {
       return;
     }
 
+    await _computeForCurrentInput();
+  }
+
+  Future<void> _computeForCurrentInput() async {
     await _controller.submit(
       dateOfBirth: _dateController.text.trim(),
       timeOfBirth: _timeController.text.trim(),
@@ -93,10 +103,13 @@ class _BirthInputPageState extends State<BirthInputPage> {
       _placeController.selection = TextSelection.collapsed(
         offset: _placeController.text.length,
       );
-      widget.birthInputState
-          .markChartComputed(dashaSummary: _controller.dashaResult);
+      widget.birthInputState.markChartComputed(
+        dashaSummary: _controller.dashaResult,
+      );
+      _cacheComputedForActiveProfile();
     } else {
       widget.birthInputState.clearComputedChart();
+      _controller.clearComputedResult();
     }
   }
 
@@ -316,6 +329,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
       return;
     }
     if (didSave) {
+      _cacheComputedForActiveProfile();
       _showInfo('Profile saved.');
       return;
     }
@@ -323,9 +337,38 @@ class _BirthInputPageState extends State<BirthInputPage> {
         widget.birthInputState.profilesError ?? 'Could not save profile.');
   }
 
-  void _onUseProfile(String profileId) {
+  Future<void> _onUseProfile(String profileId) async {
     widget.birthInputState.applyProfile(profileId);
     _controller.clearPlaceSuggestions();
+    if (_restoreCachedProfileComputation(profileId)) {
+      return;
+    }
+    _controller.clearComputedResult();
+    await _computeForCurrentInput();
+  }
+
+  bool _restoreCachedProfileComputation(String profileId) {
+    final cachedReport = _computedReportByProfileId[profileId];
+    if (cachedReport == null) {
+      return false;
+    }
+    final cachedDasha = _computedDashaByProfileId[profileId];
+    _controller.applyComputedResult(
+      report: cachedReport,
+      dasha: cachedDasha,
+    );
+    widget.birthInputState.markChartComputed(dashaSummary: cachedDasha);
+    return true;
+  }
+
+  void _cacheComputedForActiveProfile() {
+    final activeProfileId = widget.birthInputState.activeProfileId;
+    final report = _controller.result;
+    if (activeProfileId == null || report == null) {
+      return;
+    }
+    _computedReportByProfileId[activeProfileId] = report;
+    _computedDashaByProfileId[activeProfileId] = _controller.dashaResult;
   }
 
   Future<void> _onRenameProfile(SavedBirthProfile profile) async {
@@ -378,6 +421,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
       return;
     }
     if (didUpdate) {
+      _cacheComputedForActiveProfile();
       _showInfo('Profile updated with current form values.');
       return;
     }
@@ -396,6 +440,8 @@ class _BirthInputPageState extends State<BirthInputPage> {
       return;
     }
     if (didDelete) {
+      _computedReportByProfileId.remove(profile.id);
+      _computedDashaByProfileId.remove(profile.id);
       _showInfo('Profile deleted.');
       return;
     }
@@ -638,7 +684,7 @@ class _SavedProfilesCard extends StatelessWidget {
   final List<SavedBirthProfile> profiles;
   final String? activeProfileId;
   final Future<void> Function() onSaveNew;
-  final void Function(String profileId) onUseProfile;
+  final Future<void> Function(String profileId) onUseProfile;
   final Future<void> Function(SavedBirthProfile profile) onRenameProfile;
   final Future<void> Function(SavedBirthProfile profile) onSetDefaultProfile;
   final Future<void> Function(SavedBirthProfile profile)
@@ -698,7 +744,9 @@ class _SavedProfilesCard extends StatelessWidget {
                 _SavedProfileListTile(
                   profile: profile,
                   isActive: activeProfileId == profile.id,
-                  onTap: () => onUseProfile(profile.id),
+                  onTap: () {
+                    onUseProfile(profile.id);
+                  },
                   onActionSelected: (action) async {
                     switch (action) {
                       case _ProfileAction.setDefault:
