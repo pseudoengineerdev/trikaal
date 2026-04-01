@@ -47,9 +47,13 @@ jobs:
 
           result = run_reference_parity_suite_check()
           print(
-              f"Reference parity suite: fixtures={result.fixture_count}, "
+              f"Reference parity suite (verified-only): fixtures={result.fixture_count}, "
               f"accuracy={result.accuracy_percent}%"
           )
+          if result.fixture_count < 11:
+              raise SystemExit(
+                  "Accuracy gate failed: less than 11 verified Reference fixtures available."
+              )
           if not result.all_matched:
               raise SystemExit(
                   f"Parity mismatch detected: {result.mismatched_fixture_count} fixture(s) failed."

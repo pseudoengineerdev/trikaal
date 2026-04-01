@@ -20,6 +20,7 @@ class ChartResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final meta = _asMap(result.snapshot['meta']);
+    final panchanga = _asMap(result.snapshot['panchanga']);
     final varga = _asMap(result.snapshot['varga']);
     final d1 = _asMap(varga['d1']);
     final d9 = _asMap(varga['d9']);
@@ -62,6 +63,17 @@ class ChartResultCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _SectionCard(
+          title: 'Panchanga',
+          children: <Widget>[
+            _PanchangaSection(
+              panchanga: panchanga,
+              mode: mode,
+              termsState: termsState,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _SectionCard(
           title: 'Rashi Chart (D1)',
           children: <Widget>[
             _DivisionalChartGrid(
@@ -92,6 +104,71 @@ class ChartResultCard extends StatelessWidget {
               termsState: termsState,
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _PanchangaSection extends StatelessWidget {
+  const _PanchangaSection({
+    required this.panchanga,
+    required this.mode,
+    required this.termsState,
+  });
+
+  final Map<String, dynamic> panchanga;
+  final TerminologyMode mode;
+  final AstrologyTermsState termsState;
+
+  @override
+  Widget build(BuildContext context) {
+    if (panchanga.isEmpty) {
+      return const Text('Panchanga data not available yet.');
+    }
+
+    final tithi = _asMap(panchanga['tithi']);
+    final vara = _asMap(panchanga['vara']);
+    final nakshatra = _asMap(panchanga['nakshatra']);
+    final yoga = _asMap(panchanga['yoga']);
+    final karana = _asMap(panchanga['karana']);
+    final sunrise = _asMap(panchanga['sunrise']);
+    final sunset = _asMap(panchanga['sunset']);
+    final nakshatraName = '${nakshatra['name_vedic'] ?? ''}'.trim();
+
+    return Column(
+      children: <Widget>[
+        _KeyValueRow(
+          label: 'Tithi',
+          value: _pickPanchangaName(tithi, mode),
+        ),
+        _KeyValueRow(
+          label: 'Vara',
+          value: _pickPanchangaName(vara, mode),
+        ),
+        _KeyValueRow(
+          label: 'Nakshatra',
+          value: localizeNakshatra(
+            nakshatraName,
+            mode,
+            termsState: termsState,
+          ),
+        ),
+        _KeyValueRow(
+          label: 'Yoga',
+          value: _pickPanchangaName(yoga, mode),
+        ),
+        _KeyValueRow(
+          label: 'Karana',
+          value: _pickPanchangaName(karana, mode),
+        ),
+        _KeyValueRow(
+          label: 'Sunrise',
+          value: '${sunrise['local_time'] ?? '-'}',
+        ),
+        _KeyValueRow(
+          label: 'Sunset',
+          value: '${sunset['local_time'] ?? '-'}',
         ),
       ],
     );
@@ -388,4 +465,24 @@ double? _num(Object? raw) {
     return raw.toDouble();
   }
   return double.tryParse('${raw ?? ''}');
+}
+
+String _pickPanchangaName(Map<String, dynamic> section, TerminologyMode mode) {
+  if (section.isEmpty) {
+    return '-';
+  }
+  if (mode == TerminologyMode.vedic) {
+    final vedic = '${section['name_vedic'] ?? ''}'.trim();
+    if (vedic.isNotEmpty) {
+      return vedic;
+    }
+  } else {
+    final english = '${section['name_english'] ?? ''}'.trim();
+    if (english.isNotEmpty) {
+      return english;
+    }
+  }
+  final fallback =
+      '${section['name_vedic'] ?? section['name_english'] ?? '-'}'.trim();
+  return fallback.isEmpty ? '-' : fallback;
 }

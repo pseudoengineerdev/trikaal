@@ -9,7 +9,7 @@ API_SRC = PROJECT_ROOT / "services" / "api" / "src"
 if str(API_SRC) not in sys.path:
     sys.path.insert(0, str(API_SRC))
 
-from trikaal_api.canonical import build_canonical_preview
+from trikaal_api.canonical import build_canonical_preview  # noqa: E402
 
 
 def main() -> None:

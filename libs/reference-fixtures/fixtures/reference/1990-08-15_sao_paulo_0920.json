@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_sao_paulo_1990_08_15_0920_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "1990-08-15",
+    "local_time": "09:20",
+    "timezone": "America/Sao_Paulo",
+    "latitude": -23.5475,
+    "longitude": -46.63611,
+    "elevation_m": 760.0,
+    "place_label": "Sao Paulo, Sao Paulo, Brazil"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 118.68,
+      "moon_sidereal_deg": 53.28
+    },
+    "vedic": {
+      "sun_rashi": "Kark",
+      "moon_rashi": "Vrish",
+      "lagna_rashi": "Kany",
+      "sun_nakshatra": "Ashlesha",
+      "sun_pada": 4,
+      "moon_nakshatra": "Rohini",
+      "moon_pada": 4,
+      "lagna_nakshatra": "Hasta",
+      "lagna_pada": 4
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

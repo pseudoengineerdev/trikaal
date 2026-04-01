@@ -2,6 +2,7 @@
   "fixture_id": "reference_mumbai_1973_04_24_1300_sachin_v1",
   "source": "reference_panchang",
   "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "reference_captured",
   "birth_input": {
     "local_date": "1973-04-24",
     "local_time": "13:00",

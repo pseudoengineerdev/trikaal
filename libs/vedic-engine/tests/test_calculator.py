@@ -19,6 +19,19 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["meta"]["status"] == "computed"
     assert snapshot["meta"]["timezone"] == "Asia/Kolkata"
     assert snapshot["meta"]["utc_iso"] == "1999-07-04T06:52:00Z"
+    assert snapshot["panchanga"]["vara"]["name_vedic"] == "Ravivara"
+    assert snapshot["panchanga"]["vara"]["name_english"] == "Sunday"
+    assert snapshot["panchanga"]["tithi"]["number"] == 21
+    assert snapshot["panchanga"]["tithi"]["name_vedic"] == "Krishna Shashthi"
+    assert snapshot["panchanga"]["tithi"]["name_english"] == "Waning Shashthi"
+    assert snapshot["panchanga"]["nakshatra"]["name_vedic"] == "P Bhadrapada"
+    assert snapshot["panchanga"]["nakshatra"]["pada"] == 1
+    assert snapshot["panchanga"]["yoga"]["number"] == 3
+    assert snapshot["panchanga"]["yoga"]["name_vedic"] == "Ayushman"
+    assert snapshot["panchanga"]["karana"]["serial"] == 41
+    assert snapshot["panchanga"]["karana"]["name_vedic"] == "Garija"
+    assert isinstance(snapshot["panchanga"]["sunrise"]["local_time"], str)
+    assert isinstance(snapshot["panchanga"]["sunset"]["local_time"], str)
     assert isinstance(snapshot["astronomy"]["julian_day_utc"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg"], float)

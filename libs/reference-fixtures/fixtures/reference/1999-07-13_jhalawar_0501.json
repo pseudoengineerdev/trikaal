@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_jhalawar_1999_07_13_0501_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "1999-07-13",
+    "local_time": "05:01",
+    "timezone": "Asia/Kolkata",
+    "latitude": 24.59633,
+    "longitude": 76.16499,
+    "elevation_m": 0.0,
+    "place_label": "Jhalawar, Rajasthan, India"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 86.31,
+      "moon_sidereal_deg": 84.67
+    },
+    "vedic": {
+      "sun_rashi": "Mitu",
+      "moon_rashi": "Mitu",
+      "lagna_rashi": "Mitu",
+      "sun_nakshatra": "Punarvasu",
+      "sun_pada": 2,
+      "moon_nakshatra": "Punarvasu",
+      "moon_pada": 2,
+      "lagna_nakshatra": "Ardra",
+      "lagna_pada": 3
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

@@ -2,6 +2,7 @@
   "fixture_id": "reference_mumbai_1999_07_04_1222_v1",
   "source": "reference_panchang",
   "captured_at_utc": "2026-03-31T00:00:00Z",
+  "reference_status": "reference_captured",
   "birth_input": {
     "local_date": "1999-07-04",
     "local_time": "12:22",
@@ -85,6 +86,24 @@
       "ketu_house": 5,
       "spashth_rahu_house": 11,
       "spashth_ketu_house": 5
+    },
+    "panchanga": {
+      "tithi": {
+        "name_vedic": "Krishna Shashthi"
+      },
+      "vara": {
+        "name_vedic": "Ravivara"
+      },
+      "nakshatra": {
+        "name_vedic": "P Bhadrapada",
+        "pada": 1
+      },
+      "yoga": {
+        "name_vedic": "Ayushman"
+      },
+      "karana": {
+        "name_vedic": "Garija"
+      }
     }
   },
   "comparison_rules": {

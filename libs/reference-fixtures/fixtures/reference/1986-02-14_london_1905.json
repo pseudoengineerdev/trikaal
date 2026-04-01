@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_london_1986_02_14_1905_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "1986-02-14",
+    "local_time": "19:05",
+    "timezone": "Europe/London",
+    "latitude": 51.50853,
+    "longitude": -0.12574,
+    "elevation_m": 35.0,
+    "place_label": "London, England, United Kingdom"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 302.12,
+      "moon_sidereal_deg": 10.05
+    },
+    "vedic": {
+      "sun_rashi": "Kumb",
+      "moon_rashi": "Mesh",
+      "lagna_rashi": "Simh",
+      "sun_nakshatra": "Dhanishta",
+      "sun_pada": 3,
+      "moon_nakshatra": "Ashwini",
+      "moon_pada": 4,
+      "lagna_nakshatra": "P Phalguni",
+      "lagna_pada": 3
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

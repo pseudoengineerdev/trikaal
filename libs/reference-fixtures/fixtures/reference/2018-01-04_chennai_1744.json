@@ -2,6 +2,7 @@
   "fixture_id": "reference_chennai_2018_01_04_1744_v1",
   "source": "reference_panchang_archived_export",
   "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "reference_archived_export",
   "birth_input": {
     "local_date": "2018-01-04",
     "local_time": "17:44",

@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_berlin_2020_10_25_0130_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "2020-10-25",
+    "local_time": "01:30",
+    "timezone": "Europe/Berlin",
+    "latitude": 52.52437,
+    "longitude": 13.41053,
+    "elevation_m": 34.0,
+    "place_label": "Berlin, State of Berlin, Germany"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 187.85,
+      "moon_sidereal_deg": 294.56
+    },
+    "vedic": {
+      "sun_rashi": "Tula",
+      "moon_rashi": "Maka",
+      "lagna_rashi": "Simh",
+      "sun_nakshatra": "Swati",
+      "sun_pada": 1,
+      "moon_nakshatra": "Dhanishta",
+      "moon_pada": 1,
+      "lagna_nakshatra": "Magha",
+      "lagna_pada": 1
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

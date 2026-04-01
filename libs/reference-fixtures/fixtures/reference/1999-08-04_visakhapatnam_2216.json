@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_visakhapatnam_1999_08_04_2216_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "1999-08-04",
+    "local_time": "22:16",
+    "timezone": "Asia/Kolkata",
+    "latitude": 17.68009,
+    "longitude": 83.20161,
+    "elevation_m": 0.0,
+    "place_label": "Visakhapatnam, Andhra Pradesh, India"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 108.01,
+      "moon_sidereal_deg": 17.64
+    },
+    "vedic": {
+      "sun_rashi": "Kark",
+      "moon_rashi": "Mesh",
+      "lagna_rashi": "Meen",
+      "sun_nakshatra": "Ashlesha",
+      "sun_pada": 1,
+      "moon_nakshatra": "Bharani",
+      "moon_pada": 2,
+      "lagna_nakshatra": "Revati",
+      "lagna_pada": 4
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}
