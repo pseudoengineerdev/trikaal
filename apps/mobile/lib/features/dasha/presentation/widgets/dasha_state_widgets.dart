@@ -3,12 +3,31 @@ import 'package:flutter/material.dart';
 import '../../data/models/dasha_models.dart';
 
 class DashaEmptyState extends StatelessWidget {
-  const DashaEmptyState({super.key});
+  const DashaEmptyState({
+    required this.dateOfBirth,
+    required this.timeOfBirth,
+    required this.placeOfBirth,
+    super.key,
+  });
+
+  final String dateOfBirth;
+  final String timeOfBirth;
+  final String placeOfBirth;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Tap "Compute Dasha" to fetch Vimshottari Dasha.'),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Text('Tap "Compute Dasha" to fetch Vimshottari Dasha.'),
+            const SizedBox(height: 8),
+            Text('Using: $dateOfBirth, $timeOfBirth, $placeOfBirth'),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -60,9 +79,18 @@ class DashaErrorState extends StatelessWidget {
 }
 
 class DashaSummaryCard extends StatelessWidget {
-  const DashaSummaryCard({required this.summary, super.key});
+  const DashaSummaryCard({
+    required this.summary,
+    required this.dateOfBirth,
+    required this.timeOfBirth,
+    required this.placeOfBirth,
+    super.key,
+  });
 
   final DashaSummary summary;
+  final String dateOfBirth;
+  final String timeOfBirth;
+  final String placeOfBirth;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +106,8 @@ class DashaSummaryCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
+            _row('Birth Input', '$dateOfBirth, $timeOfBirth'),
+            _row('Place', placeOfBirth),
             _row('Maha Dasha', summary.currentMahaDasha),
             _row('Antar Dasha', summary.currentAntarDasha),
             _row('Active From', summary.activeFrom),

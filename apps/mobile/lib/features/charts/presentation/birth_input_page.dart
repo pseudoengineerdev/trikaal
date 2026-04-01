@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/state/birth_input_state.dart';
 import '../data/models/place_search_models.dart';
 import 'state/birth_chart_controller.dart';
 import 'widgets/chart_result_card.dart';
 import 'widgets/chart_state_widgets.dart';
 
 class BirthInputPage extends StatefulWidget {
-  const BirthInputPage({super.key});
+  const BirthInputPage({
+    required this.birthInputState,
+    super.key,
+  });
+
+  final BirthInputState birthInputState;
 
   @override
   State<BirthInputPage> createState() => _BirthInputPageState();
@@ -14,10 +20,21 @@ class BirthInputPage extends StatefulWidget {
 
 class _BirthInputPageState extends State<BirthInputPage> {
   final _formKey = GlobalKey<FormState>();
-  final _dateController = TextEditingController(text: '1999-07-04');
-  final _timeController = TextEditingController(text: '12:22');
-  final _placeController = TextEditingController(text: 'Mumbai');
+  late final TextEditingController _dateController;
+  late final TextEditingController _timeController;
+  late final TextEditingController _placeController;
   final _controller = BirthChartController();
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController =
+        TextEditingController(text: widget.birthInputState.dateOfBirth);
+    _timeController =
+        TextEditingController(text: widget.birthInputState.timeOfBirth);
+    _placeController =
+        TextEditingController(text: widget.birthInputState.placeOfBirth);
+  }
 
   @override
   void dispose() {
@@ -91,7 +108,11 @@ class _BirthInputPageState extends State<BirthInputPage> {
                             labelText: 'Place of Birth',
                             hintText: 'Mumbai',
                           ),
-                          onChanged: _controller.onPlaceQueryChanged,
+                          onChanged: (String value) {
+                            widget.birthInputState
+                                .updatePlaceOfBirth(value.trim());
+                            _controller.onPlaceQueryChanged(value);
+                          },
                           validator: (String? value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Place is required';
@@ -161,6 +182,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
     _placeController.selection = TextSelection.collapsed(
       offset: _placeController.text.length,
     );
+    widget.birthInputState.updatePlaceOfBirth(_placeController.text);
     _controller.clearPlaceSuggestions();
   }
 
@@ -198,6 +220,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
       return;
     }
     _dateController.text = _formatDate(selected);
+    widget.birthInputState.updateDateOfBirth(_dateController.text);
   }
 
   Future<void> _pickTime() async {
@@ -220,6 +243,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
       return;
     }
     _timeController.text = _formatTimeOfDay(selected);
+    widget.birthInputState.updateTimeOfBirth(_timeController.text);
   }
 
   DateTime? _parseDate(String input) {

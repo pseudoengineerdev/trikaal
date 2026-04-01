@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'state/birth_input_state.dart';
 import '../features/charts/presentation/birth_input_page.dart';
 import '../features/dasha/presentation/dasha_page.dart';
 
@@ -12,18 +13,31 @@ class HomeShellPage extends StatefulWidget {
 
 class _HomeShellPageState extends State<HomeShellPage> {
   int _selectedIndex = 0;
+  late final BirthInputState _birthInputState;
 
-  static const List<Widget> _pages = <Widget>[
-    BirthInputPage(),
-    DashaPage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _birthInputState = BirthInputState();
+  }
+
+  @override
+  void dispose() {
+    _birthInputState.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final pages = <Widget>[
+      BirthInputPage(birthInputState: _birthInputState),
+      DashaPage(birthInputState: _birthInputState),
+    ];
+
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: _pages,
+        children: pages,
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
