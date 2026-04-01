@@ -17,7 +17,12 @@ from trikaal_api.chart import (
 )
 from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
 from trikaal_api.metadata import AstrologyTermsResponse, load_astrology_terms
-from trikaal_api.parity import ParityResult, run_canonical_drik_parity_check
+from trikaal_api.parity import (
+    ParityResult,
+    ParitySuiteResult,
+    run_canonical_drik_parity_check,
+    run_drik_parity_suite_check,
+)
 from trikaal_api.report import ComputeReportRequest, ComputeReportResponse, compute_report
 from trikaal_api.resolver import PlaceNotFoundError, search_places
 
@@ -42,6 +47,11 @@ def health() -> dict[str, str]:
 @app.get("/v1/engine/parity/canonical-drik", response_model=ParityResult)
 def canonical_drik_parity() -> ParityResult:
     return run_canonical_drik_parity_check()
+
+
+@app.get("/v1/engine/parity/drik-suite", response_model=ParitySuiteResult)
+def drik_suite_parity() -> ParitySuiteResult:
+    return run_drik_parity_suite_check()
 
 
 @app.get("/v1/engine/canonical-preview", response_model=CanonicalPreview)

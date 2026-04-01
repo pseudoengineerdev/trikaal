@@ -1,0 +1,104 @@
+{
+  "fixture_id": "drik_mumbai_1973_04_24_1300_sachin_v1",
+  "source": "drik_panchang",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "birth_input": {
+    "local_date": "1973-04-24",
+    "local_time": "13:00",
+    "timezone": "Asia/Kolkata",
+    "latitude": 19.076,
+    "longitude": 72.8777,
+    "elevation_m": 14.0,
+    "place_label": "Mumbai, India"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 10.49,
+      "moon_sidereal_deg": 264.59,
+      "mangal_sidereal_deg": 296.7,
+      "budha_sidereal_deg": 346.72,
+      "guru_sidereal_deg": 286.59,
+      "shukra_sidereal_deg": 14.26,
+      "shani_sidereal_deg": 54.26,
+      "rahu_sidereal_deg": 257.76,
+      "ketu_sidereal_deg": 77.76,
+      "spashth_rahu_sidereal_deg": 256.37,
+      "spashth_ketu_sidereal_deg": 76.37,
+      "lagna_sidereal_deg": 108.01
+    },
+    "vedic": {
+      "sun_rashi": "Mesh",
+      "moon_rashi": "Dhanu",
+      "lagna_rashi": "Kark",
+      "mangal_rashi": "Maka",
+      "budha_rashi": "Meen",
+      "guru_rashi": "Maka",
+      "shukra_rashi": "Mesh",
+      "shani_rashi": "Vrish",
+      "rahu_rashi": "Dhanu",
+      "ketu_rashi": "Mitu",
+      "spashth_rahu_rashi": "Dhanu",
+      "spashth_ketu_rashi": "Mitu",
+      "sun_nakshatra": "Ashwini",
+      "sun_pada": 4,
+      "moon_nakshatra": "P Ashadha",
+      "moon_pada": 4,
+      "lagna_nakshatra": "Ashlesha",
+      "lagna_pada": 1,
+      "mangal_nakshatra": "Dhanishta",
+      "mangal_pada": 2,
+      "budha_nakshatra": "Revati",
+      "budha_pada": 1,
+      "guru_nakshatra": "Shravana",
+      "guru_pada": 2,
+      "shukra_nakshatra": "Bharani",
+      "shukra_pada": 1,
+      "shani_nakshatra": "Mrigashirsha",
+      "shani_pada": 1,
+      "rahu_nakshatra": "P Ashadha",
+      "rahu_pada": 2,
+      "ketu_nakshatra": "Ardra",
+      "ketu_pada": 4,
+      "spashth_rahu_nakshatra": "P Ashadha",
+      "spashth_rahu_pada": 1,
+      "spashth_ketu_nakshatra": "Ardra",
+      "spashth_ketu_pada": 3
+    },
+    "bhava": {
+      "lagna_house": 1,
+      "sun_house": 10,
+      "moon_house": 6,
+      "mangal_house": 7,
+      "budha_house": 9,
+      "guru_house": 7,
+      "shukra_house": 10,
+      "shani_house": 11,
+      "rahu_house": 6,
+      "ketu_house": 12,
+      "spashth_rahu_house": 6,
+      "spashth_ketu_house": 12
+    },
+    "varga": {
+      "d1": {
+        "lagna_rashi": "Kark"
+      },
+      "d9": {
+        "lagna_rashi": "Dhanu"
+      }
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

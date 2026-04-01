@@ -30,6 +30,7 @@ uvicorn trikaal_api.main:app --reload
 
 - `GET /health`
 - `GET /v1/engine/parity/canonical-drik`
+- `GET /v1/engine/parity/drik-suite` (multi-case strict parity + accuracy metrics)
 - `GET /v1/engine/canonical-preview`
 - `GET /v1/metadata/astrology-terms` (shared term contract for mobile/web)
 - `GET /v1/places/search?query=<text>`
@@ -183,6 +184,25 @@ Now includes timeline fields:
 - `current_maha_start` / `current_maha_end`
 - `maha_timeline` (9 Mahadasha periods)
 - `antar_timeline_current_maha` (9 Antardasha periods inside active Maha)
+
+## Accuracy Lock (Drik Suite)
+
+Use this endpoint to validate all Drik fixtures in one run and get aggregated
+accuracy:
+
+```bash
+curl "http://127.0.0.1:8000/v1/engine/parity/drik-suite"
+```
+
+Response includes:
+
+- `fixture_count`
+- `matched_fixture_count`
+- `mismatched_fixture_count`
+- `compared_field_count`
+- `matched_field_count`
+- `accuracy_percent`
+- `fixtures[]` with per-fixture differences (if any)
 
 ## Shared Terminology Contract
 
