@@ -90,7 +90,7 @@ Replace:
 
 and set:
 
-- `expected_snapshot.meta.reference_status` to `drik_captured`
+- top-level `reference_status` to `drik_captured`
 
 ## Step 4: Validate
 

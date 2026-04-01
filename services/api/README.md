@@ -30,7 +30,7 @@ uvicorn trikaal_api.main:app --reload
 
 - `GET /health`
 - `GET /v1/engine/parity/canonical-drik`
-- `GET /v1/engine/parity/drik-suite` (multi-case strict parity + accuracy metrics)
+- `GET /v1/engine/parity/drik-suite` (strict parity on verified Drik fixtures)
 - `GET /v1/engine/canonical-preview`
 - `GET /v1/metadata/astrology-terms` (shared term contract for mobile/web)
 - `GET /v1/places/search?query=<text>`
@@ -216,9 +216,21 @@ accuracy:
 curl "http://127.0.0.1:8000/v1/engine/parity/drik-suite"
 ```
 
+By default this endpoint runs only **verified** references (`drik_captured` and
+`drik_archived_export`), which is what CI gate enforcement uses.
+
+To include provisional engine-seed fixtures too:
+
+```bash
+curl "http://127.0.0.1:8000/v1/engine/parity/drik-suite?include_unverified=true"
+```
+
 Response includes:
 
+- `available_fixture_count` (verified + provisional)
 - `fixture_count`
+- `verified_fixture_count`
+- `unverified_fixture_count`
 - `matched_fixture_count`
 - `mismatched_fixture_count`
 - `compared_field_count`

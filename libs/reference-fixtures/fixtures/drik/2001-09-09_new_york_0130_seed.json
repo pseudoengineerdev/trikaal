@@ -1,0 +1,64 @@
+{
+  "fixture_id": "drik_seed_new_york_2001_09_09_0130_v1",
+  "source": "engine_seed",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "engine_seed_pending_capture",
+  "birth_input": {
+    "local_date": "2001-09-09",
+    "local_time": "01:30",
+    "timezone": "America/New_York",
+    "latitude": 40.71427,
+    "longitude": -74.00597,
+    "elevation_m": 10.0,
+    "place_label": "New York City, New York, United States"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 142.72,
+      "moon_sidereal_deg": 33.88,
+      "lagna_sidereal_deg": 82.58
+    },
+    "vedic": {
+      "sun_rashi": "Simh",
+      "moon_rashi": "Vrish",
+      "lagna_rashi": "Mitu",
+      "sun_nakshatra": "P Phalguni",
+      "sun_pada": 3,
+      "moon_nakshatra": "Krittika",
+      "moon_pada": 3,
+      "lagna_nakshatra": "Punarvasu",
+      "lagna_pada": 1
+    },
+    "bhava": {
+      "lagna_house": 1,
+      "sun_house": 3,
+      "moon_house": 12
+    },
+    "panchanga": {
+      "tithi": {
+        "name_vedic": "Krishna Shashthi"
+      },
+      "vara": {
+        "name_vedic": "Ravivara"
+      },
+      "nakshatra": {
+        "name_vedic": "Krittika",
+        "pada": 3
+      }
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 1e-06
+  }
+}

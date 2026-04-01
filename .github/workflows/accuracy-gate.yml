@@ -47,9 +47,13 @@ jobs:
 
           result = run_drik_parity_suite_check()
           print(
-              f"Drik parity suite: fixtures={result.fixture_count}, "
+              f"Drik parity suite (verified-only): fixtures={result.fixture_count}, "
               f"accuracy={result.accuracy_percent}%"
           )
+          if result.fixture_count < 3:
+              raise SystemExit(
+                  "Accuracy gate failed: less than 3 verified Drik fixtures available."
+              )
           if not result.all_matched:
               raise SystemExit(
                   f"Parity mismatch detected: {result.mismatched_fixture_count} fixture(s) failed."

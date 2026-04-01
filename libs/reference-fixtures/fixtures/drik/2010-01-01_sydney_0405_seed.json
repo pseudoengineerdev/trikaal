@@ -1,0 +1,64 @@
+{
+  "fixture_id": "drik_seed_sydney_2010_01_01_0405_v1",
+  "source": "engine_seed",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "engine_seed_pending_capture",
+  "birth_input": {
+    "local_date": "2010-01-01",
+    "local_time": "04:05",
+    "timezone": "Australia/Sydney",
+    "latitude": -33.86785,
+    "longitude": 151.20732,
+    "elevation_m": 58.0,
+    "place_label": "Sydney, New South Wales, Australia"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 256.14,
+      "moon_sidereal_deg": 74.9,
+      "lagna_sidereal_deg": 231.39
+    },
+    "vedic": {
+      "sun_rashi": "Dhanu",
+      "moon_rashi": "Mitu",
+      "lagna_rashi": "Vrsc",
+      "sun_nakshatra": "P Ashadha",
+      "sun_pada": 1,
+      "moon_nakshatra": "Ardra",
+      "moon_pada": 3,
+      "lagna_nakshatra": "Jyeshtha",
+      "lagna_pada": 2
+    },
+    "bhava": {
+      "lagna_house": 1,
+      "sun_house": 2,
+      "moon_house": 8
+    },
+    "panchanga": {
+      "tithi": {
+        "name_vedic": "Purnima"
+      },
+      "vara": {
+        "name_vedic": "Shukravara"
+      },
+      "nakshatra": {
+        "name_vedic": "Ardra",
+        "pada": 3
+      }
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 1e-06
+  }
+}

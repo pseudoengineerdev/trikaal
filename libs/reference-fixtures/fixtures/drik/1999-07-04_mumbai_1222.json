@@ -2,6 +2,7 @@
   "fixture_id": "drik_mumbai_1999_07_04_1222_v1",
   "source": "drik_panchang",
   "captured_at_utc": "2026-03-31T00:00:00Z",
+  "reference_status": "drik_captured",
   "birth_input": {
     "local_date": "1999-07-04",
     "local_time": "12:22",
