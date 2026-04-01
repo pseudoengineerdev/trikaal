@@ -8,5 +8,6 @@ void main() {
     await tester.pumpWidget(const TrikaalApp());
 
     expect(find.text('Trikaal Birth Chart'), findsOneWidget);
+    expect(find.text('Saved Profiles'), findsOneWidget);
   });
 }
