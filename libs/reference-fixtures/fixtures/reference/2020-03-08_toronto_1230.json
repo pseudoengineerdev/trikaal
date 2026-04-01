@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_toronto_2020_03_08_1230_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "2020-03-08",
+    "local_time": "12:30",
+    "timezone": "America/Toronto",
+    "latitude": 43.70643,
+    "longitude": -79.39864,
+    "elevation_m": 0.0,
+    "place_label": "Toronto, Ontario, Canada"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 324.42,
+      "moon_sidereal_deg": 129.44
+    },
+    "vedic": {
+      "sun_rashi": "Kumb",
+      "moon_rashi": "Simh",
+      "lagna_rashi": "Mitu",
+      "sun_nakshatra": "P Bhadrapada",
+      "sun_pada": 2,
+      "moon_nakshatra": "Magha",
+      "moon_pada": 3,
+      "lagna_nakshatra": "Mrigashirsha",
+      "lagna_pada": 4
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_sao_paulo_2018_11_04_1230_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "2018-11-04",
+    "local_time": "12:30",
+    "timezone": "America/Sao_Paulo",
+    "latitude": -23.5475,
+    "longitude": -46.63611,
+    "elevation_m": 0.0,
+    "place_label": "S\u00e3o Paulo, S\u00e3o Paulo, Brazil"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 197.98,
+      "moon_sidereal_deg": 159.06
+    },
+    "vedic": {
+      "sun_rashi": "Tula",
+      "moon_rashi": "Kany",
+      "lagna_rashi": "Maka",
+      "sun_nakshatra": "Swati",
+      "sun_pada": 4,
+      "moon_nakshatra": "U Phalguni",
+      "moon_pada": 4,
+      "lagna_nakshatra": "Shravana",
+      "lagna_pada": 2
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

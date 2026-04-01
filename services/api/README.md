@@ -228,6 +228,7 @@ curl "http://127.0.0.1:8000/v1/engine/parity/reference-suite?include_unverified=
 Current suite status:
 
 - All fixtures are verified Reference references (`unverified_fixture_count = 0`).
+- Verified fixture count floor in CI: `25`.
 - `include_unverified=true` returns the same set until new provisional fixtures are added.
 
 Response includes:
@@ -241,6 +242,11 @@ Response includes:
 - `compared_field_count`
 - `matched_field_count`
 - `accuracy_percent`
+- `coverage` summary:
+  - `timezone_count`, `country_count`
+  - `min_birth_year`, `max_birth_year`
+  - `dst_observing_timezone_count`
+  - `timezones[]`, `countries[]`
 - `fixtures[]` with per-fixture differences (if any)
 
 ## Shared Terminology Contract

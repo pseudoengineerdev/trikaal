@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_auckland_2023_09_24_1230_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "2023-09-24",
+    "local_time": "12:30",
+    "timezone": "Pacific/Auckland",
+    "latitude": -36.84853,
+    "longitude": 174.76349,
+    "elevation_m": 0.0,
+    "place_label": "Auckland, Auckland, New Zealand"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 156.48,
+      "moon_sidereal_deg": 261.53
+    },
+    "vedic": {
+      "sun_rashi": "Kany",
+      "moon_rashi": "Dhanu",
+      "lagna_rashi": "Dhanu",
+      "sun_nakshatra": "U Phalguni",
+      "sun_pada": 3,
+      "moon_nakshatra": "P Ashadha",
+      "moon_pada": 3,
+      "lagna_nakshatra": "P Ashadha",
+      "lagna_pada": 1
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

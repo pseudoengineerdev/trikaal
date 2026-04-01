@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_los_angeles_2021_11_07_1230_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "2021-11-07",
+    "local_time": "12:30",
+    "timezone": "America/Los_Angeles",
+    "latitude": 34.05223,
+    "longitude": -118.24368,
+    "elevation_m": 0.0,
+    "place_label": "Los Angeles, California, United States"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 201.48,
+      "moon_sidereal_deg": 243.03
+    },
+    "vedic": {
+      "sun_rashi": "Tula",
+      "moon_rashi": "Dhanu",
+      "lagna_rashi": "Maka",
+      "sun_nakshatra": "Vishakha",
+      "sun_pada": 1,
+      "moon_nakshatra": "Mula",
+      "moon_pada": 1,
+      "lagna_nakshatra": "Shravana",
+      "lagna_pada": 3
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

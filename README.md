@@ -24,4 +24,4 @@ Trikaal is a Vedic astrology platform being built with a mobile-first approach.
 - GitHub workflow: `.github/workflows/accuracy-gate.yml`
 - Job name: `Reference Parity Lock`
 - Rule: merge should be blocked when parity is not `100.0%` on **verified** Reference fixtures
-- Current verified Reference fixture floor: `11` cases
+- Current verified Reference fixture floor: `25` cases

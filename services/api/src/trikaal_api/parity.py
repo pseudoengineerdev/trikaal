@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import sys
+from datetime import datetime
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel
 
@@ -55,6 +57,7 @@ class ParitySuiteResult(BaseModel):
     matched_field_count: int
     accuracy_percent: float
     all_matched: bool
+    coverage: dict[str, Any]
     fixtures: list[FixtureParityResult]
 
 
@@ -163,6 +166,7 @@ def run_reference_parity_suite_check(*, include_unverified: bool = False) -> Par
         matched_field_count=total_matched,
         accuracy_percent=overall_accuracy,
         all_matched=mismatched_fixture_count == 0,
+        coverage=_build_coverage_summary(fixtures),
         fixtures=fixture_results,
     )
 
@@ -180,3 +184,57 @@ def _flatten_paths(snapshot: dict[str, Any], parent: str = "") -> dict[str, Any]
         else:
             flattened[current] = value
     return flattened
+
+
+def _build_coverage_summary(fixtures: list[Any]) -> dict[str, Any]:
+    if not fixtures:
+        return {
+            "timezone_count": 0,
+            "country_count": 0,
+            "min_birth_year": None,
+            "max_birth_year": None,
+            "northern_fixture_count": 0,
+            "southern_fixture_count": 0,
+            "equatorial_fixture_count": 0,
+            "dst_observing_timezone_count": 0,
+            "timezones": [],
+            "countries": [],
+        }
+
+    timezones = sorted({fixture.birth_input.timezone for fixture in fixtures})
+    countries = sorted({_extract_country(fixture.birth_input.place_label) for fixture in fixtures})
+    years = sorted(int(fixture.birth_input.local_date.split("-")[0]) for fixture in fixtures)
+
+    northern_count = len([fixture for fixture in fixtures if fixture.birth_input.latitude > 0])
+    southern_count = len([fixture for fixture in fixtures if fixture.birth_input.latitude < 0])
+    equatorial_count = len(
+        [fixture for fixture in fixtures if fixture.birth_input.latitude == 0]
+    )
+    dst_count = len([timezone for timezone in timezones if _timezone_observes_dst(timezone)])
+
+    return {
+        "timezone_count": len(timezones),
+        "country_count": len(countries),
+        "min_birth_year": years[0],
+        "max_birth_year": years[-1],
+        "northern_fixture_count": northern_count,
+        "southern_fixture_count": southern_count,
+        "equatorial_fixture_count": equatorial_count,
+        "dst_observing_timezone_count": dst_count,
+        "timezones": timezones,
+        "countries": countries,
+    }
+
+
+def _extract_country(place_label: str) -> str:
+    segments = [segment.strip() for segment in place_label.split(",") if segment.strip()]
+    if not segments:
+        return "Unknown"
+    return segments[-1]
+
+
+def _timezone_observes_dst(timezone_name: str) -> bool:
+    zone = ZoneInfo(timezone_name)
+    january_offset = datetime(2024, 1, 1, 12, 0, tzinfo=zone).utcoffset()
+    july_offset = datetime(2024, 7, 1, 12, 0, tzinfo=zone).utcoffset()
+    return january_offset != july_offset

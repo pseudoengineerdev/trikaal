@@ -1,0 +1,46 @@
+{
+  "fixture_id": "reference_london_2018_03_25_1230_v1",
+  "source": "reference_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "reference_captured",
+  "birth_input": {
+    "local_date": "2018-03-25",
+    "local_time": "12:30",
+    "timezone": "Europe/London",
+    "latitude": 51.50853,
+    "longitude": -0.12574,
+    "elevation_m": 0.0,
+    "place_label": "London, England, United Kingdom"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "modern_ephemeris"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 340.64,
+      "moon_sidereal_deg": 81.56
+    },
+    "vedic": {
+      "sun_rashi": "Meen",
+      "moon_rashi": "Mitu",
+      "lagna_rashi": "Mitu",
+      "sun_nakshatra": "U Bhadrapada",
+      "sun_pada": 3,
+      "moon_nakshatra": "Punarvasu",
+      "moon_pada": 1,
+      "lagna_nakshatra": "Punarvasu",
+      "lagna_pada": 3
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}
