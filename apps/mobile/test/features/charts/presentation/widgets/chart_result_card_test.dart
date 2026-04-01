@@ -48,6 +48,49 @@ void main() {
     expect(find.text('78.0200°'), findsOneWidget);
     expect(find.text('Direct'), findsOneWidget);
   });
+
+  testWidgets('tapping house placement row opens deep detail drawer',
+      (WidgetTester tester) async {
+    final report = _sampleReport();
+    final termsState = AstrologyTermsState();
+    addTearDown(termsState.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ChartResultCard(
+              result: report,
+              mode: TerminologyMode.english,
+              termsState: termsState,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const sunHouseRowKey = ValueKey<String>('house-row-sun');
+    final verticalScrollable = find
+        .byWidgetPredicate(
+          (Widget widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
+
+    await tester.scrollUntilVisible(
+      find.byKey(sunHouseRowKey),
+      400,
+      scrollable: verticalScrollable,
+    );
+    await tester.tap(find.byKey(sunHouseRowKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Graha Deep View'), findsOneWidget);
+    expect(find.text('D1 House'), findsOneWidget);
+    expect(find.text('Raw Deg'), findsOneWidget);
+    expect(find.text('78.0300°'), findsOneWidget);
+  });
 }
 
 ComputeReportResponse _sampleReport() {

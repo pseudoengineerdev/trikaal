@@ -360,45 +360,80 @@ class _HousePlacementsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        headingRowHeight: 36,
-        dataRowMinHeight: 34,
-        dataRowMaxHeight: 42,
-        columns: const <DataColumn>[
-          DataColumn(label: Text('Graha')),
-          DataColumn(label: Text('House')),
-          DataColumn(label: Text('Rashi')),
-          DataColumn(label: Text('Nakshatra')),
-          DataColumn(label: Text('Pada')),
-          DataColumn(label: Text('Retro')),
-        ],
-        rows: rows.map((ReportGrahaEntry row) {
-          return DataRow(
-            cells: <DataCell>[
-              DataCell(
-                Text(localizeGraha(row.key, mode, termsState: termsState)),
-              ),
-              DataCell(Text(row.house.toString())),
-              DataCell(
-                Text(localizeRashi(row.rashi, mode, termsState: termsState)),
-              ),
-              DataCell(
-                Text(
-                  localizeNakshatra(
-                    row.nakshatra,
-                    mode,
-                    termsState: termsState,
-                  ),
-                ),
-              ),
-              DataCell(Text(row.pada.toString())),
-              DataCell(Text(row.retrograde ? 'Yes' : 'No')),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Tap any house placement row to open deep details.',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            headingRowHeight: 36,
+            dataRowMinHeight: 34,
+            dataRowMaxHeight: 42,
+            columns: const <DataColumn>[
+              DataColumn(label: Text('Graha')),
+              DataColumn(label: Text('House')),
+              DataColumn(label: Text('Rashi')),
+              DataColumn(label: Text('Nakshatra')),
+              DataColumn(label: Text('Pada')),
+              DataColumn(label: Text('Retro')),
             ],
-          );
-        }).toList(growable: false),
-      ),
+            rows: rows.map((ReportGrahaEntry row) {
+              final dignity = evaluateGrahaDignity(
+                grahaKey: row.key,
+                rashiKey: row.rashi,
+              );
+              void openDetails() {
+                _showGrahaDetailDrawer(
+                  context: context,
+                  row: row,
+                  mode: mode,
+                  termsState: termsState,
+                  dignity: dignity,
+                );
+              }
+
+              DataCell cell(Widget child) =>
+                  DataCell(child, onTap: openDetails);
+
+              return DataRow(
+                cells: <DataCell>[
+                  cell(
+                    Text(
+                      localizeGraha(row.key, mode, termsState: termsState),
+                      key: ValueKey<String>('house-row-${row.key}'),
+                    ),
+                  ),
+                  cell(Text(row.house.toString())),
+                  cell(
+                    Text(
+                        localizeRashi(row.rashi, mode, termsState: termsState)),
+                  ),
+                  cell(
+                    Text(
+                      localizeNakshatra(
+                        row.nakshatra,
+                        mode,
+                        termsState: termsState,
+                      ),
+                    ),
+                  ),
+                  cell(Text(row.pada.toString())),
+                  cell(Text(row.retrograde ? 'Yes' : 'No')),
+                ],
+              );
+            }).toList(growable: false),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -467,7 +502,6 @@ class _GrahaTable extends StatelessWidget {
                   DataCell(child, onTap: openDetails);
 
               return DataRow(
-                onSelectChanged: (bool? _) => openDetails(),
                 cells: <DataCell>[
                   cell(
                     Text(
