@@ -31,6 +31,7 @@ uvicorn trikaal_api.main:app --reload
 - `GET /health`
 - `GET /v1/engine/parity/canonical-reference`
 - `GET /v1/engine/canonical-preview`
+- `GET /v1/metadata/astrology-terms` (shared term contract for mobile/web)
 - `GET /v1/places/search?query=<text>`
 - `POST /v1/charts/compute` (recommended for app clients)
 - `POST /v1/dasha/compute` (Vimshottari current dasha)
@@ -116,6 +117,18 @@ curl -X POST "http://127.0.0.1:8000/v1/dasha/compute" \
     "place_of_birth": "Mumbai"
   }'
 ```
+
+## Shared Terminology Contract
+
+Use this endpoint so all clients (Flutter now, Next.js later) use one source of truth:
+
+```bash
+curl "http://127.0.0.1:8000/v1/metadata/astrology-terms"
+```
+
+Source file in repo:
+
+- `libs/contracts/astrology_terms.v1.json`
 
 ## Test
 

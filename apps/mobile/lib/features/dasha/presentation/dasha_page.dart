@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../../shared/widgets/terminology_toggle.dart';
@@ -12,11 +13,13 @@ class DashaPage extends StatefulWidget {
   const DashaPage({
     required this.birthInputState,
     required this.terminologyModeState,
+    required this.astrologyTermsState,
     super.key,
   });
 
   final BirthInputState birthInputState;
   final TerminologyModeState terminologyModeState;
+  final AstrologyTermsState astrologyTermsState;
 
   @override
   State<DashaPage> createState() => _DashaPageState();
@@ -50,6 +53,7 @@ class _DashaPageState extends State<DashaPage> {
           _controller,
           widget.birthInputState,
           widget.terminologyModeState,
+          widget.astrologyTermsState,
         ]),
         builder: (BuildContext context, Widget? child) {
           return Column(
@@ -94,6 +98,7 @@ class _DashaPageState extends State<DashaPage> {
       timeOfBirth: widget.birthInputState.timeOfBirth,
       placeOfBirth: widget.birthInputState.placeOfBirth,
       mode: widget.terminologyModeState.mode,
+      termsState: widget.astrologyTermsState,
     );
   }
 

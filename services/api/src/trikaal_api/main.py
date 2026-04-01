@@ -16,6 +16,7 @@ from trikaal_api.chart import (
     generate_chart_snapshot_from_place,
 )
 from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
+from trikaal_api.metadata import AstrologyTermsResponse, load_astrology_terms
 from trikaal_api.parity import ParityResult, run_canonical_reference_parity_check
 from trikaal_api.resolver import PlaceNotFoundError, search_places
 
@@ -95,3 +96,8 @@ def place_search(query: str) -> PlaceSearchResponse:
         for place in search_places(query)
     ]
     return PlaceSearchResponse(query=query, count=len(matches), matches=matches)
+
+
+@app.get("/v1/metadata/astrology-terms", response_model=AstrologyTermsResponse)
+def astrology_terms() -> AstrologyTermsResponse:
+    return load_astrology_terms()

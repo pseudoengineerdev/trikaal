@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'state/astrology_terms_state.dart';
 import 'state/birth_input_state.dart';
 import 'state/terminology_mode_state.dart';
 import '../features/charts/presentation/birth_input_page.dart';
@@ -16,11 +17,19 @@ class _HomeShellPageState extends State<HomeShellPage> {
   int _selectedIndex = 0;
   final BirthInputState _birthInputState = BirthInputState();
   final TerminologyModeState _terminologyModeState = TerminologyModeState();
+  final AstrologyTermsState _astrologyTermsState = AstrologyTermsState();
+
+  @override
+  void initState() {
+    super.initState();
+    _astrologyTermsState.load();
+  }
 
   @override
   void dispose() {
     _birthInputState.dispose();
     _terminologyModeState.dispose();
+    _astrologyTermsState.dispose();
     super.dispose();
   }
 
@@ -30,10 +39,12 @@ class _HomeShellPageState extends State<HomeShellPage> {
       BirthInputPage(
         birthInputState: _birthInputState,
         terminologyModeState: _terminologyModeState,
+        astrologyTermsState: _astrologyTermsState,
       ),
       DashaPage(
         birthInputState: _birthInputState,
         terminologyModeState: _terminologyModeState,
+        astrologyTermsState: _astrologyTermsState,
       ),
     ];
 

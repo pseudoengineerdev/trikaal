@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/state/astrology_terms_state.dart';
 import '../../../../app/state/terminology_mode_state.dart';
 import '../../data/models/compute_chart_models.dart';
 import '../../../shared/astrology/term_localizer.dart';
@@ -8,11 +9,13 @@ class ChartResultCard extends StatelessWidget {
   const ChartResultCard({
     required this.result,
     required this.mode,
+    required this.termsState,
     super.key,
   });
 
   final ComputeChartResponse result;
   final TerminologyMode mode;
+  final AstrologyTermsState termsState;
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +44,17 @@ class ChartResultCard extends StatelessWidget {
           title: 'Lagna Overview',
           children: <Widget>[
             _KeyValueRow(
-              label: '${localizeGraha('lagna', mode)} Rashi',
-              value: localizeRashi('${vedic['lagna_rashi'] ?? '-'}', mode),
+              label:
+                  '${localizeGraha('lagna', mode, termsState: termsState)} Rashi',
+              value: localizeRashi(
+                '${vedic['lagna_rashi'] ?? '-'}',
+                mode,
+                termsState: termsState,
+              ),
             ),
             _KeyValueRow(
-              label: '${localizeGraha('lagna', mode)} Nakshatra',
+              label:
+                  '${localizeGraha('lagna', mode, termsState: termsState)} Nakshatra',
               value: _formatNakshatra(
                 '${vedic['lagna_nakshatra'] ?? '-'}',
                 '${vedic['lagna_pada'] ?? '-'}',
@@ -58,7 +67,7 @@ class ChartResultCard extends StatelessWidget {
           title: 'Graha Highlights',
           children: <Widget>[
             _KeyValueRow(
-              label: localizeGraha('sun', mode),
+              label: localizeGraha('sun', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['sun_rashi'] ?? '-'}',
                 nakshatra: '${vedic['sun_nakshatra'] ?? '-'}',
@@ -66,7 +75,7 @@ class ChartResultCard extends StatelessWidget {
               ),
             ),
             _KeyValueRow(
-              label: localizeGraha('moon', mode),
+              label: localizeGraha('moon', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['moon_rashi'] ?? '-'}',
                 nakshatra: '${vedic['moon_nakshatra'] ?? '-'}',
@@ -74,7 +83,7 @@ class ChartResultCard extends StatelessWidget {
               ),
             ),
             _KeyValueRow(
-              label: localizeGraha('mangal', mode),
+              label: localizeGraha('mangal', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['mangal_rashi'] ?? '-'}',
                 nakshatra: '${vedic['mangal_nakshatra'] ?? '-'}',
@@ -82,7 +91,7 @@ class ChartResultCard extends StatelessWidget {
               ),
             ),
             _KeyValueRow(
-              label: localizeGraha('budha', mode),
+              label: localizeGraha('budha', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['budha_rashi'] ?? '-'}',
                 nakshatra: '${vedic['budha_nakshatra'] ?? '-'}',
@@ -90,7 +99,7 @@ class ChartResultCard extends StatelessWidget {
               ),
             ),
             _KeyValueRow(
-              label: localizeGraha('guru', mode),
+              label: localizeGraha('guru', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['guru_rashi'] ?? '-'}',
                 nakshatra: '${vedic['guru_nakshatra'] ?? '-'}',
@@ -98,7 +107,7 @@ class ChartResultCard extends StatelessWidget {
               ),
             ),
             _KeyValueRow(
-              label: localizeGraha('shukra', mode),
+              label: localizeGraha('shukra', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['shukra_rashi'] ?? '-'}',
                 nakshatra: '${vedic['shukra_nakshatra'] ?? '-'}',
@@ -106,7 +115,7 @@ class ChartResultCard extends StatelessWidget {
               ),
             ),
             _KeyValueRow(
-              label: localizeGraha('shani', mode),
+              label: localizeGraha('shani', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['shani_rashi'] ?? '-'}',
                 nakshatra: '${vedic['shani_nakshatra'] ?? '-'}',
@@ -114,7 +123,7 @@ class ChartResultCard extends StatelessWidget {
               ),
             ),
             _KeyValueRow(
-              label: localizeGraha('rahu', mode),
+              label: localizeGraha('rahu', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['rahu_rashi'] ?? '-'}',
                 nakshatra: '${vedic['rahu_nakshatra'] ?? '-'}',
@@ -122,7 +131,7 @@ class ChartResultCard extends StatelessWidget {
               ),
             ),
             _KeyValueRow(
-              label: localizeGraha('ketu', mode),
+              label: localizeGraha('ketu', mode, termsState: termsState),
               value: _formatGrahaLine(
                 rashi: '${vedic['ketu_rashi'] ?? '-'}',
                 nakshatra: '${vedic['ketu_nakshatra'] ?? '-'}',
@@ -136,39 +145,48 @@ class ChartResultCard extends StatelessWidget {
           title: 'Bhava (House Placements)',
           children: <Widget>[
             _KeyValueRow(
-              label: '${localizeGraha('sun', mode)} House',
+              label:
+                  '${localizeGraha('sun', mode, termsState: termsState)} House',
               value: '${bhava['sun_house'] ?? '-'}',
             ),
             _KeyValueRow(
-              label: '${localizeGraha('moon', mode)} House',
+              label:
+                  '${localizeGraha('moon', mode, termsState: termsState)} House',
               value: '${bhava['moon_house'] ?? '-'}',
             ),
             _KeyValueRow(
-              label: '${localizeGraha('mangal', mode)} House',
+              label:
+                  '${localizeGraha('mangal', mode, termsState: termsState)} House',
               value: '${bhava['mangal_house'] ?? '-'}',
             ),
             _KeyValueRow(
-              label: '${localizeGraha('budha', mode)} House',
+              label:
+                  '${localizeGraha('budha', mode, termsState: termsState)} House',
               value: '${bhava['budha_house'] ?? '-'}',
             ),
             _KeyValueRow(
-              label: '${localizeGraha('guru', mode)} House',
+              label:
+                  '${localizeGraha('guru', mode, termsState: termsState)} House',
               value: '${bhava['guru_house'] ?? '-'}',
             ),
             _KeyValueRow(
-              label: '${localizeGraha('shukra', mode)} House',
+              label:
+                  '${localizeGraha('shukra', mode, termsState: termsState)} House',
               value: '${bhava['shukra_house'] ?? '-'}',
             ),
             _KeyValueRow(
-              label: '${localizeGraha('shani', mode)} House',
+              label:
+                  '${localizeGraha('shani', mode, termsState: termsState)} House',
               value: '${bhava['shani_house'] ?? '-'}',
             ),
             _KeyValueRow(
-              label: '${localizeGraha('rahu', mode)} House',
+              label:
+                  '${localizeGraha('rahu', mode, termsState: termsState)} House',
               value: '${bhava['rahu_house'] ?? '-'}',
             ),
             _KeyValueRow(
-              label: '${localizeGraha('ketu', mode)} House',
+              label:
+                  '${localizeGraha('ketu', mode, termsState: termsState)} House',
               value: '${bhava['ketu_house'] ?? '-'}',
             ),
           ],
@@ -182,11 +200,11 @@ class ChartResultCard extends StatelessWidget {
     required String nakshatra,
     required String pada,
   }) {
-    return '${localizeRashi(rashi, mode)} • ${_formatNakshatra(nakshatra, pada)}';
+    return '${localizeRashi(rashi, mode, termsState: termsState)} • ${_formatNakshatra(nakshatra, pada)}';
   }
 
   String _formatNakshatra(String nakshatra, String pada) {
-    return '${localizeNakshatra(nakshatra, mode)} ($pada)';
+    return '${localizeNakshatra(nakshatra, mode, termsState: termsState)} ($pada)';
   }
 }
 
