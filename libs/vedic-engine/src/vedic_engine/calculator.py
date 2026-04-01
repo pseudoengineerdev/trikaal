@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import trunc
 from zoneinfo import ZoneInfo
 
@@ -65,6 +65,172 @@ COMBUSTION_ORB_DEG = {
     "shukra": 10.0,
     "shani": 15.0,
 }
+VARA_NAMES_VEDIC = [
+    "Ravivara",
+    "Somavara",
+    "Mangalavara",
+    "Budhavara",
+    "Guruvara",
+    "Shukravara",
+    "Shanivara",
+]
+VARA_NAMES_ENGLISH = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+]
+TITHI_NAMES_VEDIC = [
+    "Shukla Pratipada",
+    "Shukla Dvitiya",
+    "Shukla Tritiya",
+    "Shukla Chaturthi",
+    "Shukla Panchami",
+    "Shukla Shashthi",
+    "Shukla Saptami",
+    "Shukla Ashtami",
+    "Shukla Navami",
+    "Shukla Dashami",
+    "Shukla Ekadashi",
+    "Shukla Dvadashi",
+    "Shukla Trayodashi",
+    "Shukla Chaturdashi",
+    "Purnima",
+    "Krishna Pratipada",
+    "Krishna Dvitiya",
+    "Krishna Tritiya",
+    "Krishna Chaturthi",
+    "Krishna Panchami",
+    "Krishna Shashthi",
+    "Krishna Saptami",
+    "Krishna Ashtami",
+    "Krishna Navami",
+    "Krishna Dashami",
+    "Krishna Ekadashi",
+    "Krishna Dvadashi",
+    "Krishna Trayodashi",
+    "Krishna Chaturdashi",
+    "Amavasya",
+]
+TITHI_NAMES_ENGLISH = [
+    "Waxing Pratipada",
+    "Waxing Dvitiya",
+    "Waxing Tritiya",
+    "Waxing Chaturthi",
+    "Waxing Panchami",
+    "Waxing Shashthi",
+    "Waxing Saptami",
+    "Waxing Ashtami",
+    "Waxing Navami",
+    "Waxing Dashami",
+    "Waxing Ekadashi",
+    "Waxing Dvadashi",
+    "Waxing Trayodashi",
+    "Waxing Chaturdashi",
+    "Full Moon",
+    "Waning Pratipada",
+    "Waning Dvitiya",
+    "Waning Tritiya",
+    "Waning Chaturthi",
+    "Waning Panchami",
+    "Waning Shashthi",
+    "Waning Saptami",
+    "Waning Ashtami",
+    "Waning Navami",
+    "Waning Dashami",
+    "Waning Ekadashi",
+    "Waning Dvadashi",
+    "Waning Trayodashi",
+    "Waning Chaturdashi",
+    "New Moon",
+]
+YOGA_NAMES_VEDIC = [
+    "Vishkambha",
+    "Priti",
+    "Ayushman",
+    "Saubhagya",
+    "Shobhana",
+    "Atiganda",
+    "Sukarma",
+    "Dhriti",
+    "Shoola",
+    "Ganda",
+    "Vriddhi",
+    "Dhruva",
+    "Vyaghata",
+    "Harshana",
+    "Vajra",
+    "Siddhi",
+    "Vyatipata",
+    "Variyana",
+    "Parigha",
+    "Shiva",
+    "Siddha",
+    "Sadhya",
+    "Shubha",
+    "Shukla",
+    "Brahma",
+    "Indra",
+    "Vaidhriti",
+]
+YOGA_NAMES_ENGLISH = [
+    "Vishkambha",
+    "Priti",
+    "Ayushman",
+    "Saubhagya",
+    "Shobhana",
+    "Atiganda",
+    "Sukarma",
+    "Dhriti",
+    "Shoola",
+    "Ganda",
+    "Vriddhi",
+    "Dhruva",
+    "Vyaghata",
+    "Harshana",
+    "Vajra",
+    "Siddhi",
+    "Vyatipata",
+    "Variyana",
+    "Parigha",
+    "Shiva",
+    "Siddha",
+    "Sadhya",
+    "Shubha",
+    "Shukla",
+    "Brahma",
+    "Indra",
+    "Vaidhriti",
+]
+KARANA_NAMES_VEDIC = [
+    "Kimstughna",
+    "Bava",
+    "Balava",
+    "Kaulava",
+    "Taitila",
+    "Garija",
+    "Vanija",
+    "Vishti",
+    "Shakuni",
+    "Chatushpada",
+    "Naga",
+]
+KARANA_NAMES_ENGLISH = [
+    "Kimstughna",
+    "Bava",
+    "Balava",
+    "Kaulava",
+    "Taitila",
+    "Garija",
+    "Vanija",
+    "Vishti",
+    "Shakuni",
+    "Chatushpada",
+    "Naga",
+]
 GRAHA_ORDER = [
     "sun",
     "moon",
@@ -383,6 +549,19 @@ def compute_chart_snapshot(
         rashi_key="d9_rashi",
     )
 
+    panchanga = _compute_panchanga(
+        local_dt=local_dt,
+        julian_day_utc=julian_day_utc,
+        latitude=birth_event.latitude,
+        longitude=birth_event.longitude,
+        elevation_m=birth_event.elevation_m,
+        timezone=birth_event.timezone,
+        sun_sidereal_deg=sun_display,
+        moon_sidereal_deg=moon_display,
+        moon_nakshatra=moon_nakshatra,
+        moon_pada=moon_pada,
+    )
+
     return {
         "meta": {
             "status": "computed",
@@ -390,6 +569,7 @@ def compute_chart_snapshot(
             "timezone": birth_event.timezone,
             "utc_iso": utc_dt.isoformat().replace("+00:00", "Z"),
         },
+        "panchanga": panchanga,
         "astronomy": {
             "julian_day_utc": round(julian_day_utc, 10),
             "sun_sidereal_deg": _truncate_2(sun_display),
@@ -607,3 +787,160 @@ def _house_from_lagna(*, lagna_rashi: str, target_rashi: str) -> int:
     lagna_index = RASHI_NAMES.index(lagna_internal)
     target_index = RASHI_NAMES.index(target_internal)
     return ((target_index - lagna_index) % 12) + 1
+
+
+def _compute_panchanga(
+    *,
+    local_dt: datetime,
+    julian_day_utc: float,
+    latitude: float,
+    longitude: float,
+    elevation_m: float,
+    timezone: str,
+    sun_sidereal_deg: float,
+    moon_sidereal_deg: float,
+    moon_nakshatra: str,
+    moon_pada: int,
+) -> dict[str, object]:
+    vara_index = local_dt.weekday()
+    vara_number = ((vara_index + 1) % 7) + 1
+    vara_vedic = VARA_NAMES_VEDIC[vara_number - 1]
+    vara_english = VARA_NAMES_ENGLISH[vara_number - 1]
+
+    tithi_phase = (moon_sidereal_deg - sun_sidereal_deg) % 360.0
+    tithi_number = int(tithi_phase // 12.0) + 1
+    tithi_vedic = TITHI_NAMES_VEDIC[tithi_number - 1]
+    tithi_english = TITHI_NAMES_ENGLISH[tithi_number - 1]
+    paksha = "Shukla" if tithi_number <= 15 else "Krishna"
+    paksha_english = "Waxing" if tithi_number <= 15 else "Waning"
+    tithi_progress = ((tithi_phase % 12.0) / 12.0) * 100.0
+
+    yoga_sum = (sun_sidereal_deg + moon_sidereal_deg) % 360.0
+    yoga_number = int(yoga_sum // (360.0 / 27.0)) + 1
+    yoga_vedic = YOGA_NAMES_VEDIC[yoga_number - 1]
+    yoga_english = YOGA_NAMES_ENGLISH[yoga_number - 1]
+    yoga_progress = ((yoga_sum % (360.0 / 27.0)) / (360.0 / 27.0)) * 100.0
+
+    karana_serial = int(tithi_phase // 6.0) + 1
+    karana_vedic, karana_english = _karana_name_for_serial(karana_serial)
+    karana_progress = ((tithi_phase % 6.0) / 6.0) * 100.0
+
+    nakshatra_span = 360.0 / 27.0
+    nakshatra_number = int((moon_sidereal_deg % 360.0) // nakshatra_span) + 1
+    nakshatra_progress = (((moon_sidereal_deg % 360.0) % nakshatra_span) / nakshatra_span) * 100.0
+
+    sunrise_utc, sunrise_local = _compute_sun_event(
+        local_dt=local_dt,
+        latitude=latitude,
+        longitude=longitude,
+        elevation_m=elevation_m,
+        timezone=timezone,
+        rsmi=swe.CALC_RISE,
+    )
+    sunset_utc, sunset_local = _compute_sun_event(
+        local_dt=local_dt,
+        latitude=latitude,
+        longitude=longitude,
+        elevation_m=elevation_m,
+        timezone=timezone,
+        rsmi=swe.CALC_SET,
+    )
+
+    return {
+        "vara": {
+            "number": vara_number,
+            "name_vedic": vara_vedic,
+            "name_english": vara_english,
+        },
+        "tithi": {
+            "number": tithi_number,
+            "paksha": paksha,
+            "paksha_english": paksha_english,
+            "name_vedic": tithi_vedic,
+            "name_english": tithi_english,
+            "progress_percent": round(tithi_progress, 2),
+        },
+        "nakshatra": {
+            "number": nakshatra_number,
+            "name_vedic": moon_nakshatra,
+            "name_english": moon_nakshatra,
+            "pada": moon_pada,
+            "progress_percent": round(nakshatra_progress, 2),
+        },
+        "yoga": {
+            "number": yoga_number,
+            "name_vedic": yoga_vedic,
+            "name_english": yoga_english,
+            "progress_percent": round(yoga_progress, 2),
+        },
+        "karana": {
+            "serial": karana_serial,
+            "name_vedic": karana_vedic,
+            "name_english": karana_english,
+            "progress_percent": round(karana_progress, 2),
+        },
+        "sunrise": {
+            "utc_iso": sunrise_utc.isoformat().replace("+00:00", "Z"),
+            "local_iso": sunrise_local.isoformat(),
+            "local_time": sunrise_local.strftime("%H:%M"),
+        },
+        "sunset": {
+            "utc_iso": sunset_utc.isoformat().replace("+00:00", "Z"),
+            "local_iso": sunset_local.isoformat(),
+            "local_time": sunset_local.strftime("%H:%M"),
+        },
+    }
+
+
+def _karana_name_for_serial(karana_serial: int) -> tuple[str, str]:
+    if karana_serial <= 1:
+        return KARANA_NAMES_VEDIC[0], KARANA_NAMES_ENGLISH[0]
+    if karana_serial >= 58:
+        fixed_index = min(karana_serial - 50, 10)
+        return KARANA_NAMES_VEDIC[fixed_index], KARANA_NAMES_ENGLISH[fixed_index]
+    repeating_index = ((karana_serial - 2) % 7) + 1
+    return KARANA_NAMES_VEDIC[repeating_index], KARANA_NAMES_ENGLISH[repeating_index]
+
+
+def _compute_sun_event(
+    *,
+    local_dt: datetime,
+    latitude: float,
+    longitude: float,
+    elevation_m: float,
+    timezone: str,
+    rsmi: int,
+) -> tuple[datetime, datetime]:
+    local_midnight = local_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    utc_midnight = local_midnight.astimezone(ZoneInfo("UTC"))
+    utc_hours = (
+        utc_midnight.hour
+        + (utc_midnight.minute / 60.0)
+        + (utc_midnight.second / 3600.0)
+        + (utc_midnight.microsecond / 3_600_000_000.0)
+    )
+    jd_utc = swe.julday(
+        utc_midnight.year,
+        utc_midnight.month,
+        utc_midnight.day,
+        utc_hours,
+        swe.GREG_CAL,
+    )
+    _, tret = swe.rise_trans(
+        jd_utc,
+        swe.SUN,
+        rsmi,
+        (longitude, latitude, elevation_m),
+        0.0,
+        15.0,
+        swe.FLG_SWIEPH,
+    )
+    event_utc = _jd_to_utc_datetime(tret[0])
+    event_local = event_utc.astimezone(ZoneInfo(timezone))
+    return event_utc, event_local
+
+
+def _jd_to_utc_datetime(jd_utc: float) -> datetime:
+    year, month, day, hour = swe.revjul(jd_utc, swe.GREG_CAL)
+    midnight_utc = datetime(year, month, day, tzinfo=ZoneInfo("UTC"))
+    return midnight_utc + timedelta(hours=hour)

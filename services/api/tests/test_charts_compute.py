@@ -28,6 +28,13 @@ def test_charts_compute_returns_snapshot_for_simple_birth_input() -> None:
     assert payload["snapshot"]["graha_table"]["sun"]["house"] == 10
     assert "retrograde" in payload["snapshot"]["graha_table"]["sun"]
     assert "combust" in payload["snapshot"]["graha_table"]["sun"]
+    assert payload["snapshot"]["panchanga"]["vara"]["name_vedic"] == "Ravivara"
+    assert payload["snapshot"]["panchanga"]["tithi"]["name_vedic"] == "Krishna Shashthi"
+    assert payload["snapshot"]["panchanga"]["nakshatra"]["name_vedic"] == "P Bhadrapada"
+    assert payload["snapshot"]["panchanga"]["yoga"]["name_vedic"] == "Ayushman"
+    assert payload["snapshot"]["panchanga"]["karana"]["name_vedic"] == "Garija"
+    assert isinstance(payload["snapshot"]["panchanga"]["sunrise"]["local_time"], str)
+    assert isinstance(payload["snapshot"]["panchanga"]["sunset"]["local_time"], str)
 
 
 def test_charts_compute_returns_not_found_for_unknown_place() -> None:

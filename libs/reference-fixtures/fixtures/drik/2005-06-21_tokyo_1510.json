@@ -1,0 +1,46 @@
+{
+  "fixture_id": "drik_tokyo_2005_06_21_1510_v1",
+  "source": "drik_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "drik_captured",
+  "birth_input": {
+    "local_date": "2005-06-21",
+    "local_time": "15:10",
+    "timezone": "Asia/Tokyo",
+    "latitude": 35.6895,
+    "longitude": 139.69171,
+    "elevation_m": 40.0,
+    "place_label": "Tokyo, Tokyo, Japan"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 66.03,
+      "moon_sidereal_deg": 233.24
+    },
+    "vedic": {
+      "sun_rashi": "Mitu",
+      "moon_rashi": "Vrsc",
+      "lagna_rashi": "Tula",
+      "sun_nakshatra": "Mrigashirsha",
+      "sun_pada": 4,
+      "moon_nakshatra": "Jyeshtha",
+      "moon_pada": 2,
+      "lagna_nakshatra": "Swati",
+      "lagna_pada": 4
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

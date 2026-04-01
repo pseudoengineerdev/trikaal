@@ -33,6 +33,8 @@ class ParityResult(BaseModel):
 class FixtureParityResult(BaseModel):
     fixture_id: str
     source: str
+    reference_status: str
+    verified_reference: bool
     matched: bool
     difference_count: int
     compared_field_count: int
@@ -42,7 +44,11 @@ class FixtureParityResult(BaseModel):
 
 
 class ParitySuiteResult(BaseModel):
+    available_fixture_count: int
     fixture_count: int
+    include_unverified: bool
+    verified_fixture_count: int
+    unverified_fixture_count: int
     matched_fixture_count: int
     mismatched_fixture_count: int
     compared_field_count: int
@@ -80,8 +86,13 @@ def run_canonical_drik_parity_check() -> ParityResult:
     )
 
 
-def run_drik_parity_suite_check() -> ParitySuiteResult:
-    fixtures = load_drik_fixtures()
+def run_drik_parity_suite_check(*, include_unverified: bool = False) -> ParitySuiteResult:
+    available_fixtures = load_drik_fixtures()
+    fixtures = [
+        fixture
+        for fixture in available_fixtures
+        if include_unverified or fixture.is_verified_drik_reference
+    ]
     fixture_results: list[FixtureParityResult] = []
     total_compared = 0
     total_matched = 0
@@ -110,6 +121,8 @@ def run_drik_parity_suite_check() -> ParitySuiteResult:
             FixtureParityResult(
                 fixture_id=fixture.fixture_id,
                 source=fixture.source,
+                reference_status=fixture.reference_status.value,
+                verified_reference=fixture.is_verified_drik_reference,
                 matched=difference_count == 0,
                 difference_count=difference_count,
                 compared_field_count=compared_field_count,
@@ -133,8 +146,17 @@ def run_drik_parity_suite_check() -> ParitySuiteResult:
         round((total_matched / total_compared) * 100, 4) if total_compared > 0 else 100.0
     )
 
+    verified_fixture_count = len(
+        [fixture for fixture in available_fixtures if fixture.is_verified_drik_reference]
+    )
+    unverified_fixture_count = len(available_fixtures) - verified_fixture_count
+
     return ParitySuiteResult(
+        available_fixture_count=len(available_fixtures),
         fixture_count=len(fixture_results),
+        include_unverified=include_unverified,
+        verified_fixture_count=verified_fixture_count,
+        unverified_fixture_count=unverified_fixture_count,
         matched_fixture_count=matched_fixture_count,
         mismatched_fixture_count=mismatched_fixture_count,
         compared_field_count=total_compared,

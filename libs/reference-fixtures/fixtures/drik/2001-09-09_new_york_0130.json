@@ -1,0 +1,46 @@
+{
+  "fixture_id": "drik_new_york_2001_09_09_0130_v1",
+  "source": "drik_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T00:00:00Z",
+  "reference_status": "drik_captured",
+  "birth_input": {
+    "local_date": "2001-09-09",
+    "local_time": "01:30",
+    "timezone": "America/New_York",
+    "latitude": 40.71427,
+    "longitude": -74.00597,
+    "elevation_m": 10.0,
+    "place_label": "New York City, New York, United States"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 142.71,
+      "moon_sidereal_deg": 33.88
+    },
+    "vedic": {
+      "sun_rashi": "Simh",
+      "moon_rashi": "Vrish",
+      "lagna_rashi": "Mitu",
+      "sun_nakshatra": "P Phalguni",
+      "sun_pada": 3,
+      "moon_nakshatra": "Krittika",
+      "moon_pada": 3,
+      "lagna_nakshatra": "Punarvasu",
+      "lagna_pada": 1
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

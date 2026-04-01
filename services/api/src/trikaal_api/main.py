@@ -50,8 +50,8 @@ def canonical_drik_parity() -> ParityResult:
 
 
 @app.get("/v1/engine/parity/drik-suite", response_model=ParitySuiteResult)
-def drik_suite_parity() -> ParitySuiteResult:
-    return run_drik_parity_suite_check()
+def drik_suite_parity(include_unverified: bool = False) -> ParitySuiteResult:
+    return run_drik_parity_suite_check(include_unverified=include_unverified)
 
 
 @app.get("/v1/engine/canonical-preview", response_model=CanonicalPreview)

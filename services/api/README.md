@@ -30,7 +30,7 @@ uvicorn trikaal_api.main:app --reload
 
 - `GET /health`
 - `GET /v1/engine/parity/canonical-drik`
-- `GET /v1/engine/parity/drik-suite` (multi-case strict parity + accuracy metrics)
+- `GET /v1/engine/parity/drik-suite` (strict parity on verified Drik fixtures)
 - `GET /v1/engine/canonical-preview`
 - `GET /v1/metadata/astrology-terms` (shared term contract for mobile/web)
 - `GET /v1/places/search?query=<text>`
@@ -100,6 +100,28 @@ Response shape (trimmed):
   "snapshot": {
     "meta": {
       "status": "computed"
+    },
+    "panchanga": {
+      "tithi": {
+        "name_vedic": "Krishna Shashthi",
+        "name_english": "Waning Shashthi"
+      },
+      "vara": {
+        "name_vedic": "Ravivara",
+        "name_english": "Sunday"
+      },
+      "nakshatra": {
+        "name_vedic": "P Bhadrapada",
+        "pada": 1
+      },
+      "yoga": {
+        "name_vedic": "Ayushman"
+      },
+      "karana": {
+        "name_vedic": "Garija"
+      },
+      "sunrise": { "local_time": "06:03" },
+      "sunset": { "local_time": "19:13" }
     },
     "varga": {
       "d1": { "lagna_rashi": "Kany" },
@@ -194,9 +216,26 @@ accuracy:
 curl "http://127.0.0.1:8000/v1/engine/parity/drik-suite"
 ```
 
+By default this endpoint runs only **verified** references (`drik_captured` and
+`drik_archived_export`), which is what CI gate enforcement uses.
+
+To include provisional engine-seed fixtures too:
+
+```bash
+curl "http://127.0.0.1:8000/v1/engine/parity/drik-suite?include_unverified=true"
+```
+
+Current suite status:
+
+- All fixtures are verified Drik references (`unverified_fixture_count = 0`).
+- `include_unverified=true` returns the same set until new provisional fixtures are added.
+
 Response includes:
 
+- `available_fixture_count` (verified + provisional)
 - `fixture_count`
+- `verified_fixture_count`
+- `unverified_fixture_count`
 - `matched_fixture_count`
 - `mismatched_fixture_count`
 - `compared_field_count`
