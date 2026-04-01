@@ -187,6 +187,30 @@ void main() {
         'Australia/Sydney',
       );
     });
+
+    test('successful retry clears stale persistence error', () async {
+      final repository = _FlakySavedProfilesRepository();
+      final state = BirthInputState(profilesRepository: repository);
+      state.updateDateOfBirth('1999-07-04');
+      state.updateTimeOfBirth('12:22');
+      state.setResolvedPlace(
+        const CustomPlacePayload(
+          placeLabel: 'Mumbai, Maharashtra, India',
+          latitude: 19.076,
+          longitude: 72.8777,
+          timezone: 'Asia/Kolkata',
+          elevationM: 14,
+        ),
+      );
+
+      final firstAttempt = await state.createProfile(name: 'First');
+      expect(firstAttempt, isFalse);
+      expect(state.profilesError, 'Unable to save profile changes right now.');
+
+      final secondAttempt = await state.createProfile(name: 'Second');
+      expect(secondAttempt, isTrue);
+      expect(state.profilesError, isNull);
+    });
   });
 }
 
@@ -209,6 +233,19 @@ class _MemorySavedProfilesRepository implements SavedProfilesRepository {
   Future<void> saveProfiles(List<SavedBirthProfile> profiles) async {
     saveCalls += 1;
     _profiles = List<SavedBirthProfile>.from(profiles);
+  }
+}
+
+class _FlakySavedProfilesRepository extends _MemorySavedProfilesRepository {
+  bool _failedOnce = false;
+
+  @override
+  Future<void> saveProfiles(List<SavedBirthProfile> profiles) async {
+    if (!_failedOnce) {
+      _failedOnce = true;
+      throw Exception('disk locked');
+    }
+    await super.saveProfiles(profiles);
   }
 }
 
