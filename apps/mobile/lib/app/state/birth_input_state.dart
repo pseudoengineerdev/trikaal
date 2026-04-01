@@ -125,8 +125,17 @@ class BirthInputState extends ChangeNotifier {
         );
         _applyProfile(preferredProfile, notify: false);
       }
-    } catch (_) {
-      _profilesError = 'Unable to load saved profiles right now.';
+    } catch (error, stackTrace) {
+      assert(() {
+        debugPrint(
+          'Saved profile load failed. Continuing without persisted data: '
+          '$error\n$stackTrace',
+        );
+        return true;
+      }());
+      _savedProfiles = <SavedBirthProfile>[];
+      _profilesLoaded = true;
+      _profilesError = null;
     } finally {
       _profilesLoading = false;
       notifyListeners();

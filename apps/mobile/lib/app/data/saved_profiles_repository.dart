@@ -18,16 +18,21 @@ class SharedPreferencesSavedProfilesRepository
 
   static const String _storageKey = 'trikaal_saved_birth_profiles_v1';
   final Future<SharedPreferences> Function() _prefsLoader;
+  bool _useMemoryFallback = false;
+  List<SavedBirthProfile> _memoryFallback = <SavedBirthProfile>[];
 
   @override
   Future<List<SavedBirthProfile>> loadProfiles() async {
-    final prefs = await _prefsLoader();
-    final rawValue = prefs.getString(_storageKey);
-    if (rawValue == null || rawValue.trim().isEmpty) {
-      return <SavedBirthProfile>[];
+    if (_useMemoryFallback) {
+      return List<SavedBirthProfile>.from(_memoryFallback);
     }
 
     try {
+      final prefs = await _prefsLoader();
+      final rawValue = prefs.getString(_storageKey);
+      if (rawValue == null || rawValue.trim().isEmpty) {
+        return <SavedBirthProfile>[];
+      }
       final decoded = jsonDecode(rawValue);
       if (decoded is! List) {
         return <SavedBirthProfile>[];
@@ -49,18 +54,28 @@ class SharedPreferencesSavedProfilesRepository
       }
       return parsed;
     } catch (_) {
-      return <SavedBirthProfile>[];
+      _useMemoryFallback = true;
+      return List<SavedBirthProfile>.from(_memoryFallback);
     }
   }
 
   @override
   Future<void> saveProfiles(List<SavedBirthProfile> profiles) async {
-    final prefs = await _prefsLoader();
-    final payload = profiles.map((profile) => profile.toJson()).toList();
-    final encoded = jsonEncode(payload);
-    final didSave = await prefs.setString(_storageKey, encoded);
-    if (!didSave) {
-      throw StateError('SharedPreferences save returned false.');
+    _memoryFallback = List<SavedBirthProfile>.from(profiles);
+    if (_useMemoryFallback) {
+      return;
+    }
+
+    try {
+      final prefs = await _prefsLoader();
+      final payload = profiles.map((profile) => profile.toJson()).toList();
+      final encoded = jsonEncode(payload);
+      final didSave = await prefs.setString(_storageKey, encoded);
+      if (!didSave) {
+        _useMemoryFallback = true;
+      }
+    } catch (_) {
+      _useMemoryFallback = true;
     }
   }
 }
