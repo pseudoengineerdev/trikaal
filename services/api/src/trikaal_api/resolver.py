@@ -63,6 +63,13 @@ def search_places(query: str, limit: int = 10) -> list[PlaceResolution]:
         return []
 
     local_matches = _search_local_places(normalized, limit=limit)
+    if _prefer_external_search():
+        external_matches = list(_fallback_search(normalized, limit=limit))
+        merged = _merge_unique_places([*external_matches, *local_matches], limit=limit)
+        if merged:
+            return merged
+        return local_matches[:limit]
+
     if len(local_matches) >= limit:
         return local_matches[:limit]
 
@@ -181,6 +188,7 @@ def _global_place_catalog() -> list[PlaceRecord]:
     geonames = geonamescache.GeonamesCache(min_city_population=_geonames_min_population())
     cities = geonames.get_cities()
     countries = geonames.get_countries()
+    us_states = geonames.get_us_states()
 
     records: list[PlaceRecord] = []
     for city in cities.values():
@@ -191,9 +199,21 @@ def _global_place_catalog() -> list[PlaceRecord]:
         country_code = city["countrycode"]
         country_name = countries.get(country_code, {}).get("name", country_code)
         city_name = city["name"]
-        place_label = f"{city_name}, {country_name}"
+        admin1_code = str(city.get("admin1code") or "").strip()
+        state_name = _resolve_state_name(
+            country_code=country_code,
+            admin1_code=admin1_code,
+            us_states=us_states,
+        )
+        place_label = _build_place_label(
+            city_name=city_name,
+            state_name=state_name,
+            country_name=country_name,
+        )
         aliases = _build_aliases(
             city_name=city_name,
+            state_name=state_name,
+            admin1_code=admin1_code,
             country_name=country_name,
             country_code=country_code,
             alternates=city.get("alternatenames") or [],
@@ -215,6 +235,8 @@ def _global_place_catalog() -> list[PlaceRecord]:
 
 def _build_aliases(
     city_name: str,
+    state_name: str | None,
+    admin1_code: str,
     country_name: str,
     country_code: str,
     alternates: list[str],
@@ -223,8 +245,17 @@ def _build_aliases(
         city_name,
         f"{city_name} {country_name}",
         f"{city_name} {country_code}",
+        f"{city_name} {admin1_code}",
+        f"{city_name} {admin1_code} {country_name}",
         *alternates[:MAX_ALTERNATE_ALIASES_PER_CITY],
     ]
+    if state_name:
+        candidates.extend(
+            [
+                f"{city_name} {state_name}",
+                f"{city_name} {state_name} {country_name}",
+            ]
+        )
     seen: set[str] = set()
     aliases: list[str] = []
     for candidate in candidates:
@@ -296,6 +327,11 @@ def _fallback_enabled() -> bool:
     return value not in {"0", "false", "no", "off"}
 
 
+def _prefer_external_search() -> bool:
+    value = os.getenv("TRIKAAL_PREFER_EXTERNAL_SEARCH", "0").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
 @lru_cache(maxsize=1)
 def _external_geocoder() -> ExternalGeocoder:
     return ExternalGeocoder()
@@ -313,6 +349,26 @@ def _geonames_min_population() -> int:
     if value < 500:
         return 500
     return value
+
+
+def _resolve_state_name(
+    country_code: str,
+    admin1_code: str,
+    us_states: dict[str, dict[str, str]],
+) -> str | None:
+    if country_code == "US":
+        return us_states.get(admin1_code, {}).get("name")
+    return None
+
+
+def _build_place_label(
+    city_name: str,
+    state_name: str | None,
+    country_name: str,
+) -> str:
+    if state_name:
+        return f"{city_name}, {state_name}, {country_name}"
+    return f"{city_name}, {country_name}"
 
 
 @lru_cache(maxsize=None)

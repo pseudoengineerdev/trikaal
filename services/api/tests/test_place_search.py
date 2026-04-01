@@ -71,3 +71,43 @@ def test_place_search_uses_external_fallback_when_enabled(monkeypatch) -> None:
     payload = response.json()
     assert payload["count"] == 1
     assert payload["matches"][0]["place_label"] == "Zzyzx, United States"
+
+
+def test_place_search_includes_state_for_same_name_us_cities() -> None:
+    client = TestClient(app)
+    response = client.get("/v1/places/search", params={"query": "pasadena"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    labels = [item["place_label"] for item in payload["matches"]]
+    assert any("Pasadena, Texas, United States" == label for label in labels)
+    assert any("Pasadena, California, United States" == label for label in labels)
+
+
+def test_place_search_can_prefer_external_results(monkeypatch) -> None:
+    class _FakeGeocoder:
+        def search_places(self, query: str, limit: int = 5) -> list[ExternalPlaceCandidate]:
+            return [
+                ExternalPlaceCandidate(
+                    place_label="Pasadena, California, United States",
+                    latitude=34.14778,
+                    longitude=-118.14452,
+                    timezone="America/Los_Angeles",
+                )
+            ]
+
+        def resolve_place(self, query: str) -> ExternalPlaceCandidate | None:
+            return None
+
+    monkeypatch.setenv("TRIKAAL_ENABLE_FALLBACK_GEOCODING", "1")
+    monkeypatch.setenv("TRIKAAL_PREFER_EXTERNAL_SEARCH", "1")
+    resolver._fallback_search.cache_clear()
+    monkeypatch.setattr(resolver, "_external_geocoder", lambda: _FakeGeocoder())
+
+    client = TestClient(app)
+    response = client.get("/v1/places/search", params={"query": "pasadena"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["count"] >= 1
+    assert payload["matches"][0]["place_label"] == "Pasadena, California, United States"

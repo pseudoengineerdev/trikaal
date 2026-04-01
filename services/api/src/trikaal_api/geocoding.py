@@ -31,6 +31,7 @@ class ExternalGeocoder:
         self._timezone_finder = TimezoneFinder()
         self._mapbox_token = os.getenv("TRIKAAL_MAPBOX_ACCESS_TOKEN", "").strip()
         self._google_api_key = os.getenv("TRIKAAL_GOOGLE_MAPS_API_KEY", "").strip()
+        self._provider = os.getenv("TRIKAAL_GEOCODER_PROVIDER", "auto").strip().lower()
 
     def search_places(self, query: str, limit: int = 5) -> list[ExternalPlaceCandidate]:
         normalized = " ".join(query.split())
@@ -38,12 +39,16 @@ class ExternalGeocoder:
             return []
 
         candidates: list[ExternalPlaceCandidate] = []
-        if self._mapbox_token:
-            candidates.extend(self._search_mapbox(normalized, limit=limit))
-        if not candidates and self._google_api_key:
-            candidates.extend(self._search_google(normalized, limit=limit))
-        if not candidates:
-            candidates.extend(self._search_nominatim(normalized, limit=limit))
+        for provider in self._provider_sequence():
+            provider_candidates = self._search_with_provider(
+                provider=provider,
+                query=normalized,
+                limit=limit,
+            )
+            if provider_candidates:
+                candidates.extend(provider_candidates)
+            if candidates:
+                break
 
         return self._dedupe(candidates)[:limit]
 
@@ -198,6 +203,31 @@ class ExternalGeocoder:
             seen.add(key)
             unique.append(candidate)
         return unique
+
+    def _provider_sequence(self) -> list[str]:
+        if self._provider == "google":
+            return ["google", "mapbox", "nominatim"]
+        if self._provider == "mapbox":
+            return ["mapbox", "google", "nominatim"]
+        if self._provider == "nominatim":
+            return ["nominatim", "google", "mapbox"]
+        return ["google", "mapbox", "nominatim"]
+
+    def _search_with_provider(
+        self,
+        provider: str,
+        query: str,
+        limit: int,
+    ) -> list[ExternalPlaceCandidate]:
+        if provider == "google":
+            if not self._google_api_key:
+                return []
+            return self._search_google(query, limit=limit)
+        if provider == "mapbox":
+            if not self._mapbox_token:
+                return []
+            return self._search_mapbox(query, limit=limit)
+        return self._search_nominatim(query, limit=limit)
 
 
 def _build_nominatim_label(row: dict[str, Any], fallback: str) -> str:
