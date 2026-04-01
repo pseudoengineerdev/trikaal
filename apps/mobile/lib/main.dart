@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'features/charts/presentation/birth_input_page.dart';
+import 'app/home_shell_page.dart';
 
 void main() {
   runApp(const TrikaalApp());
@@ -15,7 +15,7 @@ class TrikaalApp extends StatelessWidget {
       title: 'Trikaal',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.orange),
-      home: const BirthInputPage(),
+      home: const HomeShellPage(),
     );
   }
 }
