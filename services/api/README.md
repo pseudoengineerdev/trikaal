@@ -134,8 +134,10 @@ to bypass name resolution ambiguity:
 
 - `TRIKAAL_GEONAMES_MIN_CITY_POPULATION` default `500`.
 - `TRIKAAL_ENABLE_FALLBACK_GEOCODING` default `1`.
+- `TRIKAAL_PREFER_EXTERNAL_SEARCH` default `0` (set `1` to show Google/Mapbox/OSM suggestions first).
 - `TRIKAAL_MAPBOX_ACCESS_TOKEN` optional (preferred fallback when set).
 - `TRIKAAL_GOOGLE_MAPS_API_KEY` optional (fallback when set).
+- `TRIKAAL_GEOCODER_PROVIDER` optional: `google` / `mapbox` / `nominatim` / `auto`.
 - `TRIKAAL_NOMINATIM_EMAIL` optional (recommended for Nominatim policy).
 - `TRIKAAL_GEOCODER_TIMEOUT_SECONDS` default `2.5`.
 
