@@ -12,16 +12,19 @@ class BirthInputState extends ChangeNotifier {
   String _dateOfBirth;
   String _timeOfBirth;
   String _placeOfBirth;
+  bool _hasComputedChart = false;
 
   String get dateOfBirth => _dateOfBirth;
   String get timeOfBirth => _timeOfBirth;
   String get placeOfBirth => _placeOfBirth;
+  bool get hasComputedChart => _hasComputedChart;
 
   void updateDateOfBirth(String value) {
     if (_dateOfBirth == value) {
       return;
     }
     _dateOfBirth = value;
+    _hasComputedChart = false;
     notifyListeners();
   }
 
@@ -30,6 +33,7 @@ class BirthInputState extends ChangeNotifier {
       return;
     }
     _timeOfBirth = value;
+    _hasComputedChart = false;
     notifyListeners();
   }
 
@@ -38,6 +42,23 @@ class BirthInputState extends ChangeNotifier {
       return;
     }
     _placeOfBirth = value;
+    _hasComputedChart = false;
+    notifyListeners();
+  }
+
+  void markChartComputed() {
+    if (_hasComputedChart) {
+      return;
+    }
+    _hasComputedChart = true;
+    notifyListeners();
+  }
+
+  void clearComputedChart() {
+    if (!_hasComputedChart) {
+      return;
+    }
+    _hasComputedChart = false;
     notifyListeners();
   }
 }

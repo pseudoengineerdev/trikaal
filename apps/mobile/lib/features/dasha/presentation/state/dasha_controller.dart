@@ -13,6 +13,13 @@ class DashaController extends ChangeNotifier {
   String? error;
   DashaSummary? summary;
 
+  void clear() {
+    loading = false;
+    error = null;
+    summary = null;
+    notifyListeners();
+  }
+
   Future<void> loadCurrentDasha({
     required String dateOfBirth,
     required String timeOfBirth,

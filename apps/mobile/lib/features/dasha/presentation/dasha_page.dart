@@ -75,6 +75,11 @@ class _DashaPageState extends State<DashaPage> {
   }
 
   void _onBirthInputChanged() {
+    if (!widget.birthInputState.hasComputedChart) {
+      _recomputeDebounce?.cancel();
+      _controller.clear();
+      return;
+    }
     _recomputeDebounce?.cancel();
     _recomputeDebounce = Timer(const Duration(milliseconds: 450), () {
       _computeFromSharedInputs();
@@ -82,7 +87,8 @@ class _DashaPageState extends State<DashaPage> {
   }
 
   Future<void> _computeFromSharedInputs() {
-    if (!_isInputValid()) {
+    if (!widget.birthInputState.hasComputedChart || !_isInputValid()) {
+      _controller.clear();
       return Future<void>.value();
     }
     return _controller.loadCurrentDasha(

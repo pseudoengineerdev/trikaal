@@ -22,7 +22,9 @@ class DashaEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Text('Dasha will auto-compute from the shared birth input.'),
+            const Text(
+              'Compute chart first. Dasha auto-computes from the same birth input.',
+            ),
             const SizedBox(height: 8),
             Text('Using: $dateOfBirth, $timeOfBirth, $placeOfBirth'),
           ],
