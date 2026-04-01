@@ -1,0 +1,46 @@
+{
+  "fixture_id": "drik_moscow_2011_03_27_1230_v1",
+  "source": "drik_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "drik_captured",
+  "birth_input": {
+    "local_date": "2011-03-27",
+    "local_time": "12:30",
+    "timezone": "Europe/Moscow",
+    "latitude": 55.75222,
+    "longitude": 37.61556,
+    "elevation_m": 0.0,
+    "place_label": "Moscow, Moscow, Russia"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 342.3,
+      "moon_sidereal_deg": 262.26
+    },
+    "vedic": {
+      "sun_rashi": "Meen",
+      "moon_rashi": "Dhanu",
+      "lagna_rashi": "Mitu",
+      "sun_nakshatra": "U Bhadrapada",
+      "sun_pada": 3,
+      "moon_nakshatra": "P Ashadha",
+      "moon_pada": 3,
+      "lagna_nakshatra": "Punarvasu",
+      "lagna_pada": 3
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

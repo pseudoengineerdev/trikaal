@@ -1,0 +1,46 @@
+{
+  "fixture_id": "drik_paris_2019_10_27_1230_v1",
+  "source": "drik_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "drik_captured",
+  "birth_input": {
+    "local_date": "2019-10-27",
+    "local_time": "12:30",
+    "timezone": "Europe/Paris",
+    "latitude": 48.85341,
+    "longitude": 2.3488,
+    "elevation_m": 0.0,
+    "place_label": "Paris, \u00cele-de-France, France"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 189.6,
+      "moon_sidereal_deg": 180.28
+    },
+    "vedic": {
+      "sun_rashi": "Tula",
+      "moon_rashi": "Tula",
+      "lagna_rashi": "Dhanu",
+      "sun_nakshatra": "Swati",
+      "sun_pada": 1,
+      "moon_nakshatra": "Chitra",
+      "moon_pada": 3,
+      "lagna_nakshatra": "Mula",
+      "lagna_pada": 2
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

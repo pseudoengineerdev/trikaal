@@ -1,0 +1,46 @@
+{
+  "fixture_id": "drik_auckland_2023_04_02_1230_v1",
+  "source": "drik_panchang_search_capture",
+  "captured_at_utc": "2026-04-01T20:25:31Z",
+  "reference_status": "drik_captured",
+  "birth_input": {
+    "local_date": "2023-04-02",
+    "local_time": "12:30",
+    "timezone": "Pacific/Auckland",
+    "latitude": -36.84853,
+    "longitude": 174.76349,
+    "elevation_m": 0.0,
+    "place_label": "Auckland, Auckland, New Zealand"
+  },
+  "profile": {
+    "zodiac_system": "sidereal",
+    "ayanamsha": "lahiri_chitrapaksha",
+    "calculation_method": "drik_ganita"
+  },
+  "expected_snapshot": {
+    "meta": {
+      "status": "computed"
+    },
+    "astronomy": {
+      "sun_sidereal_deg": 347.82,
+      "moon_sidereal_deg": 120.59
+    },
+    "vedic": {
+      "sun_rashi": "Meen",
+      "moon_rashi": "Simh",
+      "lagna_rashi": "Mitu",
+      "sun_nakshatra": "Revati",
+      "sun_pada": 1,
+      "moon_nakshatra": "Magha",
+      "moon_pada": 1,
+      "lagna_nakshatra": "Mrigashirsha",
+      "lagna_pada": 3
+    }
+  },
+  "comparison_rules": {
+    "exact_paths": [
+      "meta.status"
+    ],
+    "float_tolerance": 0.03
+  }
+}

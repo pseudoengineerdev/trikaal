@@ -11,15 +11,23 @@ def test_drik_suite_parity_check_reports_full_accuracy() -> None:
     payload = response.json()
 
     assert payload["include_unverified"] is False
-    assert payload["available_fixture_count"] >= 11
-    assert payload["fixture_count"] >= 11
-    assert payload["verified_fixture_count"] >= 11
+    assert payload["available_fixture_count"] >= 25
+    assert payload["fixture_count"] >= 25
+    assert payload["verified_fixture_count"] >= 25
     assert payload["unverified_fixture_count"] == 0
     assert payload["all_matched"] is True
     assert payload["mismatched_fixture_count"] == 0
-    assert payload["compared_field_count"] >= 240
+    assert payload["compared_field_count"] >= 400
     assert payload["matched_field_count"] == payload["compared_field_count"]
     assert payload["accuracy_percent"] == 100.0
+    coverage = payload["coverage"]
+    assert coverage["timezone_count"] >= 10
+    assert coverage["country_count"] >= 10
+    assert coverage["min_birth_year"] <= 1973
+    assert coverage["max_birth_year"] >= 2023
+    assert coverage["dst_observing_timezone_count"] >= 6
+    assert len(coverage["timezones"]) == coverage["timezone_count"]
+    assert len(coverage["countries"]) == coverage["country_count"]
     assert all(item["matched"] for item in payload["fixtures"])
     assert all(item["difference_count"] == 0 for item in payload["fixtures"])
 
@@ -39,9 +47,9 @@ def test_drik_suite_can_include_unverified_seed_cases() -> None:
 
     assert payload["include_unverified"] is True
     assert payload["fixture_count"] == payload["available_fixture_count"]
-    assert payload["fixture_count"] >= 11
-    assert payload["verified_fixture_count"] >= 11
+    assert payload["fixture_count"] >= 25
+    assert payload["verified_fixture_count"] >= 25
     assert payload["unverified_fixture_count"] == 0
-    assert payload["compared_field_count"] >= 240
+    assert payload["compared_field_count"] >= 400
     assert payload["all_matched"] is True
     assert all(item["verified_reference"] is True for item in payload["fixtures"])

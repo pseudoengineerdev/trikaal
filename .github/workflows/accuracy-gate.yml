@@ -35,6 +35,7 @@ jobs:
       - name: Enforce strict 100% parity
         run: |
           python - <<'PY'
+          import os
           import sys
           from pathlib import Path
 
@@ -46,13 +47,28 @@ jobs:
           from trikaal_api.parity import run_drik_parity_suite_check
 
           result = run_drik_parity_suite_check()
+          coverage = result.coverage
+          coverage_line = (
+              f"countries={coverage['country_count']}, "
+              f"timezones={coverage['timezone_count']}, "
+              f"years={coverage['min_birth_year']}-{coverage['max_birth_year']}, "
+              f"dst_timezones={coverage['dst_observing_timezone_count']}"
+          )
           print(
               f"Drik parity suite (verified-only): fixtures={result.fixture_count}, "
               f"accuracy={result.accuracy_percent}%"
           )
-          if result.fixture_count < 11:
+          print(f"Coverage summary: {coverage_line}")
+          if "GITHUB_STEP_SUMMARY" in os.environ:
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
+                  handle.write("### Drik Accuracy Gate\n")
+                  handle.write(f"- Verified fixtures: `{result.fixture_count}`\n")
+                  handle.write(f"- Accuracy: `{result.accuracy_percent}%`\n")
+                  handle.write(f"- Coverage: `{coverage_line}`\n")
+
+          if result.fixture_count < 25:
               raise SystemExit(
-                  "Accuracy gate failed: less than 11 verified Drik fixtures available."
+                  "Accuracy gate failed: less than 25 verified Drik fixtures available."
               )
           if not result.all_matched:
               raise SystemExit(
