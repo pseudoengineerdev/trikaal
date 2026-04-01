@@ -33,6 +33,7 @@ uvicorn trikaal_api.main:app --reload
 - `GET /v1/engine/canonical-preview`
 - `GET /v1/places/search?query=<text>`
 - `POST /v1/charts/compute` (recommended for app clients)
+- `POST /v1/dasha/compute` (Vimshottari current dasha)
 - `POST /v1/engine/chart` (advanced/direct coordinates)
 - `POST /v1/engine/chart-from-place` (legacy-compatible place flow)
 
@@ -100,6 +101,20 @@ Use this for city autocomplete in Flutter before compute:
 
 ```bash
 curl "http://127.0.0.1:8000/v1/places/search?query=mum"
+```
+
+## Dasha Compute
+
+Use this for current Vimshottari dasha calculation:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/v1/dasha/compute" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date_of_birth": "1999-07-04",
+    "time_of_birth": "12:22",
+    "place_of_birth": "Mumbai"
+  }'
 ```
 
 ## Test

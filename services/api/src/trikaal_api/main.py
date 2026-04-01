@@ -15,6 +15,7 @@ from trikaal_api.chart import (
     generate_chart_snapshot,
     generate_chart_snapshot_from_place,
 )
+from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
 from trikaal_api.parity import ParityResult, run_canonical_reference_parity_check
 from trikaal_api.resolver import PlaceNotFoundError, search_places
 
@@ -69,6 +70,14 @@ def chart_from_place(request: PlaceChartRequest) -> PlaceChartResponse:
 def charts_compute(request: ComputeChartRequest) -> ComputeChartResponse:
     try:
         return compute_chart(request)
+    except PlaceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/v1/dasha/compute", response_model=DashaComputeResponse)
+def dasha_compute(request: DashaComputeRequest) -> DashaComputeResponse:
+    try:
+        return compute_dasha(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 

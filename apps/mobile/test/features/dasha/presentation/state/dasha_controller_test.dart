@@ -5,20 +5,29 @@ import 'package:trikaal_mobile/features/dasha/presentation/state/dasha_controlle
 
 void main() {
   group('DashaController', () {
-    test('loadPreview sets summary on success', () async {
+    test('loadCurrentDasha sets summary on success', () async {
       final controller = DashaController(
         apiClient: _FakeDashaApiClient(
-          summary: const DashaSummary(
-            system: 'Vimshottari',
-            currentMahaDasha: 'Guru',
-            currentAntarDasha: 'Shani',
-            activeFrom: '2026-01-01',
-            activeUntil: '2027-03-01',
+          response: const DashaComputeResponse(
+            profile: <String, dynamic>{},
+            normalizedInput: <String, dynamic>{},
+            resolvedPlace: <String, dynamic>{},
+            dasha: DashaSummary(
+              system: 'Vimshottari',
+              currentMahaDasha: 'Guru',
+              currentAntarDasha: 'Shani',
+              activeFrom: '2026-01-01',
+              activeUntil: '2027-03-01',
+            ),
           ),
         ),
       );
 
-      await controller.loadPreview();
+      await controller.loadCurrentDasha(
+        dateOfBirth: '1999-07-04',
+        timeOfBirth: '12:22',
+        placeOfBirth: 'Mumbai',
+      );
 
       expect(controller.loading, isFalse);
       expect(controller.error, isNull);
@@ -26,12 +35,16 @@ void main() {
       expect(controller.summary!.currentMahaDasha, 'Guru');
     });
 
-    test('loadPreview sets error on failure', () async {
+    test('loadCurrentDasha sets error on failure', () async {
       final controller = DashaController(
         apiClient: _FakeDashaApiClient(throwError: true),
       );
 
-      await controller.loadPreview();
+      await controller.loadCurrentDasha(
+        dateOfBirth: '1999-07-04',
+        timeOfBirth: '12:22',
+        placeOfBirth: 'Mumbai',
+      );
 
       expect(controller.loading, isFalse);
       expect(controller.summary, isNull);
@@ -41,27 +54,28 @@ void main() {
 }
 
 class _FakeDashaApiClient extends DashaApiClient {
-  _FakeDashaApiClient({this.summary, this.throwError = false});
+  _FakeDashaApiClient({this.response, this.throwError = false});
 
-  final DashaSummary? summary;
+  final DashaComputeResponse? response;
   final bool throwError;
 
   @override
-  Future<DashaSummary> fetchCurrentDasha({
-    required String dateOfBirth,
-    required String timeOfBirth,
-    required String placeOfBirth,
-  }) async {
+  Future<DashaComputeResponse> computeDasha(DashaComputeRequest request) async {
     if (throwError) {
-      throw Exception('failed');
+      throw const DashaApiException('failed');
     }
-    return summary ??
-        const DashaSummary(
-          system: 'Vimshottari',
-          currentMahaDasha: 'Placeholder',
-          currentAntarDasha: 'Placeholder',
-          activeFrom: 'TBD',
-          activeUntil: 'TBD',
+    return response ??
+        const DashaComputeResponse(
+          profile: <String, dynamic>{},
+          normalizedInput: <String, dynamic>{},
+          resolvedPlace: <String, dynamic>{},
+          dasha: DashaSummary(
+            system: 'Vimshottari',
+            currentMahaDasha: 'Placeholder',
+            currentAntarDasha: 'Placeholder',
+            activeFrom: 'TBD',
+            activeUntil: 'TBD',
+          ),
         );
   }
 }
