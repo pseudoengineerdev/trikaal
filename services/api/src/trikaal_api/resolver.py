@@ -6,6 +6,8 @@ from functools import lru_cache
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import geonamescache
+
 
 @dataclass(frozen=True)
 class PlaceResolution:
@@ -32,6 +34,8 @@ class PlaceRecord:
     timezone: str
     elevation_m: float
     aliases: tuple[str, ...]
+    population: int
+    source_priority: int
 
 
 def resolve_place(place_query: str) -> PlaceResolution:
@@ -47,22 +51,59 @@ def search_places(query: str, limit: int = 10) -> list[PlaceResolution]:
     if not normalized:
         return []
 
-    results: list[PlaceResolution] = []
+    scored: list[tuple[int, PlaceRecord]] = []
     for record in _place_catalog():
-        if any(normalized in alias for alias in record.aliases):
-            results.append(
-                PlaceResolution(
-                    place_label=record.place_label,
-                    latitude=record.latitude,
-                    longitude=record.longitude,
-                    timezone=record.timezone,
-                    elevation_m=record.elevation_m,
-                )
-            )
-        if len(results) >= limit:
+        score = _score_match(record, normalized)
+        if score is not None:
+            scored.append((score, record))
+
+    scored.sort(
+        key=lambda item: (
+            item[0],
+            item[1].source_priority,
+            item[1].population,
+            item[1].place_label,
+        ),
+        reverse=True,
+    )
+
+    unique: list[PlaceResolution] = []
+    seen: set[tuple[str, float, float, str]] = set()
+    for _, record in scored:
+        key = (
+            record.place_label,
+            record.latitude,
+            record.longitude,
+            record.timezone,
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(_as_resolution(record))
+        if len(unique) >= limit:
             break
 
-    return results
+    return unique
+
+
+def _score_match(record: PlaceRecord, query: str) -> int | None:
+    if any(alias == query for alias in record.aliases):
+        return 400
+    if any(alias.startswith(query) for alias in record.aliases):
+        return 250
+    if any(query in alias for alias in record.aliases):
+        return 100
+    return None
+
+
+def _as_resolution(record: PlaceRecord) -> PlaceResolution:
+    return PlaceResolution(
+        place_label=record.place_label,
+        latitude=record.latitude,
+        longitude=record.longitude,
+        timezone=record.timezone,
+        elevation_m=record.elevation_m,
+    )
 
 
 def _normalize_key(value: str) -> str:
@@ -71,30 +112,91 @@ def _normalize_key(value: str) -> str:
 
 @lru_cache(maxsize=1)
 def _place_catalog() -> tuple[PlaceRecord, ...]:
-    raw_records = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
-    records = [PlaceRecord(**raw_record) for raw_record in raw_records]
+    records = _manual_place_catalog()
+    records.extend(_global_place_catalog())
     _validate_catalog(records)
     return tuple(records)
 
 
+def _manual_place_catalog() -> list[PlaceRecord]:
+    raw_records = json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+    records: list[PlaceRecord] = []
+    for raw_record in raw_records:
+        aliases = tuple(raw_record["aliases"])
+        records.append(
+            PlaceRecord(
+                place_label=raw_record["place_label"],
+                latitude=float(raw_record["latitude"]),
+                longitude=float(raw_record["longitude"]),
+                timezone=raw_record["timezone"],
+                elevation_m=float(raw_record.get("elevation_m", 0.0)),
+                aliases=aliases,
+                population=10_000_000_000,
+                source_priority=2,
+            )
+        )
+    return records
+
+
+def _global_place_catalog() -> list[PlaceRecord]:
+    geo = geonamescache.GeonamesCache()
+    cities = geo.get_cities()
+    countries = geo.get_countries()
+
+    records: list[PlaceRecord] = []
+    for city in cities.values():
+        timezone = city.get("timezone")
+        if not timezone:
+            continue
+        if not _is_supported_timezone(timezone):
+            continue
+
+        country_name = countries.get(city["countrycode"], {}).get("name", city["countrycode"])
+        city_name = city["name"]
+        place_label = f"{city_name}, {country_name}"
+        aliases = _build_aliases(city_name, country_name, city.get("alternatenames") or [])
+        records.append(
+            PlaceRecord(
+                place_label=place_label,
+                latitude=float(city["latitude"]),
+                longitude=float(city["longitude"]),
+                timezone=timezone,
+                elevation_m=0.0,
+                aliases=aliases,
+                population=int(city.get("population") or 0),
+                source_priority=1,
+            )
+        )
+    return records
+
+
+def _build_aliases(city_name: str, country_name: str, alternates: list[str]) -> tuple[str, ...]:
+    candidates = [city_name, f"{city_name} {country_name}", *alternates]
+    seen: set[str] = set()
+    aliases: list[str] = []
+    for candidate in candidates:
+        normalized = _normalize_key(candidate)
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        aliases.append(normalized)
+    return tuple(aliases)
+
+
 @lru_cache(maxsize=1)
 def _place_registry() -> dict[str, PlaceResolution]:
-    registry: dict[str, PlaceResolution] = {}
+    registry: dict[str, tuple[int, int, PlaceResolution]] = {}
     for record in _place_catalog():
-        resolved = PlaceResolution(
-            place_label=record.place_label,
-            latitude=record.latitude,
-            longitude=record.longitude,
-            timezone=record.timezone,
-            elevation_m=record.elevation_m,
-        )
+        resolved = _as_resolution(record)
+        rank = (record.source_priority, record.population)
         for alias in record.aliases:
-            registry[_normalize_key(alias)] = resolved
-    return registry
+            existing = registry.get(alias)
+            if existing is None or rank > (existing[0], existing[1]):
+                registry[alias] = (rank[0], rank[1], resolved)
+    return {alias: item[2] for alias, item in registry.items()}
 
 
 def _validate_catalog(records: list[PlaceRecord]) -> None:
-    aliases_seen: set[str] = set()
     for record in records:
         if not record.aliases:
             raise ValueError(f"Place {record.place_label} must include at least one alias.")
@@ -102,12 +204,14 @@ def _validate_catalog(records: list[PlaceRecord]) -> None:
             raise ValueError(f"Invalid latitude for {record.place_label}.")
         if record.longitude < -180.0 or record.longitude > 180.0:
             raise ValueError(f"Invalid longitude for {record.place_label}.")
-        ZoneInfo(record.timezone)
+        if not _is_supported_timezone(record.timezone):
+            raise ValueError(f"Unsupported timezone for {record.place_label}: {record.timezone}")
 
-        for alias in record.aliases:
-            normalized = _normalize_key(alias)
-            if not normalized:
-                raise ValueError(f"Empty alias for {record.place_label}.")
-            if normalized in aliases_seen:
-                raise ValueError(f"Duplicate alias in catalog: {alias}")
-            aliases_seen.add(normalized)
+
+@lru_cache(maxsize=None)
+def _is_supported_timezone(timezone: str) -> bool:
+    try:
+        ZoneInfo(timezone)
+        return True
+    except Exception:
+        return False

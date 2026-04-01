@@ -29,7 +29,7 @@ def test_charts_compute_returns_not_found_for_unknown_place() -> None:
         json={
             "date_of_birth": "1999-07-04",
             "time_of_birth": "12:22",
-            "place_of_birth": "Atlantis",
+            "place_of_birth": "zzzzzzzzzz",
         },
     )
 
