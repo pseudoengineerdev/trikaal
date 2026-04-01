@@ -3,6 +3,8 @@ import '../../../../app/models/custom_place_payload.dart';
 class DashaSummary {
   const DashaSummary({
     required this.system,
+    required this.asOfIso,
+    required this.birthMoonNakshatra,
     required this.currentMahaDasha,
     required this.currentAntarDasha,
     required this.activeFrom,
@@ -14,6 +16,8 @@ class DashaSummary {
   });
 
   final String system;
+  final String asOfIso;
+  final String birthMoonNakshatra;
   final String currentMahaDasha;
   final String currentAntarDasha;
   final String activeFrom;
@@ -26,6 +30,8 @@ class DashaSummary {
   factory DashaSummary.fromJson(Map<String, dynamic> json) {
     return DashaSummary(
       system: (json['system'] as String?) ?? '',
+      asOfIso: (json['as_of_iso'] as String?) ?? '',
+      birthMoonNakshatra: (json['birth_moon_nakshatra'] as String?) ?? '',
       currentMahaDasha: (json['current_maha_dasha'] as String?) ?? '',
       currentAntarDasha: (json['current_antar_dasha'] as String?) ?? '',
       activeFrom: (json['active_from'] as String?) ?? '',

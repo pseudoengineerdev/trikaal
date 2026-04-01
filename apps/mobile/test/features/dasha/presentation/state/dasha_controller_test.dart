@@ -14,6 +14,8 @@ void main() {
             resolvedPlace: <String, dynamic>{},
             dasha: DashaSummary(
               system: 'Vimshottari',
+              asOfIso: '2026-01-01T00:00:00Z',
+              birthMoonNakshatra: 'P Bhadrapada',
               currentMahaDasha: 'Guru',
               currentAntarDasha: 'Shani',
               activeFrom: '2026-01-01',
@@ -75,6 +77,8 @@ class _FakeDashaApiClient extends DashaApiClient {
           resolvedPlace: <String, dynamic>{},
           dasha: DashaSummary(
             system: 'Vimshottari',
+            asOfIso: '2026-01-01T00:00:00Z',
+            birthMoonNakshatra: 'P Bhadrapada',
             currentMahaDasha: 'Placeholder',
             currentAntarDasha: 'Placeholder',
             activeFrom: 'TBD',
