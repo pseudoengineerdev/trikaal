@@ -435,6 +435,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
       return;
     }
 
+    final previousActiveProfileId = widget.birthInputState.activeProfileId;
     final didDelete = await widget.birthInputState.deleteProfile(profile.id);
     if (!mounted) {
       return;
@@ -442,6 +443,14 @@ class _BirthInputPageState extends State<BirthInputPage> {
     if (didDelete) {
       _computedReportByProfileId.remove(profile.id);
       _computedDashaByProfileId.remove(profile.id);
+      if (previousActiveProfileId == profile.id) {
+        final nextActiveProfileId = widget.birthInputState.activeProfileId;
+        if (nextActiveProfileId == null) {
+          _controller.clearComputedResult();
+        } else if (!_restoreCachedProfileComputation(nextActiveProfileId)) {
+          await _computeForCurrentInput();
+        }
+      }
       _showInfo('Profile deleted.');
       return;
     }
