@@ -1,14 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trikaal_mobile/features/charts/data/chart_api_client.dart';
 import 'package:trikaal_mobile/features/charts/data/models/compute_chart_models.dart';
+import 'package:trikaal_mobile/features/charts/data/models/compute_report_models.dart';
 import 'package:trikaal_mobile/features/charts/data/models/place_search_models.dart';
 import 'package:trikaal_mobile/features/charts/presentation/state/birth_chart_controller.dart';
+import 'package:trikaal_mobile/features/dasha/data/models/dasha_models.dart';
 
 void main() {
   group('BirthChartController', () {
     test('submit success stores result and clears error', () async {
       final fakeApiClient = _FakeChartApiClient(
-        computeChartResponse: _sampleComputeChartResponse(),
+        computeReportResponse: _sampleComputeReportResponse(),
       );
       final controller = BirthChartController(apiClient: fakeApiClient);
       controller.placeSuggestions = <PlaceMatch>[
@@ -30,6 +32,7 @@ void main() {
       expect(controller.loading, isFalse);
       expect(controller.error, isNull);
       expect(controller.result, isNotNull);
+      expect(controller.dashaResult, isNotNull);
       expect(controller.placeSuggestions, isEmpty);
       expect(fakeApiClient.computeCalls, 1);
 
@@ -58,7 +61,7 @@ void main() {
 
     test('short place query clears suggestions without API call', () {
       final fakeApiClient = _FakeChartApiClient(
-        computeChartResponse: _sampleComputeChartResponse(),
+        computeReportResponse: _sampleComputeReportResponse(),
       );
       final controller = BirthChartController(apiClient: fakeApiClient);
       controller.placeSuggestions = <PlaceMatch>[
@@ -81,7 +84,7 @@ void main() {
 
     test('debounced place query fetches suggestions once', () async {
       final fakeApiClient = _FakeChartApiClient(
-        computeChartResponse: _sampleComputeChartResponse(),
+        computeReportResponse: _sampleComputeReportResponse(),
         placeSearchResponse: const PlaceSearchResponse(
           query: 'mum',
           count: 1,
@@ -117,12 +120,12 @@ void main() {
 
 class _FakeChartApiClient extends ChartApiClient {
   _FakeChartApiClient({
-    this.computeChartResponse,
+    this.computeReportResponse,
     this.placeSearchResponse,
     this.computeException,
   });
 
-  final ComputeChartResponse? computeChartResponse;
+  final ComputeReportResponse? computeReportResponse;
   final PlaceSearchResponse? placeSearchResponse;
   final Exception? computeException;
 
@@ -130,12 +133,14 @@ class _FakeChartApiClient extends ChartApiClient {
   int searchCalls = 0;
 
   @override
-  Future<ComputeChartResponse> computeChart(ComputeChartRequest request) async {
+  Future<ComputeReportResponse> computeReport(
+    ComputeChartRequest request,
+  ) async {
     computeCalls += 1;
     if (computeException != null) {
       throw computeException!;
     }
-    return computeChartResponse!;
+    return computeReportResponse!;
   }
 
   @override
@@ -146,29 +151,42 @@ class _FakeChartApiClient extends ChartApiClient {
   }
 }
 
-ComputeChartResponse _sampleComputeChartResponse() {
-  return const ComputeChartResponse(
-    profile: <String, dynamic>{
-      'profile_id': 'vedic_drik_lahiri_v1',
-      'zodiac_system': 'sidereal',
-      'ayanamsha': 'lahiri_chitrapaksha',
-      'calculation_method': 'drik_ganita',
-    },
-    normalizedInput: <String, dynamic>{
-      'local_date': '1999-07-04',
-      'local_time': '12:22',
-      'place_query': 'Mumbai',
-    },
-    resolvedPlace: ResolvedPlace(
-      placeLabel: 'Mumbai, India',
-      latitude: 19.076,
-      longitude: 72.8777,
-      timezone: 'Asia/Kolkata',
-      elevationM: 14,
+ComputeReportResponse _sampleComputeReportResponse() {
+  return const ComputeReportResponse(
+    chart: ComputeChartResponse(
+      profile: <String, dynamic>{
+        'profile_id': 'vedic_drik_lahiri_v1',
+        'zodiac_system': 'sidereal',
+        'ayanamsha': 'lahiri_chitrapaksha',
+        'calculation_method': 'drik_ganita',
+      },
+      normalizedInput: <String, dynamic>{
+        'local_date': '1999-07-04',
+        'local_time': '12:22',
+        'place_query': 'Mumbai',
+      },
+      resolvedPlace: ResolvedPlace(
+        placeLabel: 'Mumbai, India',
+        latitude: 19.076,
+        longitude: 72.8777,
+        timezone: 'Asia/Kolkata',
+        elevationM: 14,
+      ),
+      snapshot: <String, dynamic>{
+        'meta': <String, dynamic>{'status': 'computed'},
+        'vedic': <String, dynamic>{'lagna_rashi': 'Kany'},
+      },
     ),
-    snapshot: <String, dynamic>{
-      'meta': <String, dynamic>{'status': 'computed'},
-      'vedic': <String, dynamic>{'lagna_rashi': 'Kany'},
-    },
+    dasha: DashaSummary(
+      system: 'Vimshottari',
+      currentMahaDasha: 'Ketu',
+      currentAntarDasha: 'Rahu',
+      activeFrom: '2025-01-01T00:00:00Z',
+      activeUntil: '2026-01-01T00:00:00Z',
+      currentMahaStart: '2024-01-01T00:00:00Z',
+      currentMahaEnd: '2031-01-01T00:00:00Z',
+      mahaTimeline: <DashaPeriod>[],
+      antarTimelineCurrentMaha: <DashaPeriod>[],
+    ),
   );
 }

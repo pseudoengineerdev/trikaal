@@ -73,7 +73,8 @@ class _BirthInputPageState extends State<BirthInputPage> {
       _placeController.selection = TextSelection.collapsed(
         offset: _placeController.text.length,
       );
-      widget.birthInputState.markChartComputed();
+      widget.birthInputState
+          .markChartComputed(dashaSummary: _controller.dashaResult);
     } else {
       widget.birthInputState.clearComputedChart();
     }

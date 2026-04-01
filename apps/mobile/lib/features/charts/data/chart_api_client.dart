@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../config/app_config.dart';
 import 'models/compute_chart_models.dart';
+import 'models/compute_report_models.dart';
 import 'models/place_search_models.dart';
 
 class ChartApiException implements Exception {
@@ -20,8 +21,8 @@ class ChartApiException implements Exception {
 
 class ChartApiClient {
   ChartApiClient({String? baseUrl, http.Client? httpClient})
-    : _baseUrl = baseUrl ?? AppConfig.apiBaseUrl,
-      _httpClient = httpClient ?? http.Client();
+      : _baseUrl = baseUrl ?? AppConfig.apiBaseUrl,
+        _httpClient = httpClient ?? http.Client();
 
   final String _baseUrl;
   final http.Client _httpClient;
@@ -36,6 +37,20 @@ class ChartApiClient {
     final body = _decode(response.body);
     _throwIfError(response.statusCode, body);
     return ComputeChartResponse.fromJson(body);
+  }
+
+  Future<ComputeReportResponse> computeReport(
+    ComputeChartRequest request,
+  ) async {
+    final uri = Uri.parse('$_baseUrl/v1/reports/compute');
+    final response = await _httpClient.post(
+      uri,
+      headers: const <String, String>{'Content-Type': 'application/json'},
+      body: jsonEncode(request.toJson()),
+    );
+    final body = _decode(response.body);
+    _throwIfError(response.statusCode, body);
+    return ComputeReportResponse.fromJson(body);
   }
 
   Future<PlaceSearchResponse> searchPlaces(String query) async {

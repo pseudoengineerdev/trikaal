@@ -33,16 +33,17 @@ uvicorn trikaal_api.main:app --reload
 - `GET /v1/engine/canonical-preview`
 - `GET /v1/metadata/astrology-terms` (shared term contract for mobile/web)
 - `GET /v1/places/search?query=<text>`
-- `POST /v1/charts/compute` (recommended for app clients)
-- `POST /v1/dasha/compute` (Vimshottari current dasha)
+- `POST /v1/reports/compute` (recommended one-call endpoint for app clients)
+- `POST /v1/charts/compute` (legacy-compatible chart-only endpoint)
+- `POST /v1/dasha/compute` (legacy-compatible dasha-only endpoint)
 - `POST /v1/engine/chart` (advanced/direct coordinates)
 - `POST /v1/engine/chart-from-place` (legacy-compatible place flow)
 
 ## Mobile Integration (Recommended)
 
-Use this endpoint from Flutter:
+Use this endpoint from Flutter/mobile/web:
 
-- `POST /v1/charts/compute`
+- `POST /v1/reports/compute`
 
 Request body:
 
@@ -57,7 +58,7 @@ Request body:
 Example `curl`:
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/v1/charts/compute" \
+curl -X POST "http://127.0.0.1:8000/v1/reports/compute" \
   -H "Content-Type: application/json" \
   -d '{
     "date_of_birth": "1999-07-04",
@@ -87,6 +88,13 @@ Response shape (trimmed):
     "longitude": 72.8777,
     "timezone": "Asia/Kolkata",
     "elevation_m": 14.0
+  },
+  "dasha": {
+    "system": "Vimshottari",
+    "current_maha_dasha": "Ketu",
+    "current_antar_dasha": "Rahu",
+    "maha_timeline": [],
+    "antar_timeline_current_maha": []
   },
   "snapshot": {
     "meta": {

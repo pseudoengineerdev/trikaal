@@ -18,6 +18,7 @@ from trikaal_api.chart import (
 from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
 from trikaal_api.metadata import AstrologyTermsResponse, load_astrology_terms
 from trikaal_api.parity import ParityResult, run_canonical_drik_parity_check
+from trikaal_api.report import ComputeReportRequest, ComputeReportResponse, compute_report
 from trikaal_api.resolver import PlaceNotFoundError, search_places
 
 app = FastAPI(
@@ -83,6 +84,16 @@ def charts_compute(request: ComputeChartRequest) -> ComputeChartResponse:
 def dasha_compute(request: DashaComputeRequest) -> DashaComputeResponse:
     try:
         return compute_dasha(request)
+    except PlaceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+
+
+@app.post("/v1/reports/compute", response_model=ComputeReportResponse)
+def reports_compute(request: ComputeReportRequest) -> ComputeReportResponse:
+    try:
+        return compute_report(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ZoneInfoNotFoundError as exc:
