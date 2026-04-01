@@ -34,6 +34,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
   late final TextEditingController _placeController;
   late final VoidCallback _birthInputStateListener;
   final _controller = BirthChartController();
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -50,12 +51,24 @@ class _BirthInputPageState extends State<BirthInputPage> {
 
   @override
   void dispose() {
+    _isDisposed = true;
     widget.birthInputState.removeListener(_birthInputStateListener);
     _dateController.dispose();
     _timeController.dispose();
     _placeController.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant BirthInputPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.birthInputState == widget.birthInputState) {
+      return;
+    }
+    oldWidget.birthInputState.removeListener(_birthInputStateListener);
+    widget.birthInputState.addListener(_birthInputStateListener);
+    _onBirthInputStateChanged();
   }
 
   Future<void> _submit() async {
@@ -256,6 +269,9 @@ class _BirthInputPageState extends State<BirthInputPage> {
   }
 
   void _onBirthInputStateChanged() {
+    if (_isDisposed || !mounted) {
+      return;
+    }
     _syncController(_dateController, widget.birthInputState.dateOfBirth);
     _syncController(_timeController, widget.birthInputState.timeOfBirth);
     _syncController(_placeController, widget.birthInputState.placeOfBirth);
@@ -265,6 +281,9 @@ class _BirthInputPageState extends State<BirthInputPage> {
     TextEditingController controller,
     String nextValue,
   ) {
+    if (_isDisposed || !mounted) {
+      return;
+    }
     if (controller.text == nextValue) {
       return;
     }
@@ -389,44 +408,61 @@ class _BirthInputPageState extends State<BirthInputPage> {
     required String initialValue,
     required String confirmLabel,
   }) async {
-    final controller = TextEditingController(text: initialValue);
+    if (!mounted || _isDisposed) {
+      return null;
+    }
+
+    var draftValue = initialValue;
     final value = await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: InputDecoration(hintText: hintText),
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) {
-              final text = controller.text.trim();
-              if (text.isNotEmpty) {
-                Navigator.of(context).pop(text);
-              }
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final text = controller.text.trim();
-                if (text.isEmpty) {
-                  return;
-                }
-                Navigator.of(context).pop(text);
-              },
-              child: Text(confirmLabel),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text(title),
+              content: TextFormField(
+                initialValue: initialValue,
+                autofocus: true,
+                decoration: InputDecoration(hintText: hintText),
+                textInputAction: TextInputAction.done,
+                onChanged: (String value) {
+                  setState(() {
+                    draftValue = value;
+                  });
+                },
+                onFieldSubmitted: (String value) {
+                  final text = value.trim();
+                  if (text.isNotEmpty) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    Navigator.of(context).pop(text);
+                  }
+                },
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final text = draftValue.trim();
+                    if (text.isEmpty) {
+                      return;
+                    }
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    Navigator.of(context).pop(text);
+                  },
+                  child: Text(confirmLabel),
+                ),
+              ],
+            );
+          },
         );
       },
     );
-    controller.dispose();
     return value?.trim();
   }
 
