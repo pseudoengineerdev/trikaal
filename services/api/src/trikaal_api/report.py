@@ -7,6 +7,11 @@ from pydantic import BaseModel, Field
 
 from trikaal_api.canonical import VEDIC_ENGINE_SRC
 from trikaal_api.place_models import CustomPlaceInput
+from trikaal_api.report_contract import (
+    ComputeReportResponseContract,
+    DashaContract,
+    SnapshotContract,
+)
 from trikaal_api.resolver import PlaceResolution, resolve_place
 
 if str(VEDIC_ENGINE_SRC) not in sys.path:
@@ -27,12 +32,8 @@ class ComputeReportRequest(BaseModel):
     custom_place: CustomPlaceInput | None = None
 
 
-class ComputeReportResponse(BaseModel):
-    profile: dict[str, Any]
-    normalized_input: dict[str, str]
-    resolved_place: dict[str, Any]
-    snapshot: dict[str, Any]
-    dasha: dict[str, Any]
+class ComputeReportResponse(ComputeReportResponseContract):
+    pass
 
 
 def compute_report(request: ComputeReportRequest) -> ComputeReportResponse:
@@ -58,6 +59,8 @@ def compute_report(request: ComputeReportRequest) -> ComputeReportResponse:
         birth_event=birth_event,
         profile=profile,
     )
+    snapshot_contract = SnapshotContract.model_validate(snapshot)
+    dasha_contract = DashaContract.model_validate(dasha)
 
     return ComputeReportResponse(
         profile=_profile_as_dict(profile),
@@ -67,8 +70,8 @@ def compute_report(request: ComputeReportRequest) -> ComputeReportResponse:
             "place_query": " ".join(request.place_of_birth.split()),
         },
         resolved_place=_place_as_dict(place),
-        snapshot=snapshot,
-        dasha=dasha,
+        snapshot=snapshot_contract,
+        dasha=dasha_contract,
     )
 
 
