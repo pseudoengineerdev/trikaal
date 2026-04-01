@@ -50,9 +50,9 @@ jobs:
               f"Drik parity suite (verified-only): fixtures={result.fixture_count}, "
               f"accuracy={result.accuracy_percent}%"
           )
-          if result.fixture_count < 3:
+          if result.fixture_count < 5:
               raise SystemExit(
-                  "Accuracy gate failed: less than 3 verified Drik fixtures available."
+                  "Accuracy gate failed: less than 5 verified Drik fixtures available."
               )
           if not result.all_matched:
               raise SystemExit(

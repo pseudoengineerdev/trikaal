@@ -65,6 +65,22 @@ Captured reference for this repo (as of 2026-03-31):
 - Yoga: `Ayushman`
 - Karana: `Garija`
 
+Additional verified captures (from Drik sidereal pages, 2026-04-01):
+
+- `drik_jhalawar_1999_07_13_0501_v1`
+- `drik_visakhapatnam_1999_08_04_2216_v1`
+
+Captured URLs:
+
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?date=13%2F07%2F1999`
+- `https://www.drikpanchang.com/planet/position/planetary-positions-sidereal.html?date=04%2F08%2F1999&lang=en`
+
+Capture note for historical pages crawled without exact seconds in fixture schema:
+
+- Keep fixture `local_time` at minute precision (`HH:MM`) for deterministic API inputs.
+- Prefer stable fields for strict comparison (for example Sun/Moon full degree and Rashi/Nakshatra/Pada labels).
+- Avoid strict Lagna full-degree lock when source page includes second-level time and input schema is minute-level.
+
 Current engine output (same input):
 
 - Sun sidereal degree: `78.02`

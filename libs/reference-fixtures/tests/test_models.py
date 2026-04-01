@@ -8,7 +8,7 @@ def test_all_drik_fixtures_conform_to_schema() -> None:
     fixture_dir = Path(__file__).resolve().parents[1] / "fixtures" / "drik"
     fixture_paths = sorted(fixture_dir.glob("*.json"))
 
-    assert len(fixture_paths) >= 9
+    assert len(fixture_paths) >= 11
 
     fixture_ids: set[str] = set()
     verified_count = 0
@@ -24,7 +24,7 @@ def test_all_drik_fixtures_conform_to_schema() -> None:
         else:
             provisional_count += 1
 
-    assert verified_count >= 3
+    assert verified_count >= 5
     assert provisional_count >= 6
 
 
