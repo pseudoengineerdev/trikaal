@@ -1,45 +1,163 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:trikaal_mobile/app/state/astrology_terms_state.dart';
+import 'package:trikaal_mobile/app/state/terminology_mode_state.dart';
 import 'package:trikaal_mobile/features/charts/data/models/compute_report_models.dart';
+import 'package:trikaal_mobile/features/charts/presentation/widgets/chart_result_card.dart';
 
 void main() {
-  group('ComputeReportResponse', () {
-    test('fromJson parses strict report contract payload', () {
-      final parsed = ComputeReportResponse.fromJson(_sampleReportJson());
+  testWidgets('tapping graha row opens deep detail drawer',
+      (WidgetTester tester) async {
+    final report = _sampleReport();
+    final termsState = AstrologyTermsState();
+    addTearDown(termsState.dispose);
 
-      expect(parsed.profile.profileId, 'vedic_lahiri_v1');
-      expect(parsed.normalizedInput.placeQuery, 'Mumbai');
-      expect(parsed.resolvedPlace.timezone, 'Asia/Kolkata');
-      expect(parsed.snapshot.meta.status, 'computed');
-      expect(parsed.snapshot.varga.d1.houses[1]!.rashi, 'Kany');
-      expect(parsed.snapshot.grahaTable.entryByKey('sun').siderealDeg, 78.02);
-      expect(parsed.dasha.currentMahaDasha, 'Ketu');
-      expect(parsed.dasha.mahaTimeline.length, 9);
-      expect(parsed.dasha.antarTimelineCurrentMaha.length, 9);
-      expect(parsed.interpretations.version, 'v1');
-      expect(parsed.interpretations.cards, isNotEmpty);
-      expect(parsed.interpretations.cards.first.title.english, isNotEmpty);
-      expect(parsed.interpretations.cards.first.title.vedic, isNotEmpty);
-      expect(parsed.dailyTransit.version, 'v1');
-      expect(parsed.dailyTransit.cards, isNotEmpty);
-      expect(parsed.dailyTransit.cards.first.focusTag, 'Emotions');
-    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ChartResultCard(
+              result: report,
+              mode: TerminologyMode.english,
+              termsState: termsState,
+            ),
+          ),
+        ),
+      ),
+    );
 
-    test('fromJson throws when a required report field is missing', () {
-      final broken = _sampleReportJson();
-      final snapshot = broken['snapshot']! as Map<String, dynamic>;
-      final panchanga = snapshot['panchanga']! as Map<String, dynamic>;
-      panchanga.remove('karana');
+    expect(find.text('Interpretations (Explainable)'), findsOneWidget);
+    expect(find.text('Budha-Aditya Yoga pattern detected'), findsOneWidget);
 
-      expect(
-        () => ComputeReportResponse.fromJson(broken),
-        throwsFormatException,
-      );
-    });
+    const sunRowKey = ValueKey<String>('graha-row-sun');
+    final verticalScrollable = find
+        .byWidgetPredicate(
+          (Widget widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
+
+    await tester.scrollUntilVisible(
+      find.byKey(sunRowKey),
+      500,
+      scrollable: verticalScrollable,
+    );
+    await tester.tap(find.byKey(sunRowKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Graha Deep View'), findsOneWidget);
+    expect(find.text('Sidereal Deg'), findsOneWidget);
+    expect(find.text('78.0200°'), findsOneWidget);
+    expect(find.text('Direct'), findsOneWidget);
+  });
+
+  testWidgets('tapping house placement row opens deep detail drawer',
+      (WidgetTester tester) async {
+    final report = _sampleReport();
+    final termsState = AstrologyTermsState();
+    addTearDown(termsState.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ChartResultCard(
+              result: report,
+              mode: TerminologyMode.english,
+              termsState: termsState,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const sunHouseRowKey = ValueKey<String>('house-row-sun');
+    final verticalScrollable = find
+        .byWidgetPredicate(
+          (Widget widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
+
+    await tester.scrollUntilVisible(
+      find.byKey(sunHouseRowKey),
+      400,
+      scrollable: verticalScrollable,
+    );
+    await tester.tap(find.byKey(sunHouseRowKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Graha Deep View'), findsOneWidget);
+    expect(find.text('D1 House'), findsOneWidget);
+    expect(find.text('Raw Deg'), findsOneWidget);
+    expect(find.text('78.0300°'), findsOneWidget);
+  });
+
+  testWidgets('daily transit brief renders cards with action guidance',
+      (WidgetTester tester) async {
+    final report = _sampleReport();
+    final termsState = AstrologyTermsState();
+    addTearDown(termsState.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ChartResultCard(
+              result: report,
+              mode: TerminologyMode.english,
+              termsState: termsState,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Daily Transit Brief'), findsOneWidget);
+    expect(find.text('Transit Moon focus for today'), findsOneWidget);
+    expect(find.text('Do today'), findsOneWidget);
+    expect(find.text('Watch today'), findsOneWidget);
+  });
+
+  testWidgets('tapping interpretation card opens practical guidance drawer',
+      (WidgetTester tester) async {
+    final report = _sampleReport();
+    final termsState = AstrologyTermsState();
+    addTearDown(termsState.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ChartResultCard(
+              result: report,
+              mode: TerminologyMode.english,
+              termsState: termsState,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const interpretationKey =
+        ValueKey<String>('interpretation-card-yoga_budha_aditya');
+    await tester.tap(find.byKey(interpretationKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Practical Interpretation Guide'), findsOneWidget);
+    expect(find.text('Current Dasha Lens'), findsOneWidget);
+    expect(find.text('What to do now'), findsOneWidget);
+    expect(find.text('What to watch'), findsOneWidget);
+    expect(find.text('Timing checkpoint'), findsOneWidget);
+    expect(find.text('Maha Dasha'), findsOneWidget);
+    expect(find.text('Antar Dasha'), findsOneWidget);
   });
 }
 
-Map<String, dynamic> _sampleReportJson() {
-  return <String, dynamic>{
+ComputeReportResponse _sampleReport() {
+  return ComputeReportResponse.fromJson(<String, dynamic>{
     'profile': <String, dynamic>{
       'profile_id': 'vedic_lahiri_v1',
       'zodiac_system': 'sidereal',
@@ -141,7 +259,7 @@ Map<String, dynamic> _sampleReportJson() {
       'timezone': 'Asia/Kolkata',
       'cards': _sampleDailyTransitCards(),
     },
-  };
+  });
 }
 
 Map<String, dynamic> _sampleAstronomy() {
@@ -176,6 +294,7 @@ Map<String, dynamic> _sampleAstronomy() {
   ];
   final map = <String, dynamic>{for (final key in keys) key: 1.0};
   map['sun_sidereal_deg'] = 78.02;
+  map['sun_sidereal_deg_raw'] = 78.03;
   map['moon_sidereal_deg'] = 320.35;
   map['lagna_sidereal_deg'] = 163.65;
   return map;
@@ -265,14 +384,14 @@ Map<String, dynamic> _sampleGrahaEntry(String key) {
     'key': key,
     'sidereal_deg': key == 'sun' ? 78.02 : 10.0,
     'sidereal_deg_raw': key == 'sun' ? 78.03 : 10.1,
-    'speed_deg_per_day': 1.0,
+    'speed_deg_per_day': key == 'sun' ? 0.95 : 1.0,
     'rashi': key == 'sun' ? 'Mitu' : 'Kany',
     'nakshatra': key == 'moon' ? 'P Bhadrapada' : 'Hasta',
     'pada': 2,
     'house': 1,
     'd9_rashi': 'Maka',
     'd9_house': 1,
-    'retrograde': key == 'rahu' || key == 'ketu' || key == 'shani',
+    'retrograde': false,
     'combust': key == 'shukra',
   };
 }

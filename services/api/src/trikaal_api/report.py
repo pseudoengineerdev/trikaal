@@ -1,18 +1,24 @@
 from __future__ import annotations
 
 import sys
+from datetime import datetime
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field
 
 from trikaal_api.canonical import VEDIC_ENGINE_SRC
+from trikaal_api.interpretation import build_interpretations
 from trikaal_api.place_models import CustomPlaceInput
 from trikaal_api.report_contract import (
     ComputeReportResponseContract,
+    DailyTransitBriefContract,
     DashaContract,
+    InterpretationsContract,
     SnapshotContract,
 )
 from trikaal_api.resolver import PlaceResolution, resolve_place
+from trikaal_api.transit import build_daily_transit_brief
 
 if str(VEDIC_ENGINE_SRC) not in sys.path:
     sys.path.insert(0, str(VEDIC_ENGINE_SRC))
@@ -59,8 +65,34 @@ def compute_report(request: ComputeReportRequest) -> ComputeReportResponse:
         birth_event=birth_event,
         profile=profile,
     )
+    transit_local_dt = datetime.now(ZoneInfo(place.timezone))
+    transit_event = BirthEvent(
+        local_date=transit_local_dt.strftime("%Y-%m-%d"),
+        local_time=transit_local_dt.strftime("%H:%M"),
+        timezone=place.timezone,
+        latitude=place.latitude,
+        longitude=place.longitude,
+        elevation_m=place.elevation_m,
+        place_label=place.place_label,
+    )
+    transit_snapshot = compute_chart_snapshot(
+        birth_event=transit_event,
+        profile=profile,
+    )
     snapshot_contract = SnapshotContract.model_validate(snapshot)
+    transit_snapshot_contract = SnapshotContract.model_validate(transit_snapshot)
     dasha_contract = DashaContract.model_validate(dasha)
+    interpretations_contract = InterpretationsContract.model_validate(
+        build_interpretations(snapshot_contract)
+    )
+    daily_transit_contract = DailyTransitBriefContract.model_validate(
+        build_daily_transit_brief(
+            natal_snapshot=snapshot_contract,
+            transit_snapshot=transit_snapshot_contract,
+            as_of_local_iso=transit_local_dt.isoformat(timespec="minutes"),
+            timezone=place.timezone,
+        )
+    )
 
     return ComputeReportResponse(
         profile=_profile_as_dict(profile),
@@ -72,6 +104,8 @@ def compute_report(request: ComputeReportRequest) -> ComputeReportResponse:
         resolved_place=_place_as_dict(place),
         snapshot=snapshot_contract,
         dasha=dasha_contract,
+        interpretations=interpretations_contract,
+        daily_transit=daily_transit_contract,
     )
 
 

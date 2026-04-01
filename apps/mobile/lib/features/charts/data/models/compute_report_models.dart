@@ -8,6 +8,8 @@ class ComputeReportResponse {
     required this.resolvedPlace,
     required this.snapshot,
     required this.dasha,
+    required this.interpretations,
+    required this.dailyTransit,
   });
 
   final ReportProfile profile;
@@ -15,6 +17,8 @@ class ComputeReportResponse {
   final ResolvedPlace resolvedPlace;
   final ReportSnapshot snapshot;
   final DashaSummary dasha;
+  final ReportInterpretations interpretations;
+  final ReportDailyTransitBrief dailyTransit;
 
   factory ComputeReportResponse.fromJson(Map<String, dynamic> json) {
     return ComputeReportResponse(
@@ -25,6 +29,192 @@ class ComputeReportResponse {
       resolvedPlace: ResolvedPlace.fromJson(_readMap(json, 'resolved_place')),
       snapshot: ReportSnapshot.fromJson(_readMap(json, 'snapshot')),
       dasha: DashaSummary.fromJson(_readMap(json, 'dasha')),
+      interpretations: ReportInterpretations.fromJson(
+        _readMap(json, 'interpretations'),
+      ),
+      dailyTransit: ReportDailyTransitBrief.fromJson(
+        _readMap(json, 'daily_transit'),
+      ),
+    );
+  }
+}
+
+class ReportDailyTransitBrief {
+  const ReportDailyTransitBrief({
+    required this.version,
+    required this.asOfLocalIso,
+    required this.timezone,
+    required this.cards,
+  });
+
+  final String version;
+  final String asOfLocalIso;
+  final String timezone;
+  final List<ReportDailyTransitCard> cards;
+
+  factory ReportDailyTransitBrief.fromJson(Map<String, dynamic> json) {
+    final cardsRaw = json['cards'];
+    if (cardsRaw is! List) {
+      throw const FormatException('Field "daily_transit.cards" must be a list');
+    }
+    return ReportDailyTransitBrief(
+      version: _readString(json, 'version'),
+      asOfLocalIso: _readString(json, 'as_of_local_iso'),
+      timezone: _readString(json, 'timezone'),
+      cards: cardsRaw
+          .map(
+            (Object? raw) => ReportDailyTransitCard.fromJson(
+              _asMap(raw, 'daily_transit.cards[]'),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class ReportDailyTransitCard {
+  const ReportDailyTransitCard({
+    required this.cardId,
+    required this.transitGrahaKey,
+    required this.transitHouseFromLagna,
+    required this.transitRashi,
+    required this.focusTag,
+    required this.title,
+    required this.summary,
+    required this.doItems,
+    required this.watchItems,
+  });
+
+  final String cardId;
+  final String transitGrahaKey;
+  final int transitHouseFromLagna;
+  final String transitRashi;
+  final String focusTag;
+  final ReportLocalizedText title;
+  final ReportLocalizedText summary;
+  final List<ReportLocalizedText> doItems;
+  final List<ReportLocalizedText> watchItems;
+
+  factory ReportDailyTransitCard.fromJson(Map<String, dynamic> json) {
+    final doItemsRaw = json['do_items'];
+    if (doItemsRaw is! List) {
+      throw const FormatException('Field "do_items" must be a list');
+    }
+    final watchItemsRaw = json['watch_items'];
+    if (watchItemsRaw is! List) {
+      throw const FormatException('Field "watch_items" must be a list');
+    }
+    return ReportDailyTransitCard(
+      cardId: _readString(json, 'card_id'),
+      transitGrahaKey: _readString(json, 'transit_graha_key'),
+      transitHouseFromLagna: _readInt(json, 'transit_house_from_lagna'),
+      transitRashi: _readString(json, 'transit_rashi'),
+      focusTag: _readString(json, 'focus_tag'),
+      title: ReportLocalizedText.fromJson(_readMap(json, 'title')),
+      summary: ReportLocalizedText.fromJson(_readMap(json, 'summary')),
+      doItems: doItemsRaw
+          .map(
+            (Object? raw) => ReportLocalizedText.fromJson(
+              _asMap(raw, 'daily_transit.cards[].do_items[]'),
+            ),
+          )
+          .toList(growable: false),
+      watchItems: watchItemsRaw
+          .map(
+            (Object? raw) => ReportLocalizedText.fromJson(
+              _asMap(raw, 'daily_transit.cards[].watch_items[]'),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class ReportInterpretations {
+  const ReportInterpretations({
+    required this.version,
+    required this.cards,
+  });
+
+  final String version;
+  final List<ReportInterpretationCard> cards;
+
+  factory ReportInterpretations.fromJson(Map<String, dynamic> json) {
+    final cardsRaw = json['cards'];
+    if (cardsRaw is! List) {
+      throw const FormatException('Field "cards" must be a list');
+    }
+    return ReportInterpretations(
+      version: _readString(json, 'version'),
+      cards: cardsRaw
+          .map(
+            (Object? raw) => ReportInterpretationCard.fromJson(
+              _asMap(raw, 'interpretations.cards[]'),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class ReportInterpretationCard {
+  const ReportInterpretationCard({
+    required this.cardId,
+    required this.category,
+    required this.confidence,
+    required this.strengthScore,
+    required this.title,
+    required this.summary,
+    required this.impact,
+    required this.evidence,
+  });
+
+  final String cardId;
+  final String category;
+  final String confidence;
+  final double strengthScore;
+  final ReportLocalizedText title;
+  final ReportLocalizedText summary;
+  final ReportLocalizedText impact;
+  final List<ReportLocalizedText> evidence;
+
+  factory ReportInterpretationCard.fromJson(Map<String, dynamic> json) {
+    final evidenceRaw = json['evidence'];
+    if (evidenceRaw is! List) {
+      throw const FormatException('Field "evidence" must be a list');
+    }
+    return ReportInterpretationCard(
+      cardId: _readString(json, 'card_id'),
+      category: _readString(json, 'category'),
+      confidence: _readString(json, 'confidence'),
+      strengthScore: _readDouble(json, 'strength_score'),
+      title: ReportLocalizedText.fromJson(_readMap(json, 'title')),
+      summary: ReportLocalizedText.fromJson(_readMap(json, 'summary')),
+      impact: ReportLocalizedText.fromJson(_readMap(json, 'impact')),
+      evidence: evidenceRaw
+          .map(
+            (Object? raw) => ReportLocalizedText.fromJson(
+              _asMap(raw, 'interpretations.cards[].evidence[]'),
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+}
+
+class ReportLocalizedText {
+  const ReportLocalizedText({
+    required this.english,
+    required this.vedic,
+  });
+
+  final String english;
+  final String vedic;
+
+  factory ReportLocalizedText.fromJson(Map<String, dynamic> json) {
+    return ReportLocalizedText(
+      english: _readString(json, 'english'),
+      vedic: _readString(json, 'vedic'),
     );
   }
 }

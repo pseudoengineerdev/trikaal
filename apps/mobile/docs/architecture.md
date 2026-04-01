@@ -28,6 +28,11 @@ Path map:
   - Screen composition and input handling
 - `lib/features/charts/presentation/widgets/*`
   - Reusable UI blocks for result and state rendering
+  - Includes Detailed Kundli sections (graha table, house placements, dignity)
+  - Includes tap-to-expand graha deep-view drawer from the graha table
+  - Includes explainable Interpretation cards (what + why + impact)
+  - Includes interpretation card detail drawer with dasha-tied action guidance
+  - Includes Daily Transit Brief cards (focus, summary, do/watch actions)
 
 ## Saved Profiles Flow
 

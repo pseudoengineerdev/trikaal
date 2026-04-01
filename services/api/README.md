@@ -97,6 +97,59 @@ Response shape (trimmed):
     "maha_timeline": [],
     "antar_timeline_current_maha": []
   },
+  "interpretations": {
+    "version": "v1",
+    "cards": [
+      {
+        "card_id": "yoga_budha_aditya",
+        "category": "yoga",
+        "confidence": "high",
+        "strength_score": 0.86,
+        "title": {
+          "english": "Budha-Aditya Yoga pattern detected",
+          "vedic": "Budha-Aditya yoga pattern detected"
+        },
+        "summary": {
+          "english": "Sun and Mercury are in the same house.",
+          "vedic": "Surya and Budha are in the same bhava."
+        },
+        "impact": {
+          "english": "This can support clear expression and planning.",
+          "vedic": "This can support buddhi and articulate speech."
+        },
+        "evidence": [
+          {
+            "english": "Sun and Mercury both occupy H10.",
+            "vedic": "Surya and Budha both occupy 10th Bhava."
+          }
+        ]
+      }
+    ]
+  },
+  "daily_transit": {
+    "version": "v1",
+    "as_of_local_iso": "2026-04-01T09:15+05:30",
+    "timezone": "Asia/Kolkata",
+    "cards": [
+      {
+        "card_id": "daily_transit_moon",
+        "transit_graha_key": "moon",
+        "transit_house_from_lagna": 6,
+        "transit_rashi": "Kumb",
+        "focus_tag": "Emotions",
+        "title": {
+          "english": "Transit Moon focus for today",
+          "vedic": "Daily Chandra transit focus"
+        },
+        "summary": {
+          "english": "Transit Moon is in H6 today.",
+          "vedic": "Transit Chandra is in 6th Bhava today."
+        },
+        "do_items": [{ "english": "Review emotional decisions after one day.", "vedic": "Review emotional decisions after one day." }],
+        "watch_items": [{ "english": "Avoid overreaction to temporary mood shifts.", "vedic": "Avoid overreaction to temporary mood shifts." }]
+      }
+    ]
+  },
   "snapshot": {
     "meta": {
       "status": "computed"
