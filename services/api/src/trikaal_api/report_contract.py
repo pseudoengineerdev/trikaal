@@ -316,6 +316,41 @@ class InterpretationsContract(StrictModel):
     cards: list[InterpretationCardContract]
 
 
+class DailyTransitCardContract(StrictModel):
+    card_id: str
+    transit_graha_key: str
+    transit_house_from_lagna: int
+    transit_rashi: str
+    focus_tag: str
+    title: LocalizedTextContract
+    summary: LocalizedTextContract
+    do_items: list[LocalizedTextContract]
+    watch_items: list[LocalizedTextContract]
+
+    @model_validator(mode="after")
+    def validate_transit_card(self) -> Self:
+        if not (1 <= self.transit_house_from_lagna <= 12):
+            raise ValueError("transit_house_from_lagna must be between 1 and 12")
+        if not self.do_items:
+            raise ValueError("do_items must contain at least one line")
+        if not self.watch_items:
+            raise ValueError("watch_items must contain at least one line")
+        return self
+
+
+class DailyTransitBriefContract(StrictModel):
+    version: str
+    as_of_local_iso: str
+    timezone: str
+    cards: list[DailyTransitCardContract]
+
+    @model_validator(mode="after")
+    def validate_brief(self) -> Self:
+        if not self.cards:
+            raise ValueError("cards must contain at least one transit card")
+        return self
+
+
 class ComputeReportResponseContract(StrictModel):
     profile: ProfileContract
     normalized_input: NormalizedInputContract
@@ -323,3 +358,4 @@ class ComputeReportResponseContract(StrictModel):
     snapshot: SnapshotContract
     dasha: DashaContract
     interpretations: InterpretationsContract
+    daily_transit: DailyTransitBriefContract

@@ -19,6 +19,9 @@ void main() {
       expect(parsed.interpretations.cards, isNotEmpty);
       expect(parsed.interpretations.cards.first.title.english, isNotEmpty);
       expect(parsed.interpretations.cards.first.title.vedic, isNotEmpty);
+      expect(parsed.dailyTransit.version, 'v1');
+      expect(parsed.dailyTransit.cards, isNotEmpty);
+      expect(parsed.dailyTransit.cards.first.focusTag, 'Emotions');
     });
 
     test('fromJson throws when a required report field is missing', () {
@@ -131,6 +134,12 @@ Map<String, dynamic> _sampleReportJson() {
     'interpretations': <String, dynamic>{
       'version': 'v1',
       'cards': _sampleInterpretationCards(),
+    },
+    'daily_transit': <String, dynamic>{
+      'version': 'v1',
+      'as_of_local_iso': '2026-04-01T09:15+05:30',
+      'timezone': 'Asia/Kolkata',
+      'cards': _sampleDailyTransitCards(),
     },
   };
 }
@@ -304,6 +313,38 @@ List<Map<String, dynamic>> _sampleInterpretationCards() {
         <String, dynamic>{
           'english': 'Sun and Mercury both occupy H10.',
           'vedic': 'Surya and Budha both occupy 10th Bhava.',
+        },
+      ],
+    },
+  ];
+}
+
+List<Map<String, dynamic>> _sampleDailyTransitCards() {
+  return <Map<String, dynamic>>[
+    <String, dynamic>{
+      'card_id': 'daily_transit_moon',
+      'transit_graha_key': 'moon',
+      'transit_house_from_lagna': 6,
+      'transit_rashi': 'Kumb',
+      'focus_tag': 'Emotions',
+      'title': <String, dynamic>{
+        'english': 'Transit Moon focus for today',
+        'vedic': 'Daily Chandra transit focus',
+      },
+      'summary': <String, dynamic>{
+        'english': 'Transit Moon is in H6 today.',
+        'vedic': 'Transit Chandra is in 6th Bhava today.',
+      },
+      'do_items': <Map<String, dynamic>>[
+        <String, dynamic>{
+          'english': 'Review emotional decisions after one day.',
+          'vedic': 'Review emotional decisions after one day.',
+        },
+      ],
+      'watch_items': <Map<String, dynamic>>[
+        <String, dynamic>{
+          'english': 'Avoid overreaction to temporary mood shifts.',
+          'vedic': 'Avoid overreaction to temporary mood shifts.',
         },
       ],
     },

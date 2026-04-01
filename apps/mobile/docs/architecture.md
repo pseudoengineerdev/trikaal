@@ -32,6 +32,7 @@ Path map:
   - Includes tap-to-expand graha deep-view drawer from the graha table
   - Includes explainable Interpretation cards (what + why + impact)
   - Includes interpretation card detail drawer with dasha-tied action guidance
+  - Includes Daily Transit Brief cards (focus, summary, do/watch actions)
 
 ## Saved Profiles Flow
 

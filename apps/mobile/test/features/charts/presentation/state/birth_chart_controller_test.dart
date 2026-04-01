@@ -569,5 +569,39 @@ ComputeReportResponse _sampleComputeReportResponse() {
         ),
       ],
     ),
+    dailyTransit: ReportDailyTransitBrief(
+      version: 'v1',
+      asOfLocalIso: '2026-04-01T09:15+05:30',
+      timezone: 'Asia/Kolkata',
+      cards: <ReportDailyTransitCard>[
+        ReportDailyTransitCard(
+          cardId: 'daily_transit_moon',
+          transitGrahaKey: 'moon',
+          transitHouseFromLagna: 6,
+          transitRashi: 'Kumb',
+          focusTag: 'Emotions',
+          title: ReportLocalizedText(
+            english: 'Transit Moon focus for today',
+            vedic: 'Daily Chandra transit focus',
+          ),
+          summary: ReportLocalizedText(
+            english: 'Transit Moon is in H6 today.',
+            vedic: 'Transit Chandra is in 6th Bhava today.',
+          ),
+          doItems: <ReportLocalizedText>[
+            ReportLocalizedText(
+              english: 'Review emotional decisions after one day.',
+              vedic: 'Review emotional decisions after one day.',
+            ),
+          ],
+          watchItems: <ReportLocalizedText>[
+            ReportLocalizedText(
+              english: 'Avoid overreaction to temporary mood shifts.',
+              vedic: 'Avoid overreaction to temporary mood shifts.',
+            ),
+          ],
+        ),
+      ],
+    ),
   );
 }

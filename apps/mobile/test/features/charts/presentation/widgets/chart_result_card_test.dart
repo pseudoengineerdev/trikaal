@@ -95,6 +95,32 @@ void main() {
     expect(find.text('78.0300°'), findsOneWidget);
   });
 
+  testWidgets('daily transit brief renders cards with action guidance',
+      (WidgetTester tester) async {
+    final report = _sampleReport();
+    final termsState = AstrologyTermsState();
+    addTearDown(termsState.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ChartResultCard(
+              result: report,
+              mode: TerminologyMode.english,
+              termsState: termsState,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Daily Transit Brief'), findsOneWidget);
+    expect(find.text('Transit Moon focus for today'), findsOneWidget);
+    expect(find.text('Do today'), findsOneWidget);
+    expect(find.text('Watch today'), findsOneWidget);
+  });
+
   testWidgets('tapping interpretation card opens practical guidance drawer',
       (WidgetTester tester) async {
     final report = _sampleReport();
@@ -226,6 +252,12 @@ ComputeReportResponse _sampleReport() {
     'interpretations': <String, dynamic>{
       'version': 'v1',
       'cards': _sampleInterpretationCards(),
+    },
+    'daily_transit': <String, dynamic>{
+      'version': 'v1',
+      'as_of_local_iso': '2026-04-01T09:15+05:30',
+      'timezone': 'Asia/Kolkata',
+      'cards': _sampleDailyTransitCards(),
     },
   });
 }
@@ -400,6 +432,38 @@ List<Map<String, dynamic>> _sampleInterpretationCards() {
         <String, dynamic>{
           'english': 'Sun and Mercury both occupy H10.',
           'vedic': 'Surya and Budha both occupy 10th Bhava.',
+        },
+      ],
+    },
+  ];
+}
+
+List<Map<String, dynamic>> _sampleDailyTransitCards() {
+  return <Map<String, dynamic>>[
+    <String, dynamic>{
+      'card_id': 'daily_transit_moon',
+      'transit_graha_key': 'moon',
+      'transit_house_from_lagna': 6,
+      'transit_rashi': 'Kumb',
+      'focus_tag': 'Emotions',
+      'title': <String, dynamic>{
+        'english': 'Transit Moon focus for today',
+        'vedic': 'Daily Chandra transit focus',
+      },
+      'summary': <String, dynamic>{
+        'english': 'Transit Moon is in H6 today.',
+        'vedic': 'Transit Chandra is in 6th Bhava today.',
+      },
+      'do_items': <Map<String, dynamic>>[
+        <String, dynamic>{
+          'english': 'Review emotional decisions after one day.',
+          'vedic': 'Review emotional decisions after one day.',
+        },
+      ],
+      'watch_items': <Map<String, dynamic>>[
+        <String, dynamic>{
+          'english': 'Avoid overreaction to temporary mood shifts.',
+          'vedic': 'Avoid overreaction to temporary mood shifts.',
         },
       ],
     },

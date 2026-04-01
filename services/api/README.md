@@ -126,6 +126,30 @@ Response shape (trimmed):
       }
     ]
   },
+  "daily_transit": {
+    "version": "v1",
+    "as_of_local_iso": "2026-04-01T09:15+05:30",
+    "timezone": "Asia/Kolkata",
+    "cards": [
+      {
+        "card_id": "daily_transit_moon",
+        "transit_graha_key": "moon",
+        "transit_house_from_lagna": 6,
+        "transit_rashi": "Kumb",
+        "focus_tag": "Emotions",
+        "title": {
+          "english": "Transit Moon focus for today",
+          "vedic": "Daily Chandra transit focus"
+        },
+        "summary": {
+          "english": "Transit Moon is in H6 today.",
+          "vedic": "Transit Chandra is in 6th Bhava today."
+        },
+        "do_items": [{ "english": "Review emotional decisions after one day.", "vedic": "Review emotional decisions after one day." }],
+        "watch_items": [{ "english": "Avoid overreaction to temporary mood shifts.", "vedic": "Avoid overreaction to temporary mood shifts." }]
+      }
+    ]
+  },
   "snapshot": {
     "meta": {
       "status": "computed"

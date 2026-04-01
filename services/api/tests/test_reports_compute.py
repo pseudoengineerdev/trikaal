@@ -39,6 +39,13 @@ def test_reports_compute_returns_chart_and_dasha_in_one_response() -> None:
     assert "vedic" in first_card["title"]
     assert "english" in first_card["impact"]
     assert first_card["evidence"]
+    transit = payload["daily_transit"]
+    assert transit["version"] == "v1"
+    assert transit["timezone"] == "Asia/Kolkata"
+    assert transit["cards"]
+    assert len(transit["cards"]) == 3
+    assert all("do_items" in card for card in transit["cards"])
+    assert all("watch_items" in card for card in transit["cards"])
 
 
 def test_reports_compute_returns_not_found_for_unknown_place() -> None:
@@ -80,3 +87,4 @@ def test_reports_compute_accepts_custom_place_payload() -> None:
     assert payload["snapshot"]["meta"]["status"] == "computed"
     assert payload["dasha"]["system"] == "Vimshottari"
     assert payload["interpretations"]["version"] == "v1"
+    assert payload["daily_transit"]["version"] == "v1"

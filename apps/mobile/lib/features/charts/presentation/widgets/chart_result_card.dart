@@ -92,6 +92,17 @@ class ChartResultCard extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         _SectionCard(
+          title: 'Daily Transit Brief',
+          children: <Widget>[
+            _DailyTransitSection(
+              dailyTransit: result.dailyTransit,
+              mode: mode,
+              termsState: termsState,
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _SectionCard(
           title: 'Panchanga',
           children: <Widget>[
             _PanchangaSection(
@@ -152,6 +163,136 @@ class ChartResultCard extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _DailyTransitSection extends StatelessWidget {
+  const _DailyTransitSection({
+    required this.dailyTransit,
+    required this.mode,
+    required this.termsState,
+  });
+
+  final ReportDailyTransitBrief dailyTransit;
+  final TerminologyMode mode;
+  final AstrologyTermsState termsState;
+
+  @override
+  Widget build(BuildContext context) {
+    if (dailyTransit.cards.isEmpty) {
+      return const Text('No daily transit brief available yet.');
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'As of ${dailyTransit.asOfLocalIso} (${dailyTransit.timezone})',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 8),
+        for (final ReportDailyTransitCard card in dailyTransit.cards)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _DailyTransitCardTile(
+              card: card,
+              mode: mode,
+              termsState: termsState,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DailyTransitCardTile extends StatelessWidget {
+  const _DailyTransitCardTile({
+    required this.card,
+    required this.mode,
+    required this.termsState,
+  });
+
+  final ReportDailyTransitCard card;
+  final TerminologyMode mode;
+  final AstrologyTermsState termsState;
+
+  @override
+  Widget build(BuildContext context) {
+    final grahaLabel =
+        localizeGraha(card.transitGrahaKey, mode, termsState: termsState);
+    final rashiLabel =
+        localizeRashi(card.transitRashi, mode, termsState: termsState);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                Text(
+                  _localizedTextForMode(card.title, mode),
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                _SimpleTagChip(label: card.focusTag),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '$grahaLabel in H${card.transitHouseFromLagna} • $rashiLabel',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(_localizedTextForMode(card.summary, mode)),
+            const SizedBox(height: 10),
+            Text(
+              'Do today',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            ...card.doItems.map(
+              (ReportLocalizedText line) => Padding(
+                padding: const EdgeInsets.only(bottom: 3),
+                child: Text('• ${_localizedTextForMode(line, mode)}'),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Watch today',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            ...card.watchItems.map(
+              (ReportLocalizedText line) => Padding(
+                padding: const EdgeInsets.only(bottom: 3),
+                child: Text('• ${_localizedTextForMode(line, mode)}'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -606,6 +747,35 @@ class _ConfidenceChip extends StatelessWidget {
           label,
           style: TextStyle(
             color: foreground,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SimpleTagChip extends StatelessWidget {
+  const _SimpleTagChip({
+    required this.label,
+  });
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 12,
             fontWeight: FontWeight.w600,
           ),
