@@ -9,10 +9,12 @@ import 'widgets/chart_state_widgets.dart';
 class BirthInputPage extends StatefulWidget {
   const BirthInputPage({
     required this.birthInputState,
+    required this.onOpenDashaTab,
     super.key,
   });
 
   final BirthInputState birthInputState;
+  final VoidCallback onOpenDashaTab;
 
   @override
   State<BirthInputPage> createState() => _BirthInputPageState();
@@ -167,6 +169,8 @@ class _BirthInputPageState extends State<BirthInputPage> {
                     const EmptyResultHint(),
                   ] else if (_controller.result != null) ...<Widget>[
                     ChartResultCard(result: _controller.result!),
+                    const SizedBox(height: 12),
+                    _DashaHandoffCard(onOpenDashaTab: widget.onOpenDashaTab),
                   ],
                 ],
               ),
@@ -285,4 +289,34 @@ class _BirthInputPageState extends State<BirthInputPage> {
   }
 
   String _two(int value) => value.toString().padLeft(2, '0');
+}
+
+class _DashaHandoffCard extends StatelessWidget {
+  const _DashaHandoffCard({required this.onOpenDashaTab});
+
+  final VoidCallback onOpenDashaTab;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: <Widget>[
+          const Expanded(
+            child: Text('Use these birth inputs to compute Dasha now.'),
+          ),
+          const SizedBox(width: 8),
+          FilledButton.tonal(
+            onPressed: onOpenDashaTab,
+            child: const Text('Open Dasha'),
+          ),
+        ],
+      ),
+    );
+  }
 }
