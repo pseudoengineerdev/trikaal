@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../data/models/place_search_models.dart';
@@ -12,11 +13,13 @@ class BirthInputPage extends StatefulWidget {
   const BirthInputPage({
     required this.birthInputState,
     required this.terminologyModeState,
+    required this.astrologyTermsState,
     super.key,
   });
 
   final BirthInputState birthInputState;
   final TerminologyModeState terminologyModeState;
+  final AstrologyTermsState astrologyTermsState;
 
   @override
   State<BirthInputPage> createState() => _BirthInputPageState();
@@ -75,6 +78,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
         animation: Listenable.merge(<Listenable>[
           _controller,
           widget.terminologyModeState,
+          widget.astrologyTermsState,
         ]),
         builder: (BuildContext context, Widget? _) {
           return SafeArea(
@@ -186,6 +190,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
                     ChartResultCard(
                       result: _controller.result!,
                       mode: widget.terminologyModeState.mode,
+                      termsState: widget.astrologyTermsState,
                     ),
                   ],
                 ],
