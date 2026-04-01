@@ -7,6 +7,10 @@ class DashaSummary {
     required this.currentAntarDasha,
     required this.activeFrom,
     required this.activeUntil,
+    required this.currentMahaStart,
+    required this.currentMahaEnd,
+    required this.mahaTimeline,
+    required this.antarTimelineCurrentMaha,
   });
 
   final String system;
@@ -14,6 +18,10 @@ class DashaSummary {
   final String currentAntarDasha;
   final String activeFrom;
   final String activeUntil;
+  final String currentMahaStart;
+  final String currentMahaEnd;
+  final List<DashaPeriod> mahaTimeline;
+  final List<DashaPeriod> antarTimelineCurrentMaha;
 
   factory DashaSummary.fromJson(Map<String, dynamic> json) {
     return DashaSummary(
@@ -22,6 +30,40 @@ class DashaSummary {
       currentAntarDasha: (json['current_antar_dasha'] as String?) ?? '',
       activeFrom: (json['active_from'] as String?) ?? '',
       activeUntil: (json['active_until'] as String?) ?? '',
+      currentMahaStart: (json['current_maha_start'] as String?) ?? '',
+      currentMahaEnd: (json['current_maha_end'] as String?) ?? '',
+      mahaTimeline: _asList(json['maha_timeline'])
+          .map((Object? item) => DashaPeriod.fromJson(_asMap(item)))
+          .toList(growable: false),
+      antarTimelineCurrentMaha: _asList(json['antar_timeline_current_maha'])
+          .map((Object? item) => DashaPeriod.fromJson(_asMap(item)))
+          .toList(growable: false),
+    );
+  }
+}
+
+class DashaPeriod {
+  const DashaPeriod({
+    required this.lord,
+    required this.lordKey,
+    required this.start,
+    required this.end,
+    required this.active,
+  });
+
+  final String lord;
+  final String lordKey;
+  final String start;
+  final String end;
+  final bool active;
+
+  factory DashaPeriod.fromJson(Map<String, dynamic> json) {
+    return DashaPeriod(
+      lord: (json['lord'] as String?) ?? '',
+      lordKey: (json['lord_key'] as String?) ?? '',
+      start: (json['start'] as String?) ?? '',
+      end: (json['end'] as String?) ?? '',
+      active: (json['active'] as bool?) ?? false,
     );
   }
 }
@@ -80,4 +122,14 @@ Map<String, dynamic> _asMap(Object? raw) {
     return raw.map((key, value) => MapEntry(key.toString(), value));
   }
   return <String, dynamic>{};
+}
+
+List<Object?> _asList(Object? raw) {
+  if (raw is List<Object?>) {
+    return raw;
+  }
+  if (raw is List) {
+    return raw.cast<Object?>();
+  }
+  return const <Object?>[];
 }

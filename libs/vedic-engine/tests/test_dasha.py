@@ -27,6 +27,14 @@ def test_compute_vimshottari_dasha_returns_expected_shape() -> None:
     assert isinstance(result["current_antar_dasha"], str)
     assert isinstance(result["active_from"], str)
     assert isinstance(result["active_until"], str)
+    assert isinstance(result["current_maha_start"], str)
+    assert isinstance(result["current_maha_end"], str)
+    assert isinstance(result["maha_timeline"], list)
+    assert isinstance(result["antar_timeline_current_maha"], list)
+    assert len(result["maha_timeline"]) == 9
+    assert len(result["antar_timeline_current_maha"]) == 9
+    assert any(period["active"] for period in result["maha_timeline"])
+    assert any(period["active"] for period in result["antar_timeline_current_maha"])
 
 
 def test_compute_vimshottari_dasha_is_deterministic_for_fixed_as_of() -> None:

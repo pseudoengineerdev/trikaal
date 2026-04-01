@@ -22,6 +22,12 @@ def test_charts_compute_returns_snapshot_for_simple_birth_input() -> None:
     assert payload["resolved_place"]["place_label"] == "Mumbai, Maharashtra, India"
     assert payload["snapshot"]["meta"]["status"] == "computed"
     assert payload["snapshot"]["vedic"]["sun_rashi"] == "Mitu"
+    assert payload["snapshot"]["varga"]["d1"]["lagna_rashi"] == "Kany"
+    assert payload["snapshot"]["varga"]["d9"]["lagna_rashi"]
+    assert payload["snapshot"]["graha_table"]["sun"]["rashi"] == "Mitu"
+    assert payload["snapshot"]["graha_table"]["sun"]["house"] == 10
+    assert "retrograde" in payload["snapshot"]["graha_table"]["sun"]
+    assert "combust" in payload["snapshot"]["graha_table"]["sun"]
 
 
 def test_charts_compute_returns_not_found_for_unknown_place() -> None:

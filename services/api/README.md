@@ -91,6 +91,18 @@ Response shape (trimmed):
   "snapshot": {
     "meta": {
       "status": "computed"
+    },
+    "varga": {
+      "d1": { "lagna_rashi": "Kany" },
+      "d9": { "lagna_rashi": "Maka" }
+    },
+    "graha_table": {
+      "sun": {
+        "rashi": "Mitu",
+        "house": 10,
+        "retrograde": false,
+        "combust": false
+      }
     }
   }
 }
@@ -157,6 +169,12 @@ curl -X POST "http://127.0.0.1:8000/v1/dasha/compute" \
     "place_of_birth": "Mumbai"
   }'
 ```
+
+Now includes timeline fields:
+
+- `current_maha_start` / `current_maha_end`
+- `maha_timeline` (9 Mahadasha periods)
+- `antar_timeline_current_maha` (9 Antardasha periods inside active Maha)
 
 ## Shared Terminology Contract
 
