@@ -27,6 +27,7 @@ class PlaceNotFoundError(ValueError):
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
 CATALOG_PATH = DATA_DIR / "place_catalog.json"
+ADMIN1_CODES_PATH = DATA_DIR / "admin1CodesASCII.txt"
 DEFAULT_GEONAMES_MIN_CITY_POPULATION = 500
 MAX_ALTERNATE_ALIASES_PER_CITY = 24
 
@@ -188,7 +189,7 @@ def _global_place_catalog() -> list[PlaceRecord]:
     geonames = geonamescache.GeonamesCache(min_city_population=_geonames_min_population())
     cities = geonames.get_cities()
     countries = geonames.get_countries()
-    us_states = geonames.get_us_states()
+    admin1_names = _admin1_name_map()
 
     records: list[PlaceRecord] = []
     for city in cities.values():
@@ -203,7 +204,7 @@ def _global_place_catalog() -> list[PlaceRecord]:
         state_name = _resolve_state_name(
             country_code=country_code,
             admin1_code=admin1_code,
-            us_states=us_states,
+            admin1_names=admin1_names,
         )
         place_label = _build_place_label(
             city_name=city_name,
@@ -354,11 +355,11 @@ def _geonames_min_population() -> int:
 def _resolve_state_name(
     country_code: str,
     admin1_code: str,
-    us_states: dict[str, dict[str, str]],
+    admin1_names: dict[str, str],
 ) -> str | None:
-    if country_code == "US":
-        return us_states.get(admin1_code, {}).get("name")
-    return None
+    if not country_code or not admin1_code:
+        return None
+    return admin1_names.get(f"{country_code}.{admin1_code}")
 
 
 def _build_place_label(
@@ -366,9 +367,26 @@ def _build_place_label(
     state_name: str | None,
     country_name: str,
 ) -> str:
-    if state_name:
+    if state_name and state_name != country_name:
         return f"{city_name}, {state_name}, {country_name}"
     return f"{city_name}, {country_name}"
+
+
+@lru_cache(maxsize=1)
+def _admin1_name_map() -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    for line in ADMIN1_CODES_PATH.read_text(encoding="utf-8").splitlines():
+        if not line:
+            continue
+        columns = line.split("\t")
+        if len(columns) < 2:
+            continue
+        code = columns[0].strip()
+        name = columns[1].strip()
+        if not code or not name:
+            continue
+        mapping[code] = name
+    return mapping
 
 
 @lru_cache(maxsize=None)
