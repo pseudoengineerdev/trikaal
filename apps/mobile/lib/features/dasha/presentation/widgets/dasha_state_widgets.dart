@@ -19,6 +19,9 @@ class DashaEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasAnyInput = dateOfBirth.trim().isNotEmpty ||
+        timeOfBirth.trim().isNotEmpty ||
+        placeOfBirth.trim().isNotEmpty;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -28,8 +31,10 @@ class DashaEmptyState extends StatelessWidget {
             const Text(
               'Compute chart first. Dasha auto-computes from the same birth input.',
             ),
-            const SizedBox(height: 8),
-            Text('Using: $dateOfBirth, $timeOfBirth, $placeOfBirth'),
+            if (hasAnyInput) ...<Widget>[
+              const SizedBox(height: 8),
+              Text('Using: $dateOfBirth, $timeOfBirth, $placeOfBirth'),
+            ],
           ],
         ),
       ),
