@@ -1,0 +1,59 @@
+name: Accuracy Gate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  drik-parity-lock:
+    name: Drik Parity Lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e "libs/reference-fixtures[dev]"
+          python -m pip install -e "libs/vedic-engine[dev]"
+          python -m pip install -e "services/api[dev]"
+
+      - name: Validate fixture schemas
+        run: python -m pytest libs/reference-fixtures/tests
+
+      - name: Run parity tests
+        run: python -m pytest services/api/tests/test_parity.py services/api/tests/test_parity_suite.py
+
+      - name: Enforce strict 100% parity
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+
+          root = Path.cwd()
+          api_src = root / "services" / "api" / "src"
+          if str(api_src) not in sys.path:
+              sys.path.insert(0, str(api_src))
+
+          from trikaal_api.parity import run_drik_parity_suite_check
+
+          result = run_drik_parity_suite_check()
+          print(
+              f"Drik parity suite: fixtures={result.fixture_count}, "
+              f"accuracy={result.accuracy_percent}%"
+          )
+          if not result.all_matched:
+              raise SystemExit(
+                  f"Parity mismatch detected: {result.mismatched_fixture_count} fixture(s) failed."
+              )
+          if result.accuracy_percent != 100.0:
+              raise SystemExit(f"Accuracy gate failed: {result.accuracy_percent}%")
+          PY
