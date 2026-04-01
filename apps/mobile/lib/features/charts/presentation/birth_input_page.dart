@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/state/terminology_mode_state.dart';
 import '../data/models/place_search_models.dart';
+import '../../shared/widgets/terminology_toggle.dart';
 import 'state/birth_chart_controller.dart';
 import 'widgets/chart_result_card.dart';
 import 'widgets/chart_state_widgets.dart';
@@ -9,10 +11,12 @@ import 'widgets/chart_state_widgets.dart';
 class BirthInputPage extends StatefulWidget {
   const BirthInputPage({
     required this.birthInputState,
+    required this.terminologyModeState,
     super.key,
   });
 
   final BirthInputState birthInputState;
+  final TerminologyModeState terminologyModeState;
 
   @override
   State<BirthInputPage> createState() => _BirthInputPageState();
@@ -76,6 +80,11 @@ class _BirthInputPageState extends State<BirthInputPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  TerminologyToggle(
+                    mode: widget.terminologyModeState.mode,
+                    onChanged: widget.terminologyModeState.setMode,
+                  ),
+                  const SizedBox(height: 12),
                   Form(
                     key: _formKey,
                     child: Column(
@@ -171,7 +180,10 @@ class _BirthInputPageState extends State<BirthInputPage> {
                       !_controller.loading) ...<Widget>[
                     const EmptyResultHint(),
                   ] else if (_controller.result != null) ...<Widget>[
-                    ChartResultCard(result: _controller.result!),
+                    ChartResultCard(
+                      result: _controller.result!,
+                      mode: widget.terminologyModeState.mode,
+                    ),
                   ],
                 ],
               ),

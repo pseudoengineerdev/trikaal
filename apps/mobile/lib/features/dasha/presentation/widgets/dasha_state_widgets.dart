@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/state/terminology_mode_state.dart';
 import '../../data/models/dasha_models.dart';
+import '../../../shared/astrology/term_localizer.dart';
 
 class DashaEmptyState extends StatelessWidget {
   const DashaEmptyState({
@@ -86,6 +88,7 @@ class DashaSummaryCard extends StatelessWidget {
     required this.dateOfBirth,
     required this.timeOfBirth,
     required this.placeOfBirth,
+    required this.mode,
     super.key,
   });
 
@@ -93,6 +96,7 @@ class DashaSummaryCard extends StatelessWidget {
   final String dateOfBirth;
   final String timeOfBirth;
   final String placeOfBirth;
+  final TerminologyMode mode;
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +114,8 @@ class DashaSummaryCard extends StatelessWidget {
             const SizedBox(height: 12),
             _row('Birth Input', '$dateOfBirth, $timeOfBirth'),
             _row('Place', placeOfBirth),
-            _row('Maha Dasha', summary.currentMahaDasha),
-            _row('Antar Dasha', summary.currentAntarDasha),
+            _row('Maha Dasha', localizeGraha(summary.currentMahaDasha, mode)),
+            _row('Antar Dasha', localizeGraha(summary.currentAntarDasha, mode)),
             _row('Active From', summary.activeFrom),
             _row('Active Until', summary.activeUntil),
           ],
