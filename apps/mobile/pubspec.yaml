@@ -19,3 +19,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Samarkan
+      fonts:
+        - asset: assets/fonts/SAMAN___.TTF
