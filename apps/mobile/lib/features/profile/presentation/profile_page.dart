@@ -179,45 +179,55 @@ class ProfilePage extends StatelessWidget {
                                     2: FlexColumnWidth(0.34),
                                   },
                                   border: TableBorder(
-                                    horizontalInside: BorderSide(
-                                        color: tableBorderColor, width: 0.8),
                                     verticalInside: BorderSide(
                                         color: tableBorderColor, width: 0.8),
                                   ),
                                   defaultVerticalAlignment:
                                       TableCellVerticalAlignment.middle,
                                   children: chartRows.map((row) {
+                                    final signBottomBorder =
+                                        row.isLastRow || !row.isRashiGroupEnd
+                                            ? BorderSide.none
+                                            : BorderSide(
+                                                color: tableBorderColor,
+                                                width: 0.8,
+                                              );
+                                    final houseBottomBorder =
+                                        row.isLastRow || !row.isHouseGroupEnd
+                                            ? BorderSide.none
+                                            : BorderSide(
+                                                color: tableBorderColor,
+                                                width: 0.8,
+                                              );
                                     return TableRow(
-                                      decoration: BoxDecoration(
-                                        color: row.house.isEven
-                                            ? Colors.white
-                                                .withValues(alpha: 0.02)
-                                            : Colors.transparent,
-                                      ),
                                       children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                            vertical: 6,
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              bottom: signBottomBorder,
+                                            ),
                                           ),
-                                          child: Text(
-                                            row.showRashi
-                                                ? _rashiName(row.rashiCode)
-                                                : '',
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface,
-                                              fontSize: 13.0,
-                                              fontWeight: FontWeight.w500,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 6,
+                                            ),
+                                            child: Text(
+                                              row.showRashi
+                                                  ? _rashiName(row.rashiCode)
+                                                  : '',
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface,
+                                                fontSize: 13.0,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
                                           ),
                                         ),
                                         Container(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .secondaryContainer
-                                              .withValues(alpha: 0.22),
+                                          color: const Color(0xFF10002B),
                                           child: Padding(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 9,
@@ -236,20 +246,29 @@ class ProfilePage extends StatelessWidget {
                                             ),
                                           ),
                                         ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                            vertical: 6,
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              bottom: houseBottomBorder,
+                                            ),
                                           ),
-                                          child: Text(
-                                            '${row.house}',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface,
-                                              fontSize: 13.3,
-                                              fontWeight: FontWeight.w600,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 6,
+                                            ),
+                                            child: Text(
+                                              row.showHouse
+                                                  ? '${row.house}'
+                                                  : '',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface,
+                                                fontSize: 13.3,
+                                                fontWeight: FontWeight.w600,
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -310,18 +329,27 @@ class ProfilePage extends StatelessWidget {
       });
 
     String? previousRashi;
+    int? previousHouse;
     final rows = <_ProfileChartRow>[];
-    for (final entry in entries) {
+    for (var index = 0; index < entries.length; index++) {
+      final entry = entries[index];
+      final nextEntry = index + 1 < entries.length ? entries[index + 1] : null;
       final showRashi = previousRashi != entry.rashi;
+      final showHouse = previousHouse != entry.house;
       rows.add(
         _ProfileChartRow(
           rashiCode: entry.rashi,
           grahaKey: entry.key,
           house: entry.house,
           showRashi: showRashi,
+          showHouse: showHouse,
+          isRashiGroupEnd: nextEntry == null || nextEntry.rashi != entry.rashi,
+          isHouseGroupEnd: nextEntry == null || nextEntry.house != entry.house,
+          isLastRow: nextEntry == null,
         ),
       );
       previousRashi = entry.rashi;
+      previousHouse = entry.house;
     }
     return rows;
   }
@@ -337,12 +365,20 @@ class _ProfileChartRow {
     required this.grahaKey,
     required this.house,
     required this.showRashi,
+    required this.showHouse,
+    required this.isRashiGroupEnd,
+    required this.isHouseGroupEnd,
+    required this.isLastRow,
   });
 
   final String rashiCode;
   final String grahaKey;
   final int house;
   final bool showRashi;
+  final bool showHouse;
+  final bool isRashiGroupEnd;
+  final bool isHouseGroupEnd;
+  final bool isLastRow;
 }
 
 class _ProfileTabBar extends StatelessWidget {
