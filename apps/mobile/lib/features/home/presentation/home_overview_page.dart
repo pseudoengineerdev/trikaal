@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
+import '../../features/presentation/features_grid_page.dart';
 import '../../profile/presentation/profile_page.dart';
 import '../../subscription/presentation/subscription_page.dart';
 import 'astrology/rashi_insights.dart';
@@ -142,6 +143,14 @@ class HomeOverviewPage extends StatelessWidget {
         );
         return;
       case AppDockItem.charts:
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return FeaturesGridPage(birthInputState: birthInputState);
+            },
+          ),
+        );
+        return;
       case AppDockItem.menu:
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()

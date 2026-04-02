@@ -4,6 +4,7 @@ import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
+import '../../features/presentation/features_grid_page.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
 import '../../subscription/presentation/subscription_page.dart';
 
@@ -349,6 +350,14 @@ class ProfilePage extends StatelessWidget {
       case AppDockItem.profile:
         return;
       case AppDockItem.charts:
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return FeaturesGridPage(birthInputState: birthInputState);
+            },
+          ),
+        );
+        return;
       case AppDockItem.menu:
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
