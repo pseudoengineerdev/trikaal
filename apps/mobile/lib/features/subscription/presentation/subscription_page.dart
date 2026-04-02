@@ -4,6 +4,7 @@ import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/chart_api_client.dart';
+import '../../features/presentation/features_grid_page.dart';
 import '../../subscription/data/models/subscription_models.dart';
 import '../../profile/presentation/profile_page.dart';
 
@@ -165,6 +166,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       case AppDockItem.premium:
         return;
       case AppDockItem.charts:
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return FeaturesGridPage(birthInputState: widget.birthInputState);
+            },
+          ),
+        );
+        return;
       case AppDockItem.menu:
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
