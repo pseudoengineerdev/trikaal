@@ -44,7 +44,6 @@ class _HomeShellPageState extends State<HomeShellPage> {
 
         return HomeOverviewPage(
           birthInputState: _birthInputState,
-          onEditBirthMix: _birthInputState.reopenOnboarding,
         );
       },
     );

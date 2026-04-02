@@ -7,12 +7,10 @@ import 'astrology/rashi_insights.dart';
 class HomeOverviewPage extends StatelessWidget {
   const HomeOverviewPage({
     required this.birthInputState,
-    required this.onEditBirthMix,
     super.key,
   });
 
   final BirthInputState birthInputState;
-  final VoidCallback onEditBirthMix;
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +30,6 @@ class HomeOverviewPage extends StatelessWidget {
                   const Text(
                     'We need your birth mix to build your personalized home.',
                     textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 14),
-                  ElevatedButton(
-                    onPressed: onEditBirthMix,
-                    child: const Text('Start Onboarding'),
                   ),
                 ],
               ),
@@ -135,34 +128,6 @@ class HomeOverviewPage extends StatelessWidget {
                         leadingEmoji: '⬆️',
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                _HomeCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        '${sun.name} Signature',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      _MetaRow(label: 'Element', value: sun.element),
-                      _MetaRow(label: 'Modality', value: sun.modality),
-                      _MetaRow(label: 'Polarity', value: sun.polarity),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: onEditBirthMix,
-                    icon: const Icon(Icons.tune_rounded),
-                    label: const Text('Update Birth Inputs'),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -279,42 +244,6 @@ class _SignTraitTile extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _MetaRow extends StatelessWidget {
-  const _MetaRow({
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: <Widget>[
-          SizedBox(
-            width: 90,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
