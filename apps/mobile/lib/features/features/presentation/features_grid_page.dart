@@ -315,6 +315,10 @@ class _FeatureGridCard extends StatelessWidget {
     final isTall = height > 180;
     final colorScheme = Theme.of(context).colorScheme;
     final isBirthChartCard = chartPreviewLines != null;
+    final titleFontSize = isBirthChartCard ? 20.0 : (isTall ? 22.0 : 16.0);
+    final titleLineHeight = isTall ? 1.05 : 1.1;
+    final titleMaxLines = isBirthChartCard ? 2 : (isTall ? 3 : 2);
+    final iconSize = isBirthChartCard ? 30.0 : (isTall ? 34.0 : 24.0);
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
@@ -334,20 +338,23 @@ class _FeatureGridCard extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Icon(
               data.icon,
-              size: isBirthChartCard ? 30 : (isTall ? 34 : 30),
+              size: iconSize,
               color: const Color(0xFFFFE7B3),
             ),
             const SizedBox(height: 6),
             Text(
               data.title,
+              maxLines: titleMaxLines,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: isBirthChartCard ? 20 : (isTall ? 22 : 18),
+                fontSize: titleFontSize,
+                height: titleLineHeight,
                 color: const Color(0xFFFFE7B3),
                 fontWeight: FontWeight.w700,
               ),
