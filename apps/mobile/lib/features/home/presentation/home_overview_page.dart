@@ -215,7 +215,7 @@ class _CurvedDockBar extends StatelessWidget {
               ),
             ),
             Positioned(
-              top: -2,
+              top: 2,
               child: Material(
                 color: colorScheme.primary,
                 shape: const CircleBorder(
@@ -260,14 +260,15 @@ class _CurvedDockClipper extends CustomClipper<Path> {
 
   @override
   Path getClip(Size size) {
-    const cornerRadius = 28.0;
-    const notchRadius = 28.0;
-    const notchDepth = 24.0;
+    const cornerRadius = 32.0;
+    const notchRadius = 30.0;
+    const notchDepth = 30.0;
+    const notchSideInset = 8.0;
 
     final width = size.width;
     final centerX = width / 2;
-    final notchStartX = centerX - notchRadius - 16;
-    final notchEndX = centerX + notchRadius + 16;
+    final notchStartX = centerX - notchRadius - notchSideInset;
+    final notchEndX = centerX + notchRadius + notchSideInset;
 
     final path = Path()
       ..moveTo(0, cornerRadius)
@@ -276,13 +277,13 @@ class _CurvedDockClipper extends CustomClipper<Path> {
       ..cubicTo(
         centerX - notchRadius,
         0,
-        centerX - notchRadius + 2,
+        centerX - notchRadius + 4,
         notchDepth,
         centerX,
         notchDepth,
       )
       ..cubicTo(
-        centerX + notchRadius - 2,
+        centerX + notchRadius - 4,
         notchDepth,
         centerX + notchRadius,
         0,
