@@ -16,7 +16,7 @@ class HomeOverviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final report = birthInputState.computedReport;
     if (report == null) {
-      return Scaffold(
+      return _DockedScaffold(
         appBar: AppBar(title: const Text('Trikaal')),
         body: AstroPageBackground(
           child: Center(
@@ -47,14 +47,14 @@ class HomeOverviewPage extends StatelessWidget {
         ? 'Your Profile'
         : birthInputState.firstName.trim();
 
-    return Scaffold(
+    return _DockedScaffold(
       appBar: AppBar(
         title: const Text('Trikaal'),
       ),
       body: AstroPageBackground(
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -142,6 +142,82 @@ class HomeOverviewPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DockedScaffold extends StatelessWidget {
+  const _DockedScaffold({
+    required this.appBar,
+    required this.body,
+  });
+
+  final PreferredSizeWidget appBar;
+  final Widget body;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Scaffold(
+      appBar: appBar,
+      body: body,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'profile-docked-fab',
+        onPressed: () {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(content: Text('Profile section coming soon.')),
+            );
+        },
+        tooltip: 'Profile',
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        child: const Icon(Icons.person_rounded),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8,
+        color: colorScheme.surface.withValues(alpha: 0.92),
+        child: SizedBox(
+          height: 70,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: const <Widget>[
+              _DockIcon(icon: Icons.auto_awesome_outlined),
+              _DockIcon(icon: Icons.grid_view_rounded),
+              SizedBox(width: 46),
+              _DockIcon(icon: Icons.timeline_rounded),
+              _DockIcon(icon: Icons.menu_rounded),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DockIcon extends StatelessWidget {
+  const _DockIcon({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(content: Text('This tab will be finalized next.')),
+          );
+      },
+      icon: Icon(
+        icon,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
+      tooltip: 'Coming soon',
     );
   }
 }
