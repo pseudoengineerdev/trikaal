@@ -3,26 +3,32 @@ import 'package:flutter/foundation.dart';
 import '../data/saved_profiles_repository.dart';
 import '../models/custom_place_payload.dart';
 import '../models/saved_birth_profile.dart';
+import '../../features/charts/data/models/compute_report_models.dart';
 import '../../features/dasha/data/models/dasha_models.dart';
 
 class BirthInputState extends ChangeNotifier {
   BirthInputState({
+    String firstName = '',
     String dateOfBirth = '',
     String timeOfBirth = '',
     String placeOfBirth = '',
     SavedProfilesRepository? profilesRepository,
-  })  : _dateOfBirth = dateOfBirth,
+  })  : _firstName = firstName,
+        _dateOfBirth = dateOfBirth,
         _timeOfBirth = timeOfBirth,
         _placeOfBirth = placeOfBirth,
         _profilesRepository =
             profilesRepository ?? SharedPreferencesSavedProfilesRepository();
 
+  String _firstName;
   String _dateOfBirth;
   String _timeOfBirth;
   String _placeOfBirth;
   CustomPlacePayload? _customPlace;
   bool _hasComputedChart = false;
   DashaSummary? _computedDasha;
+  ComputeReportResponse? _computedReport;
+  bool _onboardingCompleted = false;
   final SavedProfilesRepository _profilesRepository;
   List<SavedBirthProfile> _savedProfiles = <SavedBirthProfile>[];
   String? _activeProfileId;
@@ -30,12 +36,15 @@ class BirthInputState extends ChangeNotifier {
   bool _profilesLoading = false;
   String? _profilesError;
 
+  String get firstName => _firstName;
   String get dateOfBirth => _dateOfBirth;
   String get timeOfBirth => _timeOfBirth;
   String get placeOfBirth => _placeOfBirth;
   CustomPlacePayload? get customPlace => _customPlace;
   bool get hasComputedChart => _hasComputedChart;
   DashaSummary? get computedDasha => _computedDasha;
+  ComputeReportResponse? get computedReport => _computedReport;
+  bool get onboardingCompleted => _onboardingCompleted;
   List<SavedBirthProfile> get savedProfiles =>
       List<SavedBirthProfile>.unmodifiable(_savedProfiles);
   String? get activeProfileId => _activeProfileId;
@@ -47,62 +56,120 @@ class BirthInputState extends ChangeNotifier {
       _timeOfBirth.trim().isNotEmpty &&
       _placeOfBirth.trim().isNotEmpty;
 
-  void updateDateOfBirth(String value) {
+  void updateFirstName(String value, {bool clearComputed = true}) {
+    if (_firstName == value) {
+      return;
+    }
+    _firstName = value;
+    if (clearComputed) {
+      _clearComputedState();
+      _onboardingCompleted = false;
+    }
+    notifyListeners();
+  }
+
+  void updateDateOfBirth(String value, {bool clearComputed = true}) {
     if (_dateOfBirth == value) {
       return;
     }
     _dateOfBirth = value;
     _activeProfileId = null;
-    _clearComputedState();
+    if (clearComputed) {
+      _clearComputedState();
+      _onboardingCompleted = false;
+    }
     notifyListeners();
   }
 
-  void updateTimeOfBirth(String value) {
+  void updateTimeOfBirth(String value, {bool clearComputed = true}) {
     if (_timeOfBirth == value) {
       return;
     }
     _timeOfBirth = value;
     _activeProfileId = null;
-    _clearComputedState();
+    if (clearComputed) {
+      _clearComputedState();
+      _onboardingCompleted = false;
+    }
     notifyListeners();
   }
 
-  void updatePlaceOfBirth(String value) {
+  void updatePlaceOfBirth(String value, {bool clearComputed = true}) {
     if (_placeOfBirth == value) {
       return;
     }
     _placeOfBirth = value;
     _customPlace = null;
     _activeProfileId = null;
-    _clearComputedState();
+    if (clearComputed) {
+      _clearComputedState();
+      _onboardingCompleted = false;
+    }
     notifyListeners();
   }
 
   void setResolvedPlace(
     CustomPlacePayload place, {
     bool preserveActiveProfile = false,
+    bool clearComputed = true,
   }) {
     _placeOfBirth = place.placeLabel;
     _customPlace = place;
     if (!preserveActiveProfile) {
       _activeProfileId = null;
     }
-    _clearComputedState();
+    if (clearComputed) {
+      _clearComputedState();
+      _onboardingCompleted = false;
+    }
     notifyListeners();
   }
 
-  void markChartComputed({DashaSummary? dashaSummary}) {
+  void markChartComputed({
+    DashaSummary? dashaSummary,
+    ComputeReportResponse? report,
+  }) {
     _hasComputedChart = true;
     _computedDasha = dashaSummary;
+    if (report != null) {
+      _computedReport = report;
+    }
+    notifyListeners();
+  }
+
+  void markReportComputed(ComputeReportResponse report) {
+    _hasComputedChart = true;
+    _computedReport = report;
+    _computedDasha = report.dasha;
+    notifyListeners();
+  }
+
+  void completeOnboarding() {
+    if (_onboardingCompleted) {
+      return;
+    }
+    _onboardingCompleted = true;
+    notifyListeners();
+  }
+
+  void reopenOnboarding() {
+    if (!_onboardingCompleted) {
+      return;
+    }
+    _onboardingCompleted = false;
     notifyListeners();
   }
 
   void clearComputedChart() {
-    if (!_hasComputedChart && _computedDasha == null) {
+    if (!_hasComputedChart &&
+        _computedDasha == null &&
+        _computedReport == null) {
       return;
     }
     _hasComputedChart = false;
     _computedDasha = null;
+    _computedReport = null;
+    _onboardingCompleted = false;
     notifyListeners();
   }
 
@@ -286,6 +353,7 @@ class BirthInputState extends ChangeNotifier {
   }
 
   void _applyProfile(SavedBirthProfile profile, {bool notify = true}) {
+    _firstName = profile.name;
     _dateOfBirth = profile.dateOfBirth;
     _timeOfBirth = profile.timeOfBirth;
     _placeOfBirth = profile.placeOfBirth;
@@ -376,14 +444,17 @@ class BirthInputState extends ChangeNotifier {
   void _clearComputedState() {
     _hasComputedChart = false;
     _computedDasha = null;
+    _computedReport = null;
   }
 
   void _clearCurrentInput() {
+    _firstName = '';
     _dateOfBirth = '';
     _timeOfBirth = '';
     _placeOfBirth = '';
     _customPlace = null;
     _activeProfileId = null;
     _clearComputedState();
+    _onboardingCompleted = false;
   }
 }

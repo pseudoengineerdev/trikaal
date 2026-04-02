@@ -105,6 +105,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
         offset: _placeController.text.length,
       );
       widget.birthInputState.markChartComputed(
+        report: _controller.result,
         dashaSummary: _controller.dashaResult,
       );
       _cacheComputedForActiveProfile();
@@ -390,7 +391,10 @@ class _BirthInputPageState extends State<BirthInputPage> {
       report: cachedReport,
       dasha: cachedDasha,
     );
-    widget.birthInputState.markChartComputed(dashaSummary: cachedDasha);
+    widget.birthInputState.markChartComputed(
+      report: cachedReport,
+      dashaSummary: cachedDasha,
+    );
     return true;
   }
 
