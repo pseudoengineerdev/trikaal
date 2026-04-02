@@ -20,7 +20,17 @@ class HomeOverviewPage extends StatelessWidget {
     final report = birthInputState.computedReport;
     if (report == null) {
       return UniversalDockScaffold(
-        appBar: AppBar(title: const Text('Trikaal')),
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(
+            'Trikaal',
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontFamily: 'Samarkan',
+                  fontSize: 40,
+                  fontWeight: FontWeight.w500,
+                ),
+          ),
+        ),
         activeItem: AppDockItem.home,
         onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
         body: AstroPageBackground(
@@ -54,7 +64,15 @@ class HomeOverviewPage extends StatelessWidget {
 
     return UniversalDockScaffold(
       appBar: AppBar(
-        title: const Text('Trikaal'),
+        centerTitle: true,
+        title: Text(
+          'Trikaal',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontFamily: 'Samarkan',
+                fontSize: 40,
+                fontWeight: FontWeight.w500,
+              ),
+        ),
       ),
       activeItem: AppDockItem.home,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
@@ -68,13 +86,6 @@ class HomeOverviewPage extends StatelessWidget {
                 Text(
                   'Welcome, $displayName',
                   style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${birthInputState.dateOfBirth} • ${birthInputState.timeOfBirth} • ${birthInputState.placeOfBirth}',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
                 ),
                 const SizedBox(height: 18),
                 _HomeCard(
@@ -191,7 +202,10 @@ class _SignPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: const TextStyle(fontWeight: FontWeight.w600),
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
       ),
     );
   }
