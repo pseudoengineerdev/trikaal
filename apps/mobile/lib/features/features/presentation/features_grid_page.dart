@@ -18,62 +18,50 @@ class FeaturesGridPage extends StatelessWidget {
     _FeatureTileData(
       title: 'Tarot Readings',
       icon: Icons.style_rounded,
-      isTall: false,
     ),
     _FeatureTileData(
       title: 'Your Soulmate',
       icon: Icons.favorite_outline_rounded,
-      isTall: false,
     ),
     _FeatureTileData(
       title: 'Meditation',
       icon: Icons.self_improvement_rounded,
-      isTall: true,
     ),
     _FeatureTileData(
       title: 'Birth Chart',
       icon: Icons.donut_large_rounded,
-      isTall: false,
     ),
     _FeatureTileData(
       title: 'Dream Interpretation',
       icon: Icons.bedtime_rounded,
-      isTall: false,
     ),
     _FeatureTileData(
       title: 'Astrocartography',
       icon: Icons.public_rounded,
-      isTall: true,
     ),
     _FeatureTileData(
       title: 'Compatibility',
       icon: Icons.volunteer_activism_rounded,
-      isTall: false,
     ),
     _FeatureTileData(
       title: 'Rising Sign',
       icon: Icons.wb_twilight_rounded,
-      isTall: false,
     ),
     _FeatureTileData(
       title: 'Celebrity Compatibility',
       icon: Icons.people_alt_rounded,
-      isTall: true,
     ),
     _FeatureTileData(
       title: 'Fortune Cookie',
       icon: Icons.cookie_rounded,
-      isTall: false,
     ),
     _FeatureTileData(
       title: 'Druid Horoscope',
       icon: Icons.hub_rounded,
-      isTall: false,
     ),
     _FeatureTileData(
       title: 'Chinese Horoscope',
       icon: Icons.cyclone_rounded,
-      isTall: false,
     ),
   ];
 
@@ -93,6 +81,8 @@ class FeaturesGridPage extends StatelessWidget {
             builder: (BuildContext context, BoxConstraints constraints) {
               const spacing = 12.0;
               final tileWidth = (constraints.maxWidth - 16 - 16 - spacing) / 2;
+              const smallCardHeight = 106.0;
+              const bigCardHeight = (smallCardHeight * 2) + spacing;
               return SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 140),
                 child: Column(
@@ -110,28 +100,12 @@ class FeaturesGridPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-                    Wrap(
+                    ..._buildMosaicSections(
+                      context: context,
+                      tileWidth: tileWidth,
+                      smallCardHeight: smallCardHeight,
+                      bigCardHeight: bigCardHeight,
                       spacing: spacing,
-                      runSpacing: spacing,
-                      children: _featureTiles.map((tile) {
-                        return SizedBox(
-                          width: tileWidth,
-                          child: _FeatureGridCard(
-                            data: tile,
-                            onTap: () {
-                              ScaffoldMessenger.of(context)
-                                ..hideCurrentSnackBar()
-                                ..showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '${tile.title} will be added in the next feature phase.',
-                                    ),
-                                  ),
-                                );
-                            },
-                          ),
-                        );
-                      }).toList(growable: false),
                     ),
                   ],
                 ),
@@ -177,20 +151,111 @@ class FeaturesGridPage extends StatelessWidget {
         return;
     }
   }
+
+  List<Widget> _buildMosaicSections({
+    required BuildContext context,
+    required double tileWidth,
+    required double smallCardHeight,
+    required double bigCardHeight,
+    required double spacing,
+  }) {
+    final sections = <Widget>[];
+    for (var start = 0; start < _featureTiles.length; start += 3) {
+      final chunk = _featureTiles.skip(start).take(3).toList(growable: false);
+      if (chunk.length < 3) {
+        sections.add(
+          Wrap(
+            spacing: spacing,
+            runSpacing: spacing,
+            children: chunk.map((tile) {
+              return SizedBox(
+                width: tileWidth,
+                child: _FeatureGridCard(
+                  data: tile,
+                  height: smallCardHeight,
+                  onTap: () => _showFeatureToast(context, tile.title),
+                ),
+              );
+            }).toList(growable: false),
+          ),
+        );
+        continue;
+      }
+
+      final bigOnLeft = (start ~/ 3).isEven;
+      final bigTile = chunk[0];
+      final topSmallTile = chunk[1];
+      final bottomSmallTile = chunk[2];
+
+      final bigCard = SizedBox(
+        width: tileWidth,
+        child: _FeatureGridCard(
+          data: bigTile,
+          height: bigCardHeight,
+          onTap: () => _showFeatureToast(context, bigTile.title),
+        ),
+      );
+      final stackedSmallCards = SizedBox(
+        width: tileWidth,
+        child: Column(
+          children: <Widget>[
+            _FeatureGridCard(
+              data: topSmallTile,
+              height: smallCardHeight,
+              onTap: () => _showFeatureToast(context, topSmallTile.title),
+            ),
+            SizedBox(height: spacing),
+            _FeatureGridCard(
+              data: bottomSmallTile,
+              height: smallCardHeight,
+              onTap: () => _showFeatureToast(context, bottomSmallTile.title),
+            ),
+          ],
+        ),
+      );
+
+      sections.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            if (bigOnLeft) bigCard else stackedSmallCards,
+            SizedBox(width: spacing),
+            if (bigOnLeft) stackedSmallCards else bigCard,
+          ],
+        ),
+      );
+      if (start + 3 < _featureTiles.length) {
+        sections.add(SizedBox(height: spacing));
+      }
+    }
+    return sections;
+  }
+
+  void _showFeatureToast(BuildContext context, String title) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('$title will be added in the next feature phase.'),
+        ),
+      );
+  }
 }
 
 class _FeatureGridCard extends StatelessWidget {
   const _FeatureGridCard({
     required this.data,
+    required this.height,
     required this.onTap,
   });
 
   final _FeatureTileData data;
+  final double height;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final height = data.isTall ? 168.0 : 110.0;
+    final isTall = height > 180;
     final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       borderRadius: BorderRadius.circular(14),
@@ -202,14 +267,7 @@ class _FeatureGridCard extends StatelessWidget {
           border: Border.all(
             color: colorScheme.outlineVariant.withValues(alpha: 0.55),
           ),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[
-              Color(0xFF532A84),
-              Color(0xFF4B237A),
-            ],
-          ),
+          color: const Color(0xFF3C096C),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.18),
@@ -224,14 +282,14 @@ class _FeatureGridCard extends StatelessWidget {
           children: <Widget>[
             Icon(
               data.icon,
-              size: data.isTall ? 34 : 30,
+              size: isTall ? 34 : 30,
               color: const Color(0xFFFFE7B3),
             ),
             const Spacer(),
             Text(
               data.title,
               style: TextStyle(
-                fontSize: data.isTall ? 24 : 18,
+                fontSize: isTall ? 22 : 18,
                 color: const Color(0xFFFFE7B3),
                 fontWeight: FontWeight.w700,
               ),
@@ -247,10 +305,8 @@ class _FeatureTileData {
   const _FeatureTileData({
     required this.title,
     required this.icon,
-    required this.isTall,
   });
 
   final String title;
   final IconData icon;
-  final bool isTall;
 }
