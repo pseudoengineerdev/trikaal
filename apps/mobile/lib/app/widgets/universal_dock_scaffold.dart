@@ -75,7 +75,7 @@ class UniversalCurvedDockBar extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
                         _DockIcon(
-                          icon: Icons.auto_awesome_outlined,
+                          icon: Icons.home_rounded,
                           isActive: activeItem == AppDockItem.home,
                           onTap: () => onItemSelected(AppDockItem.home),
                         ),
@@ -86,7 +86,7 @@ class UniversalCurvedDockBar extends StatelessWidget {
                         ),
                         const SizedBox(width: 56),
                         _DockIcon(
-                          icon: Icons.timeline_rounded,
+                          icon: Icons.auto_awesome_outlined,
                           isActive: activeItem == AppDockItem.dasha,
                           onTap: () => onItemSelected(AppDockItem.dasha),
                         ),
