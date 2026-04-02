@@ -50,27 +50,36 @@ class _HomeShellPageState extends State<HomeShellPage> {
     ];
 
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _selectedIndex,
         children: pages,
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (int index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        destinations: const <NavigationDestination>[
-          NavigationDestination(
-            icon: Icon(Icons.auto_awesome),
-            label: 'Charts',
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: NavigationBar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (int index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            destinations: const <NavigationDestination>[
+              NavigationDestination(
+                icon: Icon(Icons.auto_awesome_outlined),
+                selectedIcon: Icon(Icons.auto_awesome_rounded),
+                label: 'Charts',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.nightlight_round_outlined),
+                selectedIcon: Icon(Icons.nightlight_round),
+                label: 'Dasha',
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.timelapse),
-            label: 'Dasha',
-          ),
-        ],
+        ),
       ),
     );
   }

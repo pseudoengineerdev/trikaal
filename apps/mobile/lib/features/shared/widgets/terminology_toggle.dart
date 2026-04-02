@@ -20,10 +20,12 @@ class TerminologyToggle extends StatelessWidget {
         segments: const <ButtonSegment<TerminologyMode>>[
           ButtonSegment<TerminologyMode>(
             value: TerminologyMode.vedic,
+            icon: Icon(Icons.auto_awesome_rounded, size: 16),
             label: Text('Vedic'),
           ),
           ButtonSegment<TerminologyMode>(
             value: TerminologyMode.english,
+            icon: Icon(Icons.translate_rounded, size: 16),
             label: Text('English'),
           ),
         ],

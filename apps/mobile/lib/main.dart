@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app/home_shell_page.dart';
+import 'app/theme/trikaal_theme.dart';
 
 void main() {
   runApp(const TrikaalApp());
@@ -14,7 +15,7 @@ class TrikaalApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trikaal',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.orange),
+      theme: TrikaalTheme.light(),
       home: const HomeShellPage(),
     );
   }

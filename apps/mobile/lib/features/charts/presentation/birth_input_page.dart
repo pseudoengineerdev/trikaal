@@ -5,6 +5,7 @@ import '../../../app/models/saved_birth_profile.dart';
 import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
+import '../../../app/widgets/astro_page_background.dart';
 import '../../dasha/data/models/dasha_models.dart';
 import '../data/models/compute_report_models.dart';
 import '../data/models/place_search_models.dart';
@@ -116,7 +117,20 @@ class _BirthInputPageState extends State<BirthInputPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Trikaal Birth Chart')),
+      appBar: AppBar(
+        title: const Text('Trikaal Birth Chart'),
+        actions: const <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 14),
+            child: Center(
+              child: Text(
+                '✨',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           _controller,
@@ -125,133 +139,163 @@ class _BirthInputPageState extends State<BirthInputPage> {
           widget.astrologyTermsState,
         ]),
         builder: (BuildContext context, Widget? _) {
-          return SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  TerminologyToggle(
-                    mode: widget.terminologyModeState.mode,
-                    onChanged: widget.terminologyModeState.setMode,
-                  ),
-                  const SizedBox(height: 12),
-                  _SavedProfilesCard(
-                    profilesLoaded: widget.birthInputState.profilesLoaded,
-                    profilesLoading: widget.birthInputState.profilesLoading,
-                    profilesError: widget.birthInputState.profilesError,
-                    profiles: widget.birthInputState.savedProfiles,
-                    activeProfileId: widget.birthInputState.activeProfileId,
-                    onSaveNew: _onSaveNewProfile,
-                    onUseProfile: _onUseProfile,
-                    onRenameProfile: _onRenameProfile,
-                    onSetDefaultProfile: _onSetDefaultProfile,
-                    onUpdateProfileFromCurrent: _onUpdateProfileFromCurrent,
-                    onDeleteProfile: _onDeleteProfile,
-                  ),
-                  const SizedBox(height: 12),
-                  Form(
-                    key: _formKey,
-                    child: Column(
+          return AstroPageBackground(
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 94),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        TextFormField(
-                          controller: _dateController,
-                          readOnly: true,
-                          enabled: !_controller.loading,
-                          onTap: _pickDate,
-                          decoration: const InputDecoration(
-                            labelText: 'Date of Birth',
-                            hintText: 'YYYY-MM-DD',
-                            suffixIcon: Icon(Icons.calendar_today_outlined),
-                          ),
-                          validator: _validateDate,
+                        const Expanded(child: _AstroIntroCard()),
+                        const SizedBox(width: 10),
+                        TerminologyToggle(
+                          mode: widget.terminologyModeState.mode,
+                          onChanged: widget.terminologyModeState.setMode,
                         ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _timeController,
-                          readOnly: true,
-                          enabled: !_controller.loading,
-                          onTap: _pickTime,
-                          decoration: const InputDecoration(
-                            labelText: 'Time of Birth',
-                            hintText: 'HH:MM',
-                            suffixIcon: Icon(Icons.schedule),
-                          ),
-                          validator: _validateTime,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _placeController,
-                          enabled: !_controller.loading,
-                          decoration: const InputDecoration(
-                            labelText: 'Place of Birth',
-                            hintText: 'Mumbai',
-                          ),
-                          onChanged: (String value) {
-                            widget.birthInputState
-                                .updatePlaceOfBirth(value.trim());
-                            _controller.onPlaceQueryChanged(value);
-                          },
-                          validator: (String? value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Place is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        if (_controller.loadingPlaceSuggestions) ...<Widget>[
-                          const SizedBox(height: 8),
-                          const LinearProgressIndicator(minHeight: 2),
-                        ],
-                        if (_controller
-                            .placeSuggestions.isNotEmpty) ...<Widget>[
-                          const SizedBox(height: 8),
-                          PlaceSuggestionList(
-                            suggestions: _controller.placeSuggestions,
-                            onTap: _onPlaceSelected,
-                          ),
-                        ],
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: _controller.loading ? null : _submit,
-                            child: _controller.loading
-                                ? const SizedBox(
-                                    height: 16,
-                                    width: 16,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2),
-                                  )
-                                : const Text('Compute Chart'),
-                          ),
-                        ),
-                        if (_controller.loading) ...<Widget>[
-                          const SizedBox(height: 10),
-                          const LoadingHint(),
-                        ],
                       ],
                     ),
-                  ),
-                  if (_controller.error != null) ...<Widget>[
                     const SizedBox(height: 12),
-                    ErrorCard(
-                      message: _controller.error!,
-                      onRetry: _controller.loading ? null : _submit,
+                    _SavedProfilesCard(
+                      profilesLoaded: widget.birthInputState.profilesLoaded,
+                      profilesLoading: widget.birthInputState.profilesLoading,
+                      profilesError: widget.birthInputState.profilesError,
+                      profiles: widget.birthInputState.savedProfiles,
+                      activeProfileId: widget.birthInputState.activeProfileId,
+                      onSaveNew: _onSaveNewProfile,
+                      onUseProfile: _onUseProfile,
+                      onRenameProfile: _onRenameProfile,
+                      onSetDefaultProfile: _onSetDefaultProfile,
+                      onUpdateProfileFromCurrent: _onUpdateProfileFromCurrent,
+                      onDeleteProfile: _onDeleteProfile,
                     ),
-                  ],
-                  const SizedBox(height: 20),
-                  if (_controller.result == null &&
-                      !_controller.loading) ...<Widget>[
-                    const EmptyResultHint(),
-                  ] else if (_controller.result != null) ...<Widget>[
-                    ChartResultCard(
-                      result: _controller.result!,
-                      mode: widget.terminologyModeState.mode,
-                      termsState: widget.astrologyTermsState,
+                    const SizedBox(height: 12),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: <Widget>[
+                              TextFormField(
+                                controller: _dateController,
+                                readOnly: true,
+                                enabled: !_controller.loading,
+                                onTap: _pickDate,
+                                decoration: const InputDecoration(
+                                  labelText: 'Date of Birth',
+                                  hintText: 'YYYY-MM-DD',
+                                  suffixIcon:
+                                      Icon(Icons.calendar_today_outlined),
+                                ),
+                                validator: _validateDate,
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _timeController,
+                                readOnly: true,
+                                enabled: !_controller.loading,
+                                onTap: _pickTime,
+                                decoration: const InputDecoration(
+                                  labelText: 'Time of Birth',
+                                  hintText: 'HH:MM',
+                                  suffixIcon: Icon(Icons.schedule),
+                                ),
+                                validator: _validateTime,
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _placeController,
+                                enabled: !_controller.loading,
+                                decoration: const InputDecoration(
+                                  labelText: 'Place of Birth',
+                                  hintText: 'Mumbai',
+                                  prefixIcon: Icon(Icons.public),
+                                ),
+                                onChanged: (String value) {
+                                  widget.birthInputState
+                                      .updatePlaceOfBirth(value.trim());
+                                  _controller.onPlaceQueryChanged(value);
+                                },
+                                validator: (String? value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Place is required';
+                                  }
+                                  return null;
+                                },
+                              ),
+                              if (_controller
+                                  .loadingPlaceSuggestions) ...<Widget>[
+                                const SizedBox(height: 8),
+                                const LinearProgressIndicator(minHeight: 2),
+                              ],
+                              if (_controller
+                                  .placeSuggestions.isNotEmpty) ...<Widget>[
+                                const SizedBox(height: 8),
+                                PlaceSuggestionList(
+                                  suggestions: _controller.placeSuggestions,
+                                  onTap: _onPlaceSelected,
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed:
+                                      _controller.loading ? null : _submit,
+                                  icon: _controller.loading
+                                      ? const SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : const Icon(Icons.auto_awesome_rounded),
+                                  label: Text(
+                                    _controller.loading
+                                        ? 'Computing...'
+                                        : 'Compute Chart',
+                                  ),
+                                ),
+                              ),
+                              if (_controller.loading) ...<Widget>[
+                                const SizedBox(height: 10),
+                                const LoadingHint(),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
+                    if (_controller.error != null) ...<Widget>[
+                      const SizedBox(height: 12),
+                      ErrorCard(
+                        message: _controller.error!,
+                        onRetry: _controller.loading ? null : _submit,
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    if (_controller.result == null &&
+                        !_controller.loading) ...<Widget>[
+                      const EmptyResultHint(),
+                    ] else if (_controller.result != null) ...<Widget>[
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: ChartResultCard(
+                            result: _controller.result!,
+                            mode: widget.terminologyModeState.mode,
+                            termsState: widget.astrologyTermsState,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           );
@@ -672,6 +716,35 @@ class _BirthInputPageState extends State<BirthInputPage> {
   String _two(int value) => value.toString().padLeft(2, '0');
 }
 
+class _AstroIntroCard extends StatelessWidget {
+  const _AstroIntroCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              '🪐 Vedic Insight Workspace',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Enter birth details once, then explore chart, dasha, and guidance in one flow.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _SavedProfilesCard extends StatelessWidget {
   const _SavedProfilesCard({
     required this.profilesLoaded,
@@ -712,7 +785,10 @@ class _SavedProfilesCard extends StatelessWidget {
           children: <Widget>[
             Row(
               children: <Widget>[
-                const Icon(Icons.bookmark_outline),
+                Icon(
+                  Icons.bookmark_outline_rounded,
+                  color: theme.colorScheme.primary,
+                ),
                 const SizedBox(width: 8),
                 const Expanded(
                   child: Text(
@@ -724,7 +800,7 @@ class _SavedProfilesCard extends StatelessWidget {
                   onPressed: () {
                     onSaveNew();
                   },
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(Icons.add_rounded),
                   label: const Text('Save New'),
                 ),
               ],
