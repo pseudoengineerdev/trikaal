@@ -158,7 +158,7 @@ class ProfilePage extends StatelessWidget {
                                     'S\nI\nG\nN\nS',
                                     textAlign: TextAlign.left,
                                     style: TextStyle(
-                                      fontSize: 9.2,
+                                      fontSize: 11.2,
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.onSurfaceVariant,
@@ -289,7 +289,7 @@ class ProfilePage extends StatelessWidget {
                                     'H\nO\nU\nS\nE\nS',
                                     textAlign: TextAlign.right,
                                     style: TextStyle(
-                                      fontSize: 9.2,
+                                      fontSize: 11.2,
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.onSurfaceVariant,
