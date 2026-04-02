@@ -4,6 +4,7 @@ import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../profile/presentation/profile_page.dart';
+import '../../subscription/presentation/subscription_page.dart';
 import 'astrology/rashi_insights.dart';
 
 class HomeOverviewPage extends StatelessWidget {
@@ -130,13 +131,21 @@ class HomeOverviewPage extends StatelessWidget {
         );
         return;
       case AppDockItem.charts:
-      case AppDockItem.dasha:
       case AppDockItem.menu:
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
             const SnackBar(content: Text('This tab will be finalized next.')),
           );
+        return;
+      case AppDockItem.premium:
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return SubscriptionPage(birthInputState: birthInputState);
+            },
+          ),
+        );
         return;
     }
   }

@@ -7,6 +7,7 @@ import '../../../config/app_config.dart';
 import 'models/compute_chart_models.dart';
 import 'models/compute_report_models.dart';
 import 'models/place_search_models.dart';
+import '../../subscription/data/models/subscription_models.dart';
 
 class ChartApiException implements Exception {
   const ChartApiException(this.message, {this.statusCode});
@@ -68,6 +69,16 @@ class ChartApiClient {
     final body = _decode(response.body);
     _throwIfError(response.statusCode, body);
     return PlaceSearchResponse.fromJson(body);
+  }
+
+  Future<SubscriptionPlansResponse> fetchSubscriptionPlans() async {
+    final uri = Uri.parse('$_baseUrl/v1/billing/plans');
+    _logRequest('GET', uri);
+    final response = await _httpClient.get(uri);
+    _logResponse('GET', uri, response.statusCode);
+    final body = _decode(response.body);
+    _throwIfError(response.statusCode, body);
+    return SubscriptionPlansResponse.fromJson(body);
   }
 
   void dispose() {
