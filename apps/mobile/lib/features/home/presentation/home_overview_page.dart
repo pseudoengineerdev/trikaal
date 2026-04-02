@@ -54,7 +54,7 @@ class HomeOverviewPage extends StatelessWidget {
       body: AstroPageBackground(
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 160),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -137,6 +137,7 @@ class HomeOverviewPage extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
+                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -163,15 +164,15 @@ class _DockedScaffold extends StatelessWidget {
       body: body,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
-        width: 62,
-        height: 62,
+        width: 54,
+        height: 54,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.35),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
+              color: Colors.black.withValues(alpha: 0.28),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -186,28 +187,26 @@ class _DockedScaffold extends StatelessWidget {
           },
           tooltip: 'Profile',
           elevation: 0,
-          shape: CircleBorder(
+          shape: const CircleBorder(
             side: BorderSide(
-              color: colorScheme.onPrimary.withValues(alpha: 0.22),
-              width: 1.4,
+              color: Color(0x1FFFFFFF),
+              width: 1.2,
             ),
           ),
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
-          child: const Icon(Icons.person_rounded),
+          child: const Icon(
+            Icons.person_rounded,
+            size: 21,
+          ),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         child: BottomAppBar(
-          shape: const AutomaticNotchedShape(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-            ),
-            CircleBorder(),
-          ),
-          notchMargin: 8,
-          color: colorScheme.surface.withValues(alpha: 0.94),
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 7,
+          color: colorScheme.surface.withValues(alpha: 1),
           elevation: 10,
           child: SizedBox(
             height: 72,
@@ -216,7 +215,7 @@ class _DockedScaffold extends StatelessWidget {
               children: const <Widget>[
                 _DockIcon(icon: Icons.auto_awesome_outlined),
                 _DockIcon(icon: Icons.grid_view_rounded),
-                SizedBox(width: 52),
+                SizedBox(width: 46),
                 _DockIcon(icon: Icons.timeline_rounded),
                 _DockIcon(icon: Icons.menu_rounded),
               ],
