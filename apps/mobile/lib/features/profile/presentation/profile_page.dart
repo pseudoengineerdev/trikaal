@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
 
@@ -56,7 +57,9 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final report = birthInputState.computedReport;
     if (report == null) {
-      return Scaffold(
+      return UniversalDockScaffold(
+        activeItem: AppDockItem.profile,
+        onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
         appBar: AppBar(title: const Text('Profile')),
         body: const AstroPageBackground(
           child: Center(
@@ -80,7 +83,9 @@ class ProfilePage extends StatelessWidget {
       context,
     ).colorScheme.outlineVariant.withValues(alpha: 0.42);
 
-    return Scaffold(
+    return UniversalDockScaffold(
+      activeItem: AppDockItem.profile,
+      onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       appBar: AppBar(title: const Text('Profile')),
       body: AstroPageBackground(
         child: SafeArea(
@@ -312,6 +317,27 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _handleDockItemTap(BuildContext context, AppDockItem item) {
+    switch (item) {
+      case AppDockItem.home:
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+        return;
+      case AppDockItem.profile:
+        return;
+      case AppDockItem.charts:
+      case AppDockItem.dasha:
+      case AppDockItem.menu:
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(content: Text('This tab will be finalized next.')),
+          );
+        return;
+    }
   }
 
   List<_ProfileChartRow> _buildChartRows(ReportGrahaTable table) {
