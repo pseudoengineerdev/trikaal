@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
-import '../../features/presentation/features_grid_page.dart';
-import '../../profile/presentation/profile_page.dart';
-import '../../subscription/presentation/subscription_page.dart';
-import 'astrology/rashi_insights.dart';
+import '../../shared/astrology/sign_trio_insights.dart';
 
 class HomeOverviewPage extends StatelessWidget {
   const HomeOverviewPage({
@@ -55,10 +53,10 @@ class HomeOverviewPage extends StatelessWidget {
       );
     }
 
-    final vedic = report.snapshot.vedic;
-    final sun = rashiInsightFor(vedic.sun.rashi);
-    final moon = rashiInsightFor(vedic.moon.rashi);
-    final rising = rashiInsightFor(vedic.lagna.rashi);
+    final trio = SignTrioInsights.fromReport(report);
+    final sun = trio.sun;
+    final moon = trio.moon;
+    final rising = trio.rising;
     final displayName = birthInputState.firstName.trim().isEmpty
         ? 'Your Profile'
         : birthInputState.firstName.trim();
@@ -130,44 +128,14 @@ class HomeOverviewPage extends StatelessWidget {
   }
 
   void _handleDockItemTap(BuildContext context, AppDockItem item) {
-    switch (item) {
-      case AppDockItem.home:
-        return;
-      case AppDockItem.profile:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return ProfilePage(birthInputState: birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.charts:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return FeaturesGridPage(birthInputState: birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.menu:
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('This tab will be finalized next.')),
-          );
-        return;
-      case AppDockItem.premium:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return SubscriptionPage(birthInputState: birthInputState);
-            },
-          ),
-        );
-        return;
-    }
+    handleAppDockSelection(
+      context: context,
+      tappedItem: item,
+      activeItem: AppDockItem.home,
+      birthInputState: birthInputState,
+      homeBehavior: DockHomeBehavior.stay,
+      chartsBehavior: DockChartsBehavior.pushFeatures,
+    );
   }
 }
 

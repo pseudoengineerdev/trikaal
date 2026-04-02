@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/chart_api_client.dart';
-import '../../features/presentation/features_grid_page.dart';
 import '../../subscription/data/models/subscription_models.dart';
-import '../../profile/presentation/profile_page.dart';
 
 class SubscriptionPage extends StatefulWidget {
   const SubscriptionPage({
@@ -150,38 +149,14 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   void _handleDockItemTap(BuildContext context, AppDockItem item) {
-    switch (item) {
-      case AppDockItem.home:
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        return;
-      case AppDockItem.profile:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return ProfilePage(birthInputState: widget.birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.premium:
-        return;
-      case AppDockItem.charts:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return FeaturesGridPage(birthInputState: widget.birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.menu:
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('This tab will be finalized next.')),
-          );
-        return;
-    }
+    handleAppDockSelection(
+      context: context,
+      tappedItem: item,
+      activeItem: AppDockItem.premium,
+      birthInputState: widget.birthInputState,
+      homeBehavior: DockHomeBehavior.popToRoot,
+      chartsBehavior: DockChartsBehavior.pushFeatures,
+    );
   }
 }
 
