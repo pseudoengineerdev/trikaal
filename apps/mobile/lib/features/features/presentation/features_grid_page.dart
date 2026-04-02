@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
+import '../../charts/data/models/compute_report_models.dart';
+import '../../home/presentation/astrology/rashi_insights.dart';
 import '../../profile/presentation/profile_page.dart';
 import '../../subscription/presentation/subscription_page.dart';
 
@@ -16,50 +18,62 @@ class FeaturesGridPage extends StatelessWidget {
 
   static const List<_FeatureTileData> _featureTiles = <_FeatureTileData>[
     _FeatureTileData(
+      code: 'tarot',
       title: 'Tarot Readings',
       icon: Icons.style_rounded,
     ),
     _FeatureTileData(
+      code: 'soulmate',
       title: 'Your Soulmate',
       icon: Icons.favorite_outline_rounded,
     ),
     _FeatureTileData(
+      code: 'meditation',
       title: 'Meditation',
       icon: Icons.self_improvement_rounded,
     ),
     _FeatureTileData(
+      code: 'birth_chart',
       title: 'Birth Chart',
       icon: Icons.donut_large_rounded,
     ),
     _FeatureTileData(
+      code: 'dream',
       title: 'Dream Interpretation',
       icon: Icons.bedtime_rounded,
     ),
     _FeatureTileData(
+      code: 'astrocartography',
       title: 'Astrocartography',
       icon: Icons.public_rounded,
     ),
     _FeatureTileData(
+      code: 'compatibility',
       title: 'Compatibility',
       icon: Icons.volunteer_activism_rounded,
     ),
     _FeatureTileData(
+      code: 'rising_sign',
       title: 'Rising Sign',
       icon: Icons.wb_twilight_rounded,
     ),
     _FeatureTileData(
+      code: 'celebrity_compatibility',
       title: 'Celebrity Compatibility',
       icon: Icons.people_alt_rounded,
     ),
     _FeatureTileData(
+      code: 'fortune_cookie',
       title: 'Fortune Cookie',
       icon: Icons.cookie_rounded,
     ),
     _FeatureTileData(
+      code: 'druid',
       title: 'Druid Horoscope',
       icon: Icons.hub_rounded,
     ),
     _FeatureTileData(
+      code: 'chinese',
       title: 'Chinese Horoscope',
       icon: Icons.cyclone_rounded,
     ),
@@ -70,6 +84,7 @@ class FeaturesGridPage extends StatelessWidget {
     final displayName = birthInputState.firstName.trim().isEmpty
         ? 'You'
         : birthInputState.firstName.trim();
+    final report = birthInputState.computedReport;
 
     return UniversalDockScaffold(
       appBar: AppBar(title: const Text('Features')),
@@ -102,6 +117,7 @@ class FeaturesGridPage extends StatelessWidget {
                     const SizedBox(height: 14),
                     ..._buildMosaicSections(
                       context: context,
+                      report: report,
                       tileWidth: tileWidth,
                       smallCardHeight: smallCardHeight,
                       bigCardHeight: bigCardHeight,
@@ -154,6 +170,7 @@ class FeaturesGridPage extends StatelessWidget {
 
   List<Widget> _buildMosaicSections({
     required BuildContext context,
+    required ComputeReportResponse? report,
     required double tileWidth,
     required double smallCardHeight,
     required double bigCardHeight,
@@ -173,7 +190,8 @@ class FeaturesGridPage extends StatelessWidget {
                 child: _FeatureGridCard(
                   data: tile,
                   height: smallCardHeight,
-                  onTap: () => _showFeatureToast(context, tile.title),
+                  chartPreviewLines: _birthChartPreviewForTile(tile, report),
+                  onTap: () => _handleFeatureTap(context, tile),
                 ),
               );
             }).toList(growable: false),
@@ -192,7 +210,8 @@ class FeaturesGridPage extends StatelessWidget {
         child: _FeatureGridCard(
           data: bigTile,
           height: bigCardHeight,
-          onTap: () => _showFeatureToast(context, bigTile.title),
+          chartPreviewLines: _birthChartPreviewForTile(bigTile, report),
+          onTap: () => _handleFeatureTap(context, bigTile),
         ),
       );
       final stackedSmallCards = SizedBox(
@@ -202,13 +221,17 @@ class FeaturesGridPage extends StatelessWidget {
             _FeatureGridCard(
               data: topSmallTile,
               height: smallCardHeight,
-              onTap: () => _showFeatureToast(context, topSmallTile.title),
+              chartPreviewLines:
+                  _birthChartPreviewForTile(topSmallTile, report),
+              onTap: () => _handleFeatureTap(context, topSmallTile),
             ),
             SizedBox(height: spacing),
             _FeatureGridCard(
               data: bottomSmallTile,
               height: smallCardHeight,
-              onTap: () => _showFeatureToast(context, bottomSmallTile.title),
+              chartPreviewLines:
+                  _birthChartPreviewForTile(bottomSmallTile, report),
+              onTap: () => _handleFeatureTap(context, bottomSmallTile),
             ),
           ],
         ),
@@ -240,23 +263,58 @@ class FeaturesGridPage extends StatelessWidget {
         ),
       );
   }
+
+  void _handleFeatureTap(BuildContext context, _FeatureTileData tile) {
+    if (tile.code == 'birth_chart') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return ProfilePage(birthInputState: birthInputState);
+          },
+        ),
+      );
+      return;
+    }
+    _showFeatureToast(context, tile.title);
+  }
+
+  List<String>? _birthChartPreviewForTile(
+    _FeatureTileData tile,
+    ComputeReportResponse? report,
+  ) {
+    if (tile.code != 'birth_chart' || report == null) {
+      return null;
+    }
+    final vedic = report.snapshot.vedic;
+    final sun = rashiInsightFor(vedic.sun.rashi);
+    final moon = rashiInsightFor(vedic.moon.rashi);
+    final rising = rashiInsightFor(vedic.lagna.rashi);
+    return <String>[
+      '☉ ${sun.name}',
+      '☽ ${moon.name}',
+      '↑ ${rising.name}',
+    ];
+  }
 }
 
 class _FeatureGridCard extends StatelessWidget {
   const _FeatureGridCard({
     required this.data,
     required this.height,
+    required this.chartPreviewLines,
     required this.onTap,
   });
 
   final _FeatureTileData data;
   final double height;
+  final List<String>? chartPreviewLines;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final isTall = height > 180;
     final colorScheme = Theme.of(context).colorScheme;
+    final isBirthChartCard = chartPreviewLines != null;
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
@@ -282,18 +340,37 @@ class _FeatureGridCard extends StatelessWidget {
           children: <Widget>[
             Icon(
               data.icon,
-              size: isTall ? 34 : 30,
+              size: isBirthChartCard ? 30 : (isTall ? 34 : 30),
               color: const Color(0xFFFFE7B3),
             ),
-            const Spacer(),
+            const SizedBox(height: 6),
             Text(
               data.title,
               style: TextStyle(
-                fontSize: isTall ? 22 : 18,
+                fontSize: isBirthChartCard ? 20 : (isTall ? 22 : 18),
                 color: const Color(0xFFFFE7B3),
                 fontWeight: FontWeight.w700,
               ),
             ),
+            if (isBirthChartCard) ...<Widget>[
+              const SizedBox(height: 8),
+              ...(chartPreviewLines ?? const <String>[]).map(
+                (line) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    line,
+                    style: const TextStyle(
+                      color: Color(0xFFFFE7B3),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const Spacer(),
+            ] else ...<Widget>[
+              const Spacer(),
+            ],
           ],
         ),
       ),
@@ -303,10 +380,12 @@ class _FeatureGridCard extends StatelessWidget {
 
 class _FeatureTileData {
   const _FeatureTileData({
+    required this.code,
     required this.title,
     required this.icon,
   });
 
+  final String code;
   final String title;
   final IconData icon;
 }
