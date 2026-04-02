@@ -178,14 +178,16 @@ class DashaSummaryCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
-              ...summary.mahaTimeline.map(_periodTile),
+              ...summary.mahaTimeline
+                  .map((DashaPeriod period) => _periodTile(context, period)),
               const SizedBox(height: 16),
               Text(
                 'Antardasha Timeline (Current Maha)',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(height: 8),
-              ...summary.antarTimelineCurrentMaha.map(_periodTile),
+              ...summary.antarTimelineCurrentMaha
+                  .map((DashaPeriod period) => _periodTile(context, period)),
             ],
           ),
         ),
@@ -205,15 +207,18 @@ class DashaSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _periodTile(DashaPeriod period) {
+  Widget _periodTile(BuildContext context, DashaPeriod period) {
     final title = localizeGraha(period.lord, mode, termsState: termsState);
     final subtitle = '${_formatIso(period.start)} → ${_formatIso(period.end)}';
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: period.active ? const Color(0x3329B6A8) : null,
-        border: Border.all(color: const Color(0x1A000000)),
+        color: period.active
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.35)
+            : theme.colorScheme.surface.withValues(alpha: 0.15),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(

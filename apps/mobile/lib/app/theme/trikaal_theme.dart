@@ -9,74 +9,74 @@ abstract final class TrikaalTheme {
   static const Color _mauveMagic = Color(0xFFC77DFF);
   static const Color _mauve = Color(0xFFE0AAFF);
 
-  static ThemeData light() {
+  static ThemeData dark() {
     const colorScheme = ColorScheme(
-      brightness: Brightness.light,
-      primary: _indigoVelvet,
-      onPrimary: Colors.white,
-      primaryContainer: _mauve,
-      onPrimaryContainer: _deepAmethyst,
+      brightness: Brightness.dark,
+      primary: _mauveMagic,
+      onPrimary: _darkAmethyst,
+      primaryContainer: _indigoVelvet,
+      onPrimaryContainer: _mauve,
       secondary: _royalViolet,
       onSecondary: Colors.white,
-      secondaryContainer: Color(0xFFF0DDFF),
-      onSecondaryContainer: _deepAmethyst,
-      tertiary: _indigoInk,
-      onTertiary: Colors.white,
-      tertiaryContainer: Color(0xFFF3E5FF),
-      onTertiaryContainer: _darkAmethyst,
-      error: Color(0xFFB3261E),
+      secondaryContainer: _deepAmethyst,
+      onSecondaryContainer: _mauve,
+      tertiary: _mauve,
+      onTertiary: _darkAmethyst,
+      tertiaryContainer: _indigoInk,
+      onTertiaryContainer: _mauveMagic,
+      error: Color(0xFFF2B8B5),
       onError: Colors.white,
-      errorContainer: Color(0xFFF9DEDC),
-      onErrorContainer: Color(0xFF410E0B),
-      surface: Color(0xFFFFFCFF),
-      onSurface: _deepAmethyst,
-      surfaceContainerHighest: Color(0xFFF4ECFB),
-      onSurfaceVariant: Color(0xFF4D2A70),
-      outline: Color(0xFFC2ABDA),
-      outlineVariant: Color(0xFFE5D6F3),
+      errorContainer: Color(0xFF8C1D18),
+      onErrorContainer: Color(0xFFFDECEA),
+      surface: Color(0xFF17062E),
+      onSurface: Color(0xFFF6EEFF),
+      surfaceContainerHighest: Color(0xFF2B1448),
+      onSurfaceVariant: Color(0xFFD8C3F2),
+      outline: Color(0xFF7D63A0),
+      outlineVariant: Color(0xFF4B326E),
       shadow: Colors.black,
       scrim: Colors.black,
-      inverseSurface: _darkAmethyst,
-      onInverseSurface: Color(0xFFF8EDFF),
-      inversePrimary: _mauveMagic,
+      inverseSurface: Color(0xFFE8D6FA),
+      onInverseSurface: _darkAmethyst,
+      inversePrimary: _indigoVelvet,
       surfaceTint: _indigoVelvet,
     );
 
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: const Color(0xFFF7F1FC),
+      scaffoldBackgroundColor: const Color(0xFF120427),
     );
 
     final textTheme = base.textTheme.copyWith(
       displaySmall: base.textTheme.displaySmall?.copyWith(
         fontFamily: 'Georgia',
         fontWeight: FontWeight.w700,
-        color: _darkAmethyst,
+        color: colorScheme.onSurface,
       ),
       headlineMedium: base.textTheme.headlineMedium?.copyWith(
         fontFamily: 'Georgia',
         fontWeight: FontWeight.w700,
-        color: _darkAmethyst,
+        color: colorScheme.onSurface,
       ),
       titleLarge: base.textTheme.titleLarge?.copyWith(
         fontFamily: 'Georgia',
         fontWeight: FontWeight.w700,
-        color: _darkAmethyst,
+        color: colorScheme.onSurface,
       ),
       titleMedium: base.textTheme.titleMedium?.copyWith(
         fontFamily: 'Georgia',
         fontWeight: FontWeight.w700,
-        color: _darkAmethyst,
+        color: colorScheme.onSurface,
       ),
       bodyLarge: base.textTheme.bodyLarge?.copyWith(
         fontFamily: 'Georgia',
-        color: _darkAmethyst,
+        color: colorScheme.onSurface,
         height: 1.35,
       ),
       bodyMedium: base.textTheme.bodyMedium?.copyWith(
         fontFamily: 'Georgia',
-        color: _darkAmethyst,
+        color: colorScheme.onSurface,
         height: 1.35,
       ),
       labelLarge: base.textTheme.labelLarge?.copyWith(
@@ -90,13 +90,13 @@ abstract final class TrikaalTheme {
       appBarTheme: const AppBarTheme(
         centerTitle: false,
         backgroundColor: Colors.transparent,
-        foregroundColor: _darkAmethyst,
+        foregroundColor: Color(0xFFF6EEFF),
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
       cardTheme: CardThemeData(
         elevation: 1,
-        color: colorScheme.surface,
+        color: Color(0xCC210E3D),
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
@@ -105,7 +105,7 @@ abstract final class TrikaalTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colorScheme.surface,
+        fillColor: const Color(0xFF241042),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
@@ -132,9 +132,10 @@ abstract final class TrikaalTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           textStyle: textTheme.titleMedium?.copyWith(
             fontSize: 19,
-            color: colorScheme.onPrimary,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -143,12 +144,21 @@ abstract final class TrikaalTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: colorScheme.secondaryContainer,
+          foregroundColor: colorScheme.onSecondaryContainer,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: colorScheme.primary,
+        ),
+      ),
       chipTheme: base.chipTheme.copyWith(
+        backgroundColor: colorScheme.surfaceContainerHighest,
+        selectedColor: colorScheme.primaryContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       navigationBarTheme: NavigationBarThemeData(
@@ -161,9 +171,26 @@ abstract final class TrikaalTheme {
           }
           return const IconThemeData(size: 22);
         }),
-        indicatorColor: colorScheme.primaryContainer,
-        backgroundColor: Colors.white.withValues(alpha: 0.96),
+        indicatorColor: colorScheme.primaryContainer.withValues(alpha: 0.45),
+        backgroundColor: const Color(0xE615082D),
         height: 70,
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return colorScheme.primaryContainer.withValues(alpha: 0.45);
+            }
+            return colorScheme.surface.withValues(alpha: 0.4);
+          }),
+          foregroundColor: WidgetStatePropertyAll(colorScheme.onSurface),
+          side: WidgetStatePropertyAll(
+            BorderSide(color: colorScheme.outlineVariant),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
       ),
       dividerTheme: DividerThemeData(
         color: colorScheme.outlineVariant,
@@ -171,4 +198,6 @@ abstract final class TrikaalTheme {
       ),
     );
   }
+
+  static ThemeData light() => dark();
 }
