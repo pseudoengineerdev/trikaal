@@ -1,79 +1,83 @@
 import 'package:flutter/material.dart';
 
 abstract final class TrikaalTheme {
-  static const Color _saffron = Color(0xFF9A531B);
-  static const Color _teal = Color(0xFF2B6A67);
-  static const Color _ink = Color(0xFF2B2018);
-  static const Color _sand = Color(0xFFF9F3EC);
+  static const Color _darkAmethyst = Color(0xFF10002B);
+  static const Color _deepAmethyst = Color(0xFF240046);
+  static const Color _indigoInk = Color(0xFF3C096C);
+  static const Color _indigoVelvet = Color(0xFF5A189A);
+  static const Color _royalViolet = Color(0xFF7B2CBF);
+  static const Color _lavenderPurple = Color(0xFF9D4EDD);
+  static const Color _mauveMagic = Color(0xFFC77DFF);
+  static const Color _mauve = Color(0xFFE0AAFF);
 
   static ThemeData light() {
     const colorScheme = ColorScheme(
       brightness: Brightness.light,
-      primary: _saffron,
+      primary: _indigoVelvet,
       onPrimary: Colors.white,
-      primaryContainer: Color(0xFFFFDDBE),
-      onPrimaryContainer: Color(0xFF381A05),
-      secondary: _teal,
+      primaryContainer: _mauveMagic,
+      onPrimaryContainer: _deepAmethyst,
+      secondary: _royalViolet,
       onSecondary: Colors.white,
-      secondaryContainer: Color(0xFFBDECE7),
-      onSecondaryContainer: Color(0xFF07211F),
-      tertiary: Color(0xFF6B5D36),
+      secondaryContainer: _mauve,
+      onSecondaryContainer: _deepAmethyst,
+      tertiary: _indigoInk,
       onTertiary: Colors.white,
-      tertiaryContainer: Color(0xFFF4E3AC),
-      onTertiaryContainer: Color(0xFF201B06),
+      tertiaryContainer: _lavenderPurple,
+      onTertiaryContainer: _darkAmethyst,
       error: Color(0xFFB3261E),
       onError: Colors.white,
       errorContainer: Color(0xFFF9DEDC),
       onErrorContainer: Color(0xFF410E0B),
-      surface: Color(0xFFFFFBF8),
-      onSurface: _ink,
-      surfaceContainerHighest: Color(0xFFF2E5D7),
-      onSurfaceVariant: Color(0xFF65574A),
-      outline: Color(0xFF9E8E80),
-      outlineVariant: Color(0xFFD9C7B8),
+      surface: _mauve,
+      onSurface: _darkAmethyst,
+      surfaceContainerHighest: _mauveMagic,
+      onSurfaceVariant: _indigoInk,
+      outline: _lavenderPurple,
+      outlineVariant: _lavenderPurple,
       shadow: Colors.black,
       scrim: Colors.black,
-      inverseSurface: Color(0xFF3A2D23),
-      onInverseSurface: Color(0xFFFFEDE1),
-      inversePrimary: Color(0xFFFFB77E),
-      surfaceTint: _saffron,
+      inverseSurface: _darkAmethyst,
+      onInverseSurface: _mauve,
+      inversePrimary: _mauveMagic,
+      surfaceTint: _indigoVelvet,
     );
 
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: _sand,
+      scaffoldBackgroundColor: _mauve,
     );
 
     final textTheme = base.textTheme.copyWith(
       displaySmall: base.textTheme.displaySmall?.copyWith(
         fontFamily: 'Georgia',
         fontWeight: FontWeight.w700,
-        color: _ink,
+        color: _darkAmethyst,
       ),
       headlineMedium: base.textTheme.headlineMedium?.copyWith(
         fontFamily: 'Georgia',
         fontWeight: FontWeight.w700,
-        color: _ink,
+        color: _darkAmethyst,
       ),
       titleLarge: base.textTheme.titleLarge?.copyWith(
         fontFamily: 'Georgia',
         fontWeight: FontWeight.w700,
-        color: _ink,
+        color: _darkAmethyst,
       ),
       titleMedium: base.textTheme.titleMedium?.copyWith(
         fontFamily: 'Georgia',
         fontWeight: FontWeight.w700,
-        color: _ink,
+        color: _darkAmethyst,
       ),
       bodyLarge: base.textTheme.bodyLarge?.copyWith(
         fontFamily: 'Georgia',
-        color: _ink,
+        color: _darkAmethyst,
         height: 1.35,
       ),
       bodyMedium: base.textTheme.bodyMedium?.copyWith(
         fontFamily: 'Georgia',
-        color: _ink,
+        color: _darkAmethyst,
         height: 1.35,
       ),
       labelLarge: base.textTheme.labelLarge?.copyWith(
@@ -87,7 +91,7 @@ abstract final class TrikaalTheme {
       appBarTheme: const AppBarTheme(
         centerTitle: false,
         backgroundColor: Colors.transparent,
-        foregroundColor: _ink,
+        foregroundColor: _darkAmethyst,
         elevation: 0,
         scrolledUnderElevation: 0,
       ),
@@ -102,7 +106,7 @@ abstract final class TrikaalTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colorScheme.surface,
+        fillColor: const Color(0xFFF3D7FF),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
