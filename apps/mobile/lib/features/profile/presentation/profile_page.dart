@@ -78,7 +78,7 @@ class ProfilePage extends StatelessWidget {
 
     final tableBorderColor = Theme.of(
       context,
-    ).colorScheme.outlineVariant.withValues(alpha: 0.65);
+    ).colorScheme.outlineVariant.withValues(alpha: 0.42);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
@@ -119,7 +119,8 @@ class ProfilePage extends StatelessWidget {
                             '☉ ${sun.name}  ☽ ${moon.name}  ↑ ${rising.name}',
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onSurface,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
                             ),
                           ),
                         ],
@@ -138,22 +139,23 @@ class ProfilePage extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       border: Border.all(color: tableBorderColor),
-                      color: Colors.black.withValues(alpha: 0.18),
+                      color: Colors.black.withValues(alpha: 0.22),
                     ),
                     child: Row(
                       children: <Widget>[
                         SizedBox(
-                          width: 24,
+                          width: 26,
                           child: Center(
                             child: Text(
                               'S\nI\nG\nN\nS',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 10.5,
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.onSurfaceVariant,
-                                letterSpacing: 1.1,
+                                letterSpacing: 1.8,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -161,15 +163,15 @@ class ProfilePage extends StatelessWidget {
                         Expanded(
                           child: Table(
                             columnWidths: const <int, TableColumnWidth>{
-                              0: FlexColumnWidth(1.15),
-                              1: FlexColumnWidth(1.22),
-                              2: FlexColumnWidth(0.45),
+                              0: FlexColumnWidth(1.05),
+                              1: FlexColumnWidth(1.34),
+                              2: FlexColumnWidth(0.34),
                             },
                             border: TableBorder(
-                              horizontalInside:
-                                  BorderSide(color: tableBorderColor),
-                              verticalInside:
-                                  BorderSide(color: tableBorderColor),
+                              horizontalInside: BorderSide(
+                                  color: tableBorderColor, width: 0.8),
+                              verticalInside: BorderSide(
+                                  color: tableBorderColor, width: 0.8),
                             ),
                             defaultVerticalAlignment:
                                 TableCellVerticalAlignment.middle,
@@ -184,7 +186,7 @@ class ProfilePage extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 10,
-                                      vertical: 10,
+                                      vertical: 7,
                                     ),
                                     child: Text(
                                       row.showRashi
@@ -194,15 +196,15 @@ class ProfilePage extends StatelessWidget {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .onSurface,
-                                        fontSize: 25,
+                                        fontSize: 15.5,
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 10,
+                                      horizontal: 9,
+                                      vertical: 7,
                                     ),
                                     child: Text(
                                       '${_grahaGlyph[row.grahaKey] ?? '•'} ${_grahaLabel[row.grahaKey] ?? row.grahaKey.toUpperCase()}',
@@ -210,15 +212,16 @@ class ProfilePage extends StatelessWidget {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .onSurface,
-                                        fontSize: 21,
-                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14.2,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: 0.25,
                                       ),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 6,
-                                      vertical: 10,
+                                      vertical: 7,
                                     ),
                                     child: Text(
                                       '${row.house}',
@@ -227,7 +230,7 @@ class ProfilePage extends StatelessWidget {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .onSurface,
-                                        fontSize: 27,
+                                        fontSize: 15.8,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -238,17 +241,18 @@ class ProfilePage extends StatelessWidget {
                           ),
                         ),
                         SizedBox(
-                          width: 24,
+                          width: 26,
                           child: Center(
                             child: Text(
                               'H\nO\nU\nS\nE\nS',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 10.5,
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.onSurfaceVariant,
-                                letterSpacing: 1.1,
+                                letterSpacing: 1.8,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ),
@@ -345,18 +349,34 @@ class _ProfileTabBar extends StatelessWidget {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    '${isActive ? '• ' : ''}${tabs[index]}',
-                    style: TextStyle(
-                      color: isActive ? activeColor : inactiveColor,
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                  child: Text.rich(
+                    TextSpan(
+                      children: <InlineSpan>[
+                        if (isActive)
+                          const TextSpan(
+                            text: '• ',
+                            style: TextStyle(
+                              color: Color(0xFFFF4D4F),
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        TextSpan(
+                          text: tabs[index],
+                          style: TextStyle(
+                            color: isActive ? activeColor : inactiveColor,
+                            fontWeight:
+                                isActive ? FontWeight.w600 : FontWeight.w500,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
                 Container(
-                  height: 2,
+                  height: 1.8,
                   color: isActive
-                      ? Theme.of(context).colorScheme.primary
+                      ? Theme.of(context).colorScheme.onSurface
                       : Colors.transparent,
                 ),
               ],
