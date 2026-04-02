@@ -5,6 +5,7 @@ import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
+import '../../subscription/presentation/subscription_page.dart';
 
 const List<String> _profileGrahaOrder = <String>[
   'lagna',
@@ -348,13 +349,21 @@ class ProfilePage extends StatelessWidget {
       case AppDockItem.profile:
         return;
       case AppDockItem.charts:
-      case AppDockItem.dasha:
       case AppDockItem.menu:
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
             const SnackBar(content: Text('This tab will be finalized next.')),
           );
+        return;
+      case AppDockItem.premium:
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return SubscriptionPage(birthInputState: birthInputState);
+            },
+          ),
+        );
         return;
     }
   }

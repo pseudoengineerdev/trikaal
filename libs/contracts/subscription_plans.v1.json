@@ -1,0 +1,42 @@
+{
+  "version": "v1",
+  "currency": "USD",
+  "headline": "Choose your Trikaal plan",
+  "subheadline": "Unlock premium insights, deeper reports, and exclusive updates.",
+  "default_plan_code": "monthly",
+  "plans": [
+    {
+      "code": "weekly",
+      "cycle": "weekly",
+      "title": "Weekly",
+      "price_usd": 2.0,
+      "period_label": "week",
+      "discount_percent": 0,
+      "discount_label": null,
+      "badge": null,
+      "recommended": false
+    },
+    {
+      "code": "monthly",
+      "cycle": "monthly",
+      "title": "Monthly",
+      "price_usd": 5.0,
+      "period_label": "month",
+      "discount_percent": 38,
+      "discount_label": "Save 38%",
+      "badge": "Most Popular",
+      "recommended": true
+    },
+    {
+      "code": "yearly",
+      "cycle": "yearly",
+      "title": "Yearly",
+      "price_usd": 50.0,
+      "period_label": "year",
+      "discount_percent": 52,
+      "discount_label": "Save 52%",
+      "badge": "Best Value",
+      "recommended": false
+    }
+  ]
+}

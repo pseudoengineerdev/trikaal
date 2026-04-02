@@ -25,6 +25,7 @@ from trikaal_api.parity import (
 )
 from trikaal_api.report import ComputeReportRequest, ComputeReportResponse, compute_report
 from trikaal_api.resolver import PlaceNotFoundError, search_places
+from trikaal_api.subscription import SubscriptionPlansResponse, load_subscription_plans
 
 app = FastAPI(
     title="Trikaal API",
@@ -128,3 +129,8 @@ def place_search(query: str) -> PlaceSearchResponse:
 @app.get("/v1/metadata/astrology-terms", response_model=AstrologyTermsResponse)
 def astrology_terms() -> AstrologyTermsResponse:
     return load_astrology_terms()
+
+
+@app.get("/v1/billing/plans", response_model=SubscriptionPlansResponse)
+def billing_plans() -> SubscriptionPlansResponse:
+    return load_subscription_plans()
