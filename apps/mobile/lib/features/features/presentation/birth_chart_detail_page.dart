@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/presentation/widgets/chart_result_card.dart';
-import '../../profile/presentation/profile_page.dart';
 import '../../shared/widgets/terminology_toggle.dart';
-import '../../subscription/presentation/subscription_page.dart';
 
 class BirthChartDetailPage extends StatefulWidget {
   const BirthChartDetailPage({
@@ -118,40 +117,13 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
   }
 
   void _handleDockItemTap(BuildContext context, AppDockItem item) {
-    switch (item) {
-      case AppDockItem.home:
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        return;
-      case AppDockItem.charts:
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-        return;
-      case AppDockItem.profile:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return ProfilePage(birthInputState: widget.birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.premium:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return SubscriptionPage(birthInputState: widget.birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.menu:
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('This tab will be finalized next.')),
-          );
-        return;
-    }
+    handleAppDockSelection(
+      context: context,
+      tappedItem: item,
+      activeItem: AppDockItem.charts,
+      birthInputState: widget.birthInputState,
+      homeBehavior: DockHomeBehavior.popToRoot,
+      chartsBehavior: DockChartsBehavior.popOne,
+    );
   }
 }

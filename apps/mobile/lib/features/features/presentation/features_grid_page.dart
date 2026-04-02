@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
-import '../../home/presentation/astrology/rashi_insights.dart';
+import '../../shared/astrology/sign_trio_insights.dart';
 import 'birth_chart_detail_page.dart';
-import '../../profile/presentation/profile_page.dart';
-import '../../subscription/presentation/subscription_page.dart';
 
 class FeaturesGridPage extends StatelessWidget {
   const FeaturesGridPage({
@@ -135,38 +134,14 @@ class FeaturesGridPage extends StatelessWidget {
   }
 
   void _handleDockItemTap(BuildContext context, AppDockItem item) {
-    switch (item) {
-      case AppDockItem.home:
-        Navigator.of(context).popUntil((route) => route.isFirst);
-        return;
-      case AppDockItem.profile:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return ProfilePage(birthInputState: birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.premium:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return SubscriptionPage(birthInputState: birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.charts:
-        return;
-      case AppDockItem.menu:
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('This tab will be finalized next.')),
-          );
-        return;
-    }
+    handleAppDockSelection(
+      context: context,
+      tappedItem: item,
+      activeItem: AppDockItem.charts,
+      birthInputState: birthInputState,
+      homeBehavior: DockHomeBehavior.popToRoot,
+      chartsBehavior: DockChartsBehavior.stay,
+    );
   }
 
   List<Widget> _buildMosaicSections({
@@ -286,14 +261,11 @@ class FeaturesGridPage extends StatelessWidget {
     if (tile.code != 'birth_chart' || report == null) {
       return null;
     }
-    final vedic = report.snapshot.vedic;
-    final sun = rashiInsightFor(vedic.sun.rashi);
-    final moon = rashiInsightFor(vedic.moon.rashi);
-    final rising = rashiInsightFor(vedic.lagna.rashi);
+    final trio = SignTrioInsights.fromReport(report);
     return <String>[
-      '☉ ${sun.name}',
-      '☽ ${moon.name}',
-      '↑ ${rising.name}',
+      '☉ ${trio.sun.name}',
+      '☽ ${trio.moon.name}',
+      '↑ ${trio.rising.name}',
     ];
   }
 }

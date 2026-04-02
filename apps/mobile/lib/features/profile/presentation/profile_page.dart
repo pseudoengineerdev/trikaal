@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
-import '../../features/presentation/features_grid_page.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
-import '../../subscription/presentation/subscription_page.dart';
+import '../../shared/astrology/sign_trio_insights.dart';
 
 const List<String> _profileGrahaOrder = <String>[
   'lagna',
@@ -76,9 +76,10 @@ class ProfilePage extends StatelessWidget {
         : birthInputState.firstName.trim();
     final handle =
         '@${displayName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '')}';
-    final sun = rashiInsightFor(report.snapshot.vedic.sun.rashi);
-    final moon = rashiInsightFor(report.snapshot.vedic.moon.rashi);
-    final rising = rashiInsightFor(report.snapshot.vedic.lagna.rashi);
+    final trio = SignTrioInsights.fromReport(report);
+    final sun = trio.sun;
+    final moon = trio.moon;
+    final rising = trio.rising;
     final chartRows = _buildChartRows(report.snapshot.grahaTable);
 
     final tableBorderColor = Theme.of(
@@ -341,40 +342,14 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _handleDockItemTap(BuildContext context, AppDockItem item) {
-    switch (item) {
-      case AppDockItem.home:
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-        return;
-      case AppDockItem.profile:
-        return;
-      case AppDockItem.charts:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return FeaturesGridPage(birthInputState: birthInputState);
-            },
-          ),
-        );
-        return;
-      case AppDockItem.menu:
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(content: Text('This tab will be finalized next.')),
-          );
-        return;
-      case AppDockItem.premium:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) {
-              return SubscriptionPage(birthInputState: birthInputState);
-            },
-          ),
-        );
-        return;
-    }
+    handleAppDockSelection(
+      context: context,
+      tappedItem: item,
+      activeItem: AppDockItem.profile,
+      birthInputState: birthInputState,
+      homeBehavior: DockHomeBehavior.popOne,
+      chartsBehavior: DockChartsBehavior.pushFeatures,
+    );
   }
 
   List<_ProfileChartRow> _buildChartRows(ReportGrahaTable table) {

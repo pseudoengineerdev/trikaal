@@ -9,6 +9,7 @@ import '../../../app/widgets/astro_page_background.dart';
 import '../../dasha/data/models/dasha_models.dart';
 import '../data/models/compute_report_models.dart';
 import '../data/models/place_search_models.dart';
+import '../../shared/birth_input/birth_input_formatters.dart';
 import '../../shared/widgets/terminology_toggle.dart';
 import 'state/birth_chart_controller.dart';
 import 'widgets/chart_result_card.dart';
@@ -178,7 +179,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
                                   suffixIcon:
                                       Icon(Icons.calendar_today_outlined),
                                 ),
-                                validator: _validateDate,
+                                validator: BirthInputFormatters.validateDate,
                               ),
                               const SizedBox(height: 12),
                               TextFormField(
@@ -191,7 +192,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
                                   hintText: 'HH:MM',
                                   suffixIcon: Icon(Icons.schedule),
                                 ),
-                                validator: _validateTime,
+                                validator: BirthInputFormatters.validateTime,
                               ),
                               const SizedBox(height: 12),
                               TextFormField(
@@ -608,30 +609,13 @@ class _BirthInputPageState extends State<BirthInputPage> {
       ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  String? _validateDate(String? value) {
-    final input = value?.trim() ?? '';
-    final ok = RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(input);
-    if (!ok) {
-      return 'Use format YYYY-MM-DD';
-    }
-    return null;
-  }
-
-  String? _validateTime(String? value) {
-    final input = value?.trim() ?? '';
-    final ok = RegExp(r'^\d{2}:\d{2}$').hasMatch(input);
-    if (!ok) {
-      return 'Use format HH:MM';
-    }
-    return null;
-  }
-
   Future<void> _pickDate() async {
     if (_controller.loading) {
       return;
     }
     final initialDate =
-        _parseDate(_dateController.text.trim()) ?? DateTime.now();
+        BirthInputFormatters.parseDate(_dateController.text.trim()) ??
+            DateTime.now();
     final selected = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -641,7 +625,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
     if (selected == null) {
       return;
     }
-    _dateController.text = _formatDate(selected);
+    _dateController.text = BirthInputFormatters.formatDate(selected);
     widget.birthInputState.updateDateOfBirth(_dateController.text);
   }
 
@@ -649,8 +633,9 @@ class _BirthInputPageState extends State<BirthInputPage> {
     if (_controller.loading) {
       return;
     }
-    final initialTime = _parseTimeOfDay(_timeController.text.trim()) ??
-        TimeOfDay.fromDateTime(DateTime.now());
+    final initialTime =
+        BirthInputFormatters.parseTime(_timeController.text.trim()) ??
+            TimeOfDay.fromDateTime(DateTime.now());
     final selected = await showTimePicker(
       context: context,
       initialTime: initialTime,
@@ -664,49 +649,9 @@ class _BirthInputPageState extends State<BirthInputPage> {
     if (selected == null) {
       return;
     }
-    _timeController.text = _formatTimeOfDay(selected);
+    _timeController.text = BirthInputFormatters.formatTime(selected);
     widget.birthInputState.updateTimeOfBirth(_timeController.text);
   }
-
-  DateTime? _parseDate(String input) {
-    final parts = input.split('-');
-    if (parts.length != 3) {
-      return null;
-    }
-    final year = int.tryParse(parts[0]);
-    final month = int.tryParse(parts[1]);
-    final day = int.tryParse(parts[2]);
-    if (year == null || month == null || day == null) {
-      return null;
-    }
-    return DateTime.tryParse('$year-${_two(month)}-${_two(day)}');
-  }
-
-  TimeOfDay? _parseTimeOfDay(String input) {
-    final parts = input.split(':');
-    if (parts.length != 2) {
-      return null;
-    }
-    final hour = int.tryParse(parts[0]);
-    final minute = int.tryParse(parts[1]);
-    if (hour == null || minute == null) {
-      return null;
-    }
-    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-      return null;
-    }
-    return TimeOfDay(hour: hour, minute: minute);
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}-${_two(date.month)}-${_two(date.day)}';
-  }
-
-  String _formatTimeOfDay(TimeOfDay time) {
-    return '${_two(time.hour)}:${_two(time.minute)}';
-  }
-
-  String _two(int value) => value.toString().padLeft(2, '0');
 }
 
 class _AstroIntroCard extends StatelessWidget {
