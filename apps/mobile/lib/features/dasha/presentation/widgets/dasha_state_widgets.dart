@@ -31,7 +31,7 @@ class DashaEmptyState extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                '🌗 Compute chart first. Dasha auto-computes from the same birth input.',
+                'Compute chart first. Dasha auto-computes from the same birth input.',
                 style: Theme.of(context).textTheme.bodyLarge,
                 textAlign: TextAlign.center,
               ),
@@ -148,7 +148,7 @@ class DashaSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Current Dasha (${summary.system}) ✨',
+                'Current Dasha (${summary.system})',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 12),

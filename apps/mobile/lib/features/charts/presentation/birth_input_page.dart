@@ -117,20 +117,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Trikaal Birth Chart'),
-        actions: const <Widget>[
-          Padding(
-            padding: EdgeInsets.only(right: 14),
-            child: Center(
-              child: Text(
-                '✨',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Trikaal Birth Chart')),
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           _controller,
@@ -724,19 +711,31 @@ class _AstroIntroCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
-        child: Column(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              '🪐 Vedic Insight Workspace',
-              style: Theme.of(context).textTheme.titleMedium,
+            Icon(
+              Icons.travel_explore_rounded,
+              color: Theme.of(context).colorScheme.primary,
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Enter birth details once, then explore chart, dasha, and guidance in one flow.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Vedic Insight Workspace',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Enter birth details once, then explore chart, dasha, and guidance in one flow.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
