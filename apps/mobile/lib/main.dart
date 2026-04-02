@@ -15,7 +15,9 @@ class TrikaalApp extends StatelessWidget {
     return MaterialApp(
       title: 'Trikaal',
       debugShowCheckedModeBanner: false,
-      theme: TrikaalTheme.light(),
+      themeMode: ThemeMode.dark,
+      theme: TrikaalTheme.dark(),
+      darkTheme: TrikaalTheme.dark(),
       home: const HomeShellPage(),
     );
   }

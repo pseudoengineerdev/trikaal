@@ -233,12 +233,14 @@ class _BirthInputPageState extends State<BirthInputPage> {
                                   onPressed:
                                       _controller.loading ? null : _submit,
                                   icon: _controller.loading
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           height: 16,
                                           width: 16,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: Colors.white,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
                                           ),
                                         )
                                       : const Icon(Icons.auto_awesome_rounded),
