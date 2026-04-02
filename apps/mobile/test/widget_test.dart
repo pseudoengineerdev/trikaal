@@ -3,11 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:trikaal_mobile/main.dart';
 
 void main() {
-  testWidgets('App renders birth chart screen title',
-      (WidgetTester tester) async {
+  testWidgets('App starts onboarding flow', (WidgetTester tester) async {
     await tester.pumpWidget(const TrikaalApp());
 
-    expect(find.text('Trikaal Birth Chart'), findsOneWidget);
-    expect(find.text('Saved Profiles'), findsOneWidget);
+    expect(find.text('Let\'s start with your first name'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
   });
 }
