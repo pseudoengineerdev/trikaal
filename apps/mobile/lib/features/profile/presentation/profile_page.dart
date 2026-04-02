@@ -135,124 +135,143 @@ class ProfilePage extends StatelessWidget {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
+                  padding: const EdgeInsets.fromLTRB(10, 2, 10, 10),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       border: Border.all(color: tableBorderColor),
                       color: Colors.black.withValues(alpha: 0.22),
                     ),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
                         SizedBox(
-                          width: 26,
-                          child: Center(
-                            child: Text(
-                              'S\nI\nG\nN\nS',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                                letterSpacing: 1.8,
-                                fontWeight: FontWeight.w600,
+                          width: 28,
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 4, top: 8),
+                              child: Text(
+                                'S\nI\nG\nN\nS',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  fontSize: 9.2,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  letterSpacing: 1.3,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
                         ),
                         Expanded(
-                          child: Table(
-                            columnWidths: const <int, TableColumnWidth>{
-                              0: FlexColumnWidth(1.05),
-                              1: FlexColumnWidth(1.34),
-                              2: FlexColumnWidth(0.34),
-                            },
-                            border: TableBorder(
-                              horizontalInside: BorderSide(
-                                  color: tableBorderColor, width: 0.8),
-                              verticalInside: BorderSide(
-                                  color: tableBorderColor, width: 0.8),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Table(
+                              columnWidths: const <int, TableColumnWidth>{
+                                0: FlexColumnWidth(1.05),
+                                1: FlexColumnWidth(1.34),
+                                2: FlexColumnWidth(0.34),
+                              },
+                              border: TableBorder(
+                                horizontalInside: BorderSide(
+                                    color: tableBorderColor, width: 0.8),
+                                verticalInside: BorderSide(
+                                    color: tableBorderColor, width: 0.8),
+                              ),
+                              defaultVerticalAlignment:
+                                  TableCellVerticalAlignment.middle,
+                              children: chartRows.map((row) {
+                                return TableRow(
+                                  decoration: BoxDecoration(
+                                    color: row.house.isEven
+                                        ? Colors.white.withValues(alpha: 0.02)
+                                        : Colors.transparent,
+                                  ),
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 6,
+                                      ),
+                                      child: Text(
+                                        row.showRashi
+                                            ? _rashiName(row.rashiCode)
+                                            : '',
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                          fontSize: 13.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondaryContainer
+                                          .withValues(alpha: 0.22),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 9,
+                                          vertical: 6,
+                                        ),
+                                        child: Text(
+                                          '${_grahaGlyph[row.grahaKey] ?? '•'} ${_grahaLabel[row.grahaKey] ?? row.grahaKey.toUpperCase()}',
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                            fontSize: 11.9,
+                                            fontWeight: FontWeight.w500,
+                                            letterSpacing: 0.18,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 6,
+                                      ),
+                                      child: Text(
+                                        '${row.house}',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface,
+                                          fontSize: 13.3,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }).toList(growable: false),
                             ),
-                            defaultVerticalAlignment:
-                                TableCellVerticalAlignment.middle,
-                            children: chartRows.map((row) {
-                              return TableRow(
-                                decoration: BoxDecoration(
-                                  color: row.house.isEven
-                                      ? Colors.white.withValues(alpha: 0.02)
-                                      : Colors.transparent,
-                                ),
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 7,
-                                    ),
-                                    child: Text(
-                                      row.showRashi
-                                          ? _rashiName(row.rashiCode)
-                                          : '',
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                        fontSize: 15.5,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 9,
-                                      vertical: 7,
-                                    ),
-                                    child: Text(
-                                      '${_grahaGlyph[row.grahaKey] ?? '•'} ${_grahaLabel[row.grahaKey] ?? row.grahaKey.toUpperCase()}',
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                        fontSize: 14.2,
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: 0.25,
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 6,
-                                      vertical: 7,
-                                    ),
-                                    child: Text(
-                                      '${row.house}',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                        fontSize: 15.8,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }).toList(growable: false),
                           ),
                         ),
                         SizedBox(
-                          width: 26,
-                          child: Center(
-                            child: Text(
-                              'H\nO\nU\nS\nE\nS',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                                letterSpacing: 1.8,
-                                fontWeight: FontWeight.w600,
+                          width: 28,
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.only(right: 4, bottom: 8),
+                              child: Text(
+                                'H\nO\nU\nS\nE\nS',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: 9.2,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  letterSpacing: 1.3,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),
@@ -349,27 +368,12 @@ class _ProfileTabBar extends StatelessWidget {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text.rich(
-                    TextSpan(
-                      children: <InlineSpan>[
-                        if (isActive)
-                          const TextSpan(
-                            text: '• ',
-                            style: TextStyle(
-                              color: Color(0xFFFF4D4F),
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        TextSpan(
-                          text: tabs[index],
-                          style: TextStyle(
-                            color: isActive ? activeColor : inactiveColor,
-                            fontWeight:
-                                isActive ? FontWeight.w600 : FontWeight.w500,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ],
+                  child: Text(
+                    tabs[index],
+                    style: TextStyle(
+                      color: isActive ? activeColor : inactiveColor,
+                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                      fontSize: 15,
                     ),
                   ),
                 ),
