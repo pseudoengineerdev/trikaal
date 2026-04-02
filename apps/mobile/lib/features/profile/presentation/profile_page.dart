@@ -161,7 +161,7 @@ class ProfilePage extends StatelessWidget {
                                   alignment: Alignment.topLeft,
                                   child: Padding(
                                     padding:
-                                        const EdgeInsets.only(left: 4, top: 8),
+                                        const EdgeInsets.only(left: 6, top: 12),
                                     child: Text(
                                       'S\nI\nG\nN\nS',
                                       textAlign: TextAlign.left,
@@ -295,7 +295,7 @@ class ProfilePage extends StatelessWidget {
                                   alignment: Alignment.bottomRight,
                                   child: Padding(
                                     padding: const EdgeInsets.only(
-                                        right: 4, bottom: 8),
+                                        right: 6, bottom: 12),
                                     child: Text(
                                       'H\nO\nU\nS\nE\nS',
                                       textAlign: TextAlign.right,
