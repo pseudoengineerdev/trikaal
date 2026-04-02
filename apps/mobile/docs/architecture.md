@@ -10,6 +10,19 @@ Feature-first organization with clear separation:
 - `presentation`: UI widgets and screen orchestration
 - `presentation/state`: page-level controller/state logic
 
+## Design System (Phase 1)
+
+Path map:
+
+- `lib/app/theme/trikaal_theme.dart`
+  - Brand palette, typography, component theming tokens
+- `lib/app/widgets/astro_page_background.dart`
+  - Shared gradient backdrop and atmospheric decorative layer
+
+Rule:
+
+- Pages should use shared theme tokens and background shell instead of one-off colors/styles.
+
 ## Current Charts Flow
 
 Path map:

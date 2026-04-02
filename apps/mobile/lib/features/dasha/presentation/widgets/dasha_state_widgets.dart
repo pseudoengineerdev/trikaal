@@ -22,20 +22,31 @@ class DashaEmptyState extends StatelessWidget {
     final hasAnyInput = dateOfBirth.trim().isNotEmpty ||
         timeOfBirth.trim().isNotEmpty ||
         placeOfBirth.trim().isNotEmpty;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const Text(
-              'Compute chart first. Dasha auto-computes from the same birth input.',
-            ),
-            if (hasAnyInput) ...<Widget>[
-              const SizedBox(height: 8),
-              Text('Using: $dateOfBirth, $timeOfBirth, $placeOfBirth'),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                '🌗 Compute chart first. Dasha auto-computes from the same birth input.',
+                style: Theme.of(context).textTheme.bodyLarge,
+                textAlign: TextAlign.center,
+              ),
+              if (hasAnyInput) ...<Widget>[
+                const SizedBox(height: 8),
+                Text(
+                  'Using: $dateOfBirth, $timeOfBirth, $placeOfBirth',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
@@ -47,8 +58,19 @@ class DashaLoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: CircularProgressIndicator(),
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const CircularProgressIndicator(),
+          const SizedBox(height: 10),
+          Text(
+            'Calculating dasha periods...',
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -65,23 +87,32 @@ class DashaErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              message,
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
-          ],
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(
+                Icons.error_outline_rounded,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -109,7 +140,7 @@ class DashaSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 94),
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -117,7 +148,7 @@ class DashaSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Current Dasha (${summary.system})',
+                'Current Dasha (${summary.system}) ✨',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 12),

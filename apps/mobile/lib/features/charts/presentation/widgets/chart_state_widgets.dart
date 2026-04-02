@@ -56,15 +56,22 @@ class LoadingHint extends StatelessWidget {
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Row(
+      child: Row(
         children: <Widget>[
-          SizedBox(
+          const SizedBox(
             height: 16,
             width: 16,
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
-          SizedBox(width: 12),
-          Expanded(child: Text('Computing chart using Drik profile...')),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '🔭 Computing chart using Drik profile...',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -83,12 +90,13 @@ class ErrorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final errorColor = Theme.of(context).colorScheme.error;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.08),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.25)),
+        color: errorColor.withValues(alpha: 0.08),
+        border: Border.all(color: errorColor.withValues(alpha: 0.25)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -96,12 +104,12 @@ class ErrorCard extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Icon(Icons.error_outline, color: Colors.red),
+              Icon(Icons.error_outline, color: errorColor),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   message,
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: errorColor),
                 ),
               ),
             ],
@@ -136,7 +144,7 @@ class EmptyResultHint extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'No chart computed yet',
+            'No chart computed yet ✨',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
