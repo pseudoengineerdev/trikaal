@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../profile/presentation/profile_page.dart';
 import 'astrology/rashi_insights.dart';
 
 class HomeOverviewPage extends StatelessWidget {
@@ -18,6 +19,13 @@ class HomeOverviewPage extends StatelessWidget {
     if (report == null) {
       return _DockedScaffold(
         appBar: AppBar(title: const Text('Trikaal')),
+        onProfileTap: () {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(content: Text('Profile section coming soon.')),
+            );
+        },
         body: AstroPageBackground(
           child: Center(
             child: Padding(
@@ -51,6 +59,15 @@ class HomeOverviewPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Trikaal'),
       ),
+      onProfileTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return ProfilePage(birthInputState: birthInputState);
+            },
+          ),
+        );
+      },
       body: AstroPageBackground(
         child: SafeArea(
           child: SingleChildScrollView(
@@ -94,45 +111,9 @@ class HomeOverviewPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 14),
-                _HomeCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                        'About You',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _SignTraitTile(
-                        title: 'Core Personality',
-                        subtitle: 'Sun in ${sun.name} ${sun.symbol}',
-                        body: sun.sunTrait,
-                        leadingEmoji: '☀️',
-                      ),
-                      const SizedBox(height: 10),
-                      _SignTraitTile(
-                        title: 'Emotional Nature',
-                        subtitle: 'Moon in ${moon.name} ${moon.symbol}',
-                        body: moon.moonTrait,
-                        leadingEmoji: '🌙',
-                      ),
-                      const SizedBox(height: 10),
-                      _SignTraitTile(
-                        title: 'How Others See You',
-                        subtitle: 'Rising in ${rising.name} ${rising.symbol}',
-                        body: rising.risingTrait,
-                        leadingEmoji: '⬆️',
-                      ),
-                    ],
-                  ),
-                ),
                 const SizedBox(height: 8),
                 Text(
-                  'Charts and Dasha will be moved into a dedicated section next.',
+                  'Tap the center profile button for your full "About You" section.',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -151,10 +132,12 @@ class _DockedScaffold extends StatelessWidget {
   const _DockedScaffold({
     required this.appBar,
     required this.body,
+    required this.onProfileTap,
   });
 
   final PreferredSizeWidget appBar;
   final Widget body;
+  final VoidCallback onProfileTap;
 
   @override
   Widget build(BuildContext context) {
@@ -162,13 +145,17 @@ class _DockedScaffold extends StatelessWidget {
       extendBody: true,
       appBar: appBar,
       body: body,
-      bottomNavigationBar: const _CurvedDockBar(),
+      bottomNavigationBar: _CurvedDockBar(onProfileTap: onProfileTap),
     );
   }
 }
 
 class _CurvedDockBar extends StatelessWidget {
-  const _CurvedDockBar();
+  const _CurvedDockBar({
+    required this.onProfileTap,
+  });
+
+  final VoidCallback onProfileTap;
 
   @override
   Widget build(BuildContext context) {
@@ -227,15 +214,7 @@ class _CurvedDockBar extends StatelessWidget {
                 elevation: 8,
                 child: InkWell(
                   customBorder: const CircleBorder(),
-                  onTap: () {
-                    ScaffoldMessenger.of(context)
-                      ..hideCurrentSnackBar()
-                      ..showSnackBar(
-                        const SnackBar(
-                          content: Text('Profile section coming soon.'),
-                        ),
-                      );
-                  },
+                  onTap: onProfileTap,
                   child: SizedBox(
                     width: 56,
                     height: 56,
@@ -369,62 +348,6 @@ class _SignPill extends StatelessWidget {
         label,
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
-    );
-  }
-}
-
-class _SignTraitTile extends StatelessWidget {
-  const _SignTraitTile({
-    required this.title,
-    required this.subtitle,
-    required this.body,
-    required this.leadingEmoji,
-  });
-
-  final String title;
-  final String subtitle;
-  final String body;
-  final String leadingEmoji;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Text(
-          leadingEmoji,
-          style: const TextStyle(fontSize: 20),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                body,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
