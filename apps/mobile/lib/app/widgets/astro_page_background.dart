@@ -16,9 +16,9 @@ class AstroPageBackground extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: <Color>[
-            Color(0xFFFFF8F1),
-            Color(0xFFF8EEE2),
-            Color(0xFFF6EAE1),
+            Color(0xFFE0AAFF),
+            Color(0xFFC77DFF),
+            Color(0xFF9D4EDD),
           ],
         ),
       ),
@@ -29,7 +29,7 @@ class AstroPageBackground extends StatelessWidget {
             right: -40,
             child: _Orb(
               diameter: 180,
-              color: const Color(0x33E6A15B),
+              color: const Color(0x403C096C),
             ),
           ),
           Positioned(
@@ -37,7 +37,15 @@ class AstroPageBackground extends StatelessWidget {
             left: -60,
             child: _Orb(
               diameter: 160,
-              color: const Color(0x262D8E87),
+              color: const Color(0x405A189A),
+            ),
+          ),
+          Positioned(
+            bottom: -60,
+            right: -30,
+            child: _Orb(
+              diameter: 150,
+              color: const Color(0x307B2CBF),
             ),
           ),
           Positioned.fill(child: child),
