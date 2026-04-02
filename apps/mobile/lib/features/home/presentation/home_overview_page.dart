@@ -164,8 +164,8 @@ class _DockedScaffold extends StatelessWidget {
       body: body,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
-        width: 54,
-        height: 54,
+        width: 56,
+        height: 56,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           boxShadow: <BoxShadow>[
@@ -197,28 +197,37 @@ class _DockedScaffold extends StatelessWidget {
           foregroundColor: colorScheme.onPrimary,
           child: const Icon(
             Icons.person_rounded,
-            size: 21,
+            size: 22,
           ),
         ),
       ),
-      bottomNavigationBar: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        child: BottomAppBar(
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 7,
-          color: colorScheme.surface.withValues(alpha: 1),
-          elevation: 10,
-          child: SizedBox(
-            height: 72,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const <Widget>[
-                _DockIcon(icon: Icons.auto_awesome_outlined),
-                _DockIcon(icon: Icons.grid_view_rounded),
-                SizedBox(width: 46),
-                _DockIcon(icon: Icons.timeline_rounded),
-                _DockIcon(icon: Icons.menu_rounded),
-              ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 8),
+          child: BottomAppBar(
+            clipBehavior: Clip.antiAlias,
+            shape: const AutomaticNotchedShape(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+              ),
+              CircleBorder(),
+            ),
+            notchMargin: 9,
+            color: colorScheme.surface.withValues(alpha: 0.98),
+            elevation: 12,
+            child: SizedBox(
+              height: 72,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: const <Widget>[
+                  _DockIcon(icon: Icons.auto_awesome_outlined),
+                  _DockIcon(icon: Icons.grid_view_rounded),
+                  SizedBox(width: 50),
+                  _DockIcon(icon: Icons.timeline_rounded),
+                  _DockIcon(icon: Icons.menu_rounded),
+                ],
+              ),
             ),
           ),
         ),
