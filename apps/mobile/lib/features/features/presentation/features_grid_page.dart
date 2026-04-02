@@ -5,6 +5,7 @@ import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
+import 'birth_chart_detail_page.dart';
 import '../../profile/presentation/profile_page.dart';
 import '../../subscription/presentation/subscription_page.dart';
 
@@ -269,7 +270,7 @@ class FeaturesGridPage extends StatelessWidget {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
-            return ProfilePage(birthInputState: birthInputState);
+            return BirthChartDetailPage(birthInputState: birthInputState);
           },
         ),
       );
