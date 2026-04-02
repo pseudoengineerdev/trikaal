@@ -18,7 +18,6 @@ class AstroPageBackground extends StatelessWidget {
           colors: <Color>[
             Color(0xFF10002B),
             Color(0xFF240046),
-            Color(0xFF3C096C),
           ],
         ),
       ),
