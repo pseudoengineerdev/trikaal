@@ -6,7 +6,6 @@ import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
-import '../../../app/widgets/neo_surface.dart';
 import '../../dasha/data/models/dasha_models.dart';
 import '../data/models/compute_report_models.dart';
 import '../data/models/place_search_models.dart';
@@ -160,100 +159,104 @@ class _BirthInputPageState extends State<BirthInputPage> {
                       onDeleteProfile: _onDeleteProfile,
                     ),
                     const SizedBox(height: 12),
-                    NeoSurface(
-                      padding: const EdgeInsets.all(14),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: <Widget>[
-                            TextFormField(
-                              controller: _dateController,
-                              readOnly: true,
-                              enabled: !_controller.loading,
-                              onTap: _pickDate,
-                              decoration: const InputDecoration(
-                                labelText: 'Date of Birth',
-                                hintText: 'YYYY-MM-DD',
-                                suffixIcon: Icon(Icons.calendar_today_outlined),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(14),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            children: <Widget>[
+                              TextFormField(
+                                controller: _dateController,
+                                readOnly: true,
+                                enabled: !_controller.loading,
+                                onTap: _pickDate,
+                                decoration: const InputDecoration(
+                                  labelText: 'Date of Birth',
+                                  hintText: 'YYYY-MM-DD',
+                                  suffixIcon:
+                                      Icon(Icons.calendar_today_outlined),
+                                ),
+                                validator: _validateDate,
                               ),
-                              validator: _validateDate,
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _timeController,
-                              readOnly: true,
-                              enabled: !_controller.loading,
-                              onTap: _pickTime,
-                              decoration: const InputDecoration(
-                                labelText: 'Time of Birth',
-                                hintText: 'HH:MM',
-                                suffixIcon: Icon(Icons.schedule),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _timeController,
+                                readOnly: true,
+                                enabled: !_controller.loading,
+                                onTap: _pickTime,
+                                decoration: const InputDecoration(
+                                  labelText: 'Time of Birth',
+                                  hintText: 'HH:MM',
+                                  suffixIcon: Icon(Icons.schedule),
+                                ),
+                                validator: _validateTime,
                               ),
-                              validator: _validateTime,
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _placeController,
-                              enabled: !_controller.loading,
-                              decoration: const InputDecoration(
-                                labelText: 'Place of Birth',
-                                hintText: 'Mumbai',
-                                prefixIcon: Icon(Icons.public),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                controller: _placeController,
+                                enabled: !_controller.loading,
+                                decoration: const InputDecoration(
+                                  labelText: 'Place of Birth',
+                                  hintText: 'Mumbai',
+                                  prefixIcon: Icon(Icons.public),
+                                ),
+                                onChanged: (String value) {
+                                  widget.birthInputState
+                                      .updatePlaceOfBirth(value.trim());
+                                  _controller.onPlaceQueryChanged(value);
+                                },
+                                validator: (String? value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'Place is required';
+                                  }
+                                  return null;
+                                },
                               ),
-                              onChanged: (String value) {
-                                widget.birthInputState
-                                    .updatePlaceOfBirth(value.trim());
-                                _controller.onPlaceQueryChanged(value);
-                              },
-                              validator: (String? value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Place is required';
-                                }
-                                return null;
-                              },
-                            ),
-                            if (_controller
-                                .loadingPlaceSuggestions) ...<Widget>[
-                              const SizedBox(height: 8),
-                              const LinearProgressIndicator(minHeight: 2),
-                            ],
-                            if (_controller
-                                .placeSuggestions.isNotEmpty) ...<Widget>[
-                              const SizedBox(height: 8),
-                              PlaceSuggestionList(
-                                suggestions: _controller.placeSuggestions,
-                                onTap: _onPlaceSelected,
-                              ),
-                            ],
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                onPressed: _controller.loading ? null : _submit,
-                                icon: _controller.loading
-                                    ? SizedBox(
-                                        height: 16,
-                                        width: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary,
-                                        ),
-                                      )
-                                    : const Icon(Icons.auto_awesome_rounded),
-                                label: Text(
-                                  _controller.loading
-                                      ? 'Computing...'
-                                      : 'Compute Chart',
+                              if (_controller
+                                  .loadingPlaceSuggestions) ...<Widget>[
+                                const SizedBox(height: 8),
+                                const LinearProgressIndicator(minHeight: 2),
+                              ],
+                              if (_controller
+                                  .placeSuggestions.isNotEmpty) ...<Widget>[
+                                const SizedBox(height: 8),
+                                PlaceSuggestionList(
+                                  suggestions: _controller.placeSuggestions,
+                                  onTap: _onPlaceSelected,
+                                ),
+                              ],
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed:
+                                      _controller.loading ? null : _submit,
+                                  icon: _controller.loading
+                                      ? SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
+                                          ),
+                                        )
+                                      : const Icon(Icons.auto_awesome_rounded),
+                                  label: Text(
+                                    _controller.loading
+                                        ? 'Computing...'
+                                        : 'Compute Chart',
+                                  ),
                                 ),
                               ),
-                            ),
-                            if (_controller.loading) ...<Widget>[
-                              const SizedBox(height: 10),
-                              const LoadingHint(),
+                              if (_controller.loading) ...<Widget>[
+                                const SizedBox(height: 10),
+                                const LoadingHint(),
+                              ],
                             ],
-                          ],
+                          ),
                         ),
                       ),
                     ),
@@ -269,12 +272,14 @@ class _BirthInputPageState extends State<BirthInputPage> {
                         !_controller.loading) ...<Widget>[
                       const EmptyResultHint(),
                     ] else if (_controller.result != null) ...<Widget>[
-                      NeoSurface(
-                        padding: const EdgeInsets.all(14),
-                        child: ChartResultCard(
-                          result: _controller.result!,
-                          mode: widget.terminologyModeState.mode,
-                          termsState: widget.astrologyTermsState,
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: ChartResultCard(
+                            result: _controller.result!,
+                            mode: widget.terminologyModeState.mode,
+                            termsState: widget.astrologyTermsState,
+                          ),
                         ),
                       ),
                     ],
@@ -705,35 +710,37 @@ class _AstroIntroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NeoSurface(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Icon(
-            Icons.travel_explore_rounded,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  'Vedic Insight Workspace',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Enter birth details once, then explore chart, dasha, and guidance in one flow.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Icon(
+              Icons.travel_explore_rounded,
+              color: Theme.of(context).colorScheme.primary,
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    'Vedic Insight Workspace',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Enter birth details once, then explore chart, dasha, and guidance in one flow.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -770,75 +777,78 @@ class _SavedProfilesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return NeoSurface(
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Icon(
-                Icons.bookmark_outline_rounded,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'Saved Profiles',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    return Card(
+      elevation: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  Icons.bookmark_outline_rounded,
+                  color: theme.colorScheme.primary,
                 ),
-              ),
-              FilledButton.tonalIcon(
-                onPressed: () {
-                  onSaveNew();
-                },
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Save New'),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Saved Profiles',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    onSaveNew();
+                  },
+                  icon: const Icon(Icons.add_rounded),
+                  label: const Text('Save New'),
+                ),
+              ],
+            ),
+            if (profilesLoading && !profilesLoaded) ...<Widget>[
+              const SizedBox(height: 8),
+              const LinearProgressIndicator(minHeight: 2),
+            ],
+            if (profilesError != null) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                profilesError!,
+                style: TextStyle(color: theme.colorScheme.error),
               ),
             ],
-          ),
-          if (profilesLoading && !profilesLoaded) ...<Widget>[
-            const SizedBox(height: 8),
-            const LinearProgressIndicator(minHeight: 2),
-          ],
-          if (profilesError != null) ...<Widget>[
-            const SizedBox(height: 10),
-            Text(
-              profilesError!,
-              style: TextStyle(color: theme.colorScheme.error),
-            ),
-          ],
-          if (profilesLoaded && profiles.isEmpty) ...<Widget>[
-            const SizedBox(height: 8),
-            Text(
-              'Save your frequently used birth details once, then load them in one tap.',
-              style: theme.textTheme.bodyMedium,
-            ),
-          ],
-          if (profiles.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 8),
-            for (final profile in profiles)
-              _SavedProfileListTile(
-                profile: profile,
-                isActive: activeProfileId == profile.id,
-                onTap: () {
-                  onUseProfile(profile.id);
-                },
-                onActionSelected: (action) async {
-                  switch (action) {
-                    case _ProfileAction.setDefault:
-                      await onSetDefaultProfile(profile);
-                    case _ProfileAction.updateFromCurrent:
-                      await onUpdateProfileFromCurrent(profile);
-                    case _ProfileAction.rename:
-                      await onRenameProfile(profile);
-                    case _ProfileAction.delete:
-                      await onDeleteProfile(profile);
-                  }
-                },
+            if (profilesLoaded && profiles.isEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(
+                'Save your frequently used birth details once, then load them in one tap.',
+                style: theme.textTheme.bodyMedium,
               ),
+            ],
+            if (profiles.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              for (final profile in profiles)
+                _SavedProfileListTile(
+                  profile: profile,
+                  isActive: activeProfileId == profile.id,
+                  onTap: () {
+                    onUseProfile(profile.id);
+                  },
+                  onActionSelected: (action) async {
+                    switch (action) {
+                      case _ProfileAction.setDefault:
+                        await onSetDefaultProfile(profile);
+                      case _ProfileAction.updateFromCurrent:
+                        await onUpdateProfileFromCurrent(profile);
+                      case _ProfileAction.rename:
+                        await onRenameProfile(profile);
+                      case _ProfileAction.delete:
+                        await onDeleteProfile(profile);
+                    }
+                  },
+                ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -859,70 +869,70 @@ class _SavedProfileListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final borderColor =
-        isActive ? theme.colorScheme.primary : theme.colorScheme.outlineVariant;
-    return NeoSurface(
-      key: ValueKey<String>(profile.id),
+    return Card(
+      elevation: 0,
       margin: const EdgeInsets.only(top: 8),
-      radius: 12,
-      borderColor: borderColor,
-      backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.84),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          onTap: onTap,
-          leading: Icon(
-            profile.isDefault ? Icons.star : Icons.person_outline,
-            color: profile.isDefault ? theme.colorScheme.primary : null,
-          ),
-          title: Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  profile.name,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
+      shape: RoundedRectangleBorder(
+        side: BorderSide(
+          color: isActive
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.outlineVariant,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Icon(
+          profile.isDefault ? Icons.star : Icons.person_outline,
+          color:
+              profile.isDefault ? Theme.of(context).colorScheme.primary : null,
+        ),
+        title: Row(
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                profile.name,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              if (isActive)
-                Chip(
-                  label: const Text('Active'),
-                  visualDensity: VisualDensity.compact,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-            ],
-          ),
-          subtitle: Text(
-            '${profile.dateOfBirth} • ${profile.timeOfBirth}\n${profile.placeOfBirth}',
-          ),
-          isThreeLine: true,
-          trailing: PopupMenuButton<_ProfileAction>(
-            tooltip: 'Profile actions',
-            onSelected: (value) {
-              onActionSelected(value);
-            },
-            itemBuilder: (BuildContext context) {
-              return <PopupMenuEntry<_ProfileAction>>[
-                const PopupMenuItem<_ProfileAction>(
-                  value: _ProfileAction.setDefault,
-                  child: Text('Set as default'),
-                ),
-                const PopupMenuItem<_ProfileAction>(
-                  value: _ProfileAction.updateFromCurrent,
-                  child: Text('Update from current form'),
-                ),
-                const PopupMenuItem<_ProfileAction>(
-                  value: _ProfileAction.rename,
-                  child: Text('Rename'),
-                ),
-                const PopupMenuDivider(),
-                const PopupMenuItem<_ProfileAction>(
-                  value: _ProfileAction.delete,
-                  child: Text('Delete'),
-                ),
-              ];
-            },
-          ),
+            ),
+            if (isActive)
+              Chip(
+                label: const Text('Active'),
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+          ],
+        ),
+        subtitle: Text(
+          '${profile.dateOfBirth} • ${profile.timeOfBirth}\n${profile.placeOfBirth}',
+        ),
+        isThreeLine: true,
+        trailing: PopupMenuButton<_ProfileAction>(
+          tooltip: 'Profile actions',
+          onSelected: (value) {
+            onActionSelected(value);
+          },
+          itemBuilder: (BuildContext context) {
+            return <PopupMenuEntry<_ProfileAction>>[
+              const PopupMenuItem<_ProfileAction>(
+                value: _ProfileAction.setDefault,
+                child: Text('Set as default'),
+              ),
+              const PopupMenuItem<_ProfileAction>(
+                value: _ProfileAction.updateFromCurrent,
+                child: Text('Update from current form'),
+              ),
+              const PopupMenuItem<_ProfileAction>(
+                value: _ProfileAction.rename,
+                child: Text('Rename'),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem<_ProfileAction>(
+                value: _ProfileAction.delete,
+                child: Text('Delete'),
+              ),
+            ];
+          },
         ),
       ),
     );
