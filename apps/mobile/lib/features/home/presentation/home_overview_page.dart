@@ -162,35 +162,65 @@ class _DockedScaffold extends StatelessWidget {
       appBar: appBar,
       body: body,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'profile-docked-fab',
-        onPressed: () {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(content: Text('Profile section coming soon.')),
-            );
-        },
-        tooltip: 'Profile',
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        child: const Icon(Icons.person_rounded),
+      floatingActionButton: Container(
+        width: 62,
+        height: 62,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: FloatingActionButton(
+          heroTag: 'profile-docked-fab',
+          onPressed: () {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(content: Text('Profile section coming soon.')),
+              );
+          },
+          tooltip: 'Profile',
+          elevation: 0,
+          shape: CircleBorder(
+            side: BorderSide(
+              color: colorScheme.onPrimary.withValues(alpha: 0.22),
+              width: 1.4,
+            ),
+          ),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          child: const Icon(Icons.person_rounded),
+        ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        color: colorScheme.surface.withValues(alpha: 0.92),
-        child: SizedBox(
-          height: 70,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const <Widget>[
-              _DockIcon(icon: Icons.auto_awesome_outlined),
-              _DockIcon(icon: Icons.grid_view_rounded),
-              SizedBox(width: 46),
-              _DockIcon(icon: Icons.timeline_rounded),
-              _DockIcon(icon: Icons.menu_rounded),
-            ],
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+        child: BottomAppBar(
+          shape: const AutomaticNotchedShape(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+            ),
+            CircleBorder(),
+          ),
+          notchMargin: 8,
+          color: colorScheme.surface.withValues(alpha: 0.94),
+          elevation: 10,
+          child: SizedBox(
+            height: 72,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: const <Widget>[
+                _DockIcon(icon: Icons.auto_awesome_outlined),
+                _DockIcon(icon: Icons.grid_view_rounded),
+                SizedBox(width: 52),
+                _DockIcon(icon: Icons.timeline_rounded),
+                _DockIcon(icon: Icons.menu_rounded),
+              ],
+            ),
           ),
         ),
       ),
