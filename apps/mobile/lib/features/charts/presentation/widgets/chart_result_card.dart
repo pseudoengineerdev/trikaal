@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../app/state/astrology_terms_state.dart';
 import '../../../../app/state/terminology_mode_state.dart';
-import '../../../../app/widgets/neo_surface.dart';
 import '../../../dasha/data/models/dasha_models.dart';
 import '../../../shared/astrology/term_localizer.dart';
 import '../../data/models/compute_report_models.dart';
@@ -1450,15 +1449,17 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NeoSurface(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 10),
-          ...children,
-        ],
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 10),
+            ...children,
+          ],
+        ),
       ),
     );
   }

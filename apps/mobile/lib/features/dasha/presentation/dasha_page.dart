@@ -4,7 +4,6 @@ import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
-import '../../../app/widgets/neo_surface.dart';
 import '../../shared/widgets/terminology_toggle.dart';
 import 'widgets/dasha_state_widgets.dart';
 
@@ -39,11 +38,13 @@ class DashaPage extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       Expanded(
-                        child: NeoSurface(
-                          padding: const EdgeInsets.all(12),
-                          child: Text(
-                            'Vimshottari Timeline & Active Periods',
-                            style: Theme.of(context).textTheme.titleMedium,
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Text(
+                              'Vimshottari Timeline & Active Periods',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
                           ),
                         ),
                       ),
