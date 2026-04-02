@@ -66,7 +66,7 @@ class LoadingHint extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              '🔭 Computing chart using Reference profile...',
+              'Computing chart using Reference profile...',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -144,7 +144,7 @@ class EmptyResultHint extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            'No chart computed yet ✨',
+            'No chart computed yet',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),

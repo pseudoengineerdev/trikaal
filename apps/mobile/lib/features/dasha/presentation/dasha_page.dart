@@ -22,20 +22,7 @@ class DashaPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dasha'),
-        actions: const <Widget>[
-          Padding(
-            padding: EdgeInsets.only(right: 14),
-            child: Center(
-              child: Text(
-                '🌙',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Dasha')),
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           birthInputState,
@@ -55,7 +42,7 @@ class DashaPage extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Text(
-                              '⏳ Vimshottari Timeline & Active Periods',
+                              'Vimshottari Timeline & Active Periods',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),

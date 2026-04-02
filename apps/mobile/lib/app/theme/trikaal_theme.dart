@@ -6,7 +6,6 @@ abstract final class TrikaalTheme {
   static const Color _indigoInk = Color(0xFF3C096C);
   static const Color _indigoVelvet = Color(0xFF5A189A);
   static const Color _royalViolet = Color(0xFF7B2CBF);
-  static const Color _lavenderPurple = Color(0xFF9D4EDD);
   static const Color _mauveMagic = Color(0xFFC77DFF);
   static const Color _mauve = Color(0xFFE0AAFF);
 
@@ -15,30 +14,30 @@ abstract final class TrikaalTheme {
       brightness: Brightness.light,
       primary: _indigoVelvet,
       onPrimary: Colors.white,
-      primaryContainer: _mauveMagic,
+      primaryContainer: _mauve,
       onPrimaryContainer: _deepAmethyst,
       secondary: _royalViolet,
       onSecondary: Colors.white,
-      secondaryContainer: _mauve,
+      secondaryContainer: Color(0xFFF0DDFF),
       onSecondaryContainer: _deepAmethyst,
       tertiary: _indigoInk,
       onTertiary: Colors.white,
-      tertiaryContainer: _lavenderPurple,
+      tertiaryContainer: Color(0xFFF3E5FF),
       onTertiaryContainer: _darkAmethyst,
       error: Color(0xFFB3261E),
       onError: Colors.white,
       errorContainer: Color(0xFFF9DEDC),
       onErrorContainer: Color(0xFF410E0B),
-      surface: _mauve,
-      onSurface: _darkAmethyst,
-      surfaceContainerHighest: _mauveMagic,
-      onSurfaceVariant: _indigoInk,
-      outline: _lavenderPurple,
-      outlineVariant: _lavenderPurple,
+      surface: Color(0xFFFFFCFF),
+      onSurface: _deepAmethyst,
+      surfaceContainerHighest: Color(0xFFF4ECFB),
+      onSurfaceVariant: Color(0xFF4D2A70),
+      outline: Color(0xFFC2ABDA),
+      outlineVariant: Color(0xFFE5D6F3),
       shadow: Colors.black,
       scrim: Colors.black,
       inverseSurface: _darkAmethyst,
-      onInverseSurface: _mauve,
+      onInverseSurface: Color(0xFFF8EDFF),
       inversePrimary: _mauveMagic,
       surfaceTint: _indigoVelvet,
     );
@@ -46,7 +45,7 @@ abstract final class TrikaalTheme {
     final base = ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: _mauve,
+      scaffoldBackgroundColor: const Color(0xFFF7F1FC),
     );
 
     final textTheme = base.textTheme.copyWith(
@@ -96,7 +95,7 @@ abstract final class TrikaalTheme {
         scrolledUnderElevation: 0,
       ),
       cardTheme: CardThemeData(
-        elevation: 0,
+        elevation: 1,
         color: colorScheme.surface,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -106,7 +105,7 @@ abstract final class TrikaalTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFFF3D7FF),
+        fillColor: colorScheme.surface,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
@@ -163,7 +162,7 @@ abstract final class TrikaalTheme {
           return const IconThemeData(size: 22);
         }),
         indicatorColor: colorScheme.primaryContainer,
-        backgroundColor: colorScheme.surface.withValues(alpha: 0.95),
+        backgroundColor: Colors.white.withValues(alpha: 0.96),
         height: 70,
       ),
       dividerTheme: DividerThemeData(
