@@ -144,168 +144,175 @@ class ProfilePage extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: IntrinsicHeight(
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: tableBorderColor),
-                          color: Colors.black.withValues(alpha: 0.22),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            SizedBox(
-                              width: 28,
-                              child: Align(
-                                alignment: Alignment.topLeft,
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 4, top: 8),
-                                  child: Text(
-                                    'S\nI\nG\nN\nS',
-                                    textAlign: TextAlign.left,
-                                    style: TextStyle(
-                                      fontSize: 11.2,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                      letterSpacing: 1.3,
-                                      fontWeight: FontWeight.w600,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: tableBorderColor),
+                            borderRadius: BorderRadius.circular(18),
+                            color: Colors.black.withValues(alpha: 0.22),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              SizedBox(
+                                width: 28,
+                                child: Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Padding(
+                                    padding:
+                                        const EdgeInsets.only(left: 4, top: 8),
+                                    child: Text(
+                                      'S\nI\nG\nN\nS',
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 11.2,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                        letterSpacing: 1.3,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.topCenter,
-                                child: Table(
-                                  columnWidths: const <int, TableColumnWidth>{
-                                    0: FlexColumnWidth(1.05),
-                                    1: FlexColumnWidth(1.34),
-                                    2: FlexColumnWidth(0.34),
-                                  },
-                                  border: TableBorder(
-                                    verticalInside: BorderSide(
-                                        color: tableBorderColor, width: 0.8),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.topCenter,
+                                  child: Table(
+                                    columnWidths: const <int, TableColumnWidth>{
+                                      0: FlexColumnWidth(1.05),
+                                      1: FlexColumnWidth(1.34),
+                                      2: FlexColumnWidth(0.34),
+                                    },
+                                    border: TableBorder(
+                                      verticalInside: BorderSide(
+                                          color: tableBorderColor, width: 0.8),
+                                    ),
+                                    defaultVerticalAlignment:
+                                        TableCellVerticalAlignment.middle,
+                                    children: chartRows.map((row) {
+                                      final signBottomBorder =
+                                          row.isLastRow || !row.isRashiGroupEnd
+                                              ? BorderSide.none
+                                              : BorderSide(
+                                                  color: tableBorderColor,
+                                                  width: 0.8,
+                                                );
+                                      final houseBottomBorder =
+                                          row.isLastRow || !row.isHouseGroupEnd
+                                              ? BorderSide.none
+                                              : BorderSide(
+                                                  color: tableBorderColor,
+                                                  width: 0.8,
+                                                );
+                                      return TableRow(
+                                        children: <Widget>[
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: signBottomBorder,
+                                              ),
+                                            ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 6,
+                                              ),
+                                              child: Text(
+                                                row.showRashi
+                                                    ? _rashiName(row.rashiCode)
+                                                    : '',
+                                                style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface,
+                                                  fontSize: 13.0,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            color: const Color(0xFF10002B),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 9,
+                                                vertical: 6,
+                                              ),
+                                              child: Text(
+                                                '${_grahaGlyph[row.grahaKey] ?? '•'} ${_grahaLabel[row.grahaKey] ?? row.grahaKey.toUpperCase()}',
+                                                style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface,
+                                                  fontSize: 11.9,
+                                                  fontWeight: FontWeight.w500,
+                                                  letterSpacing: 0.18,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: houseBottomBorder,
+                                              ),
+                                            ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 6,
+                                                vertical: 6,
+                                              ),
+                                              child: Text(
+                                                row.showHouse
+                                                    ? '${row.house}'
+                                                    : '',
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface,
+                                                  fontSize: 13.3,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(growable: false),
                                   ),
-                                  defaultVerticalAlignment:
-                                      TableCellVerticalAlignment.middle,
-                                  children: chartRows.map((row) {
-                                    final signBottomBorder =
-                                        row.isLastRow || !row.isRashiGroupEnd
-                                            ? BorderSide.none
-                                            : BorderSide(
-                                                color: tableBorderColor,
-                                                width: 0.8,
-                                              );
-                                    final houseBottomBorder =
-                                        row.isLastRow || !row.isHouseGroupEnd
-                                            ? BorderSide.none
-                                            : BorderSide(
-                                                color: tableBorderColor,
-                                                width: 0.8,
-                                              );
-                                    return TableRow(
-                                      children: <Widget>[
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              bottom: signBottomBorder,
-                                            ),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 6,
-                                            ),
-                                            child: Text(
-                                              row.showRashi
-                                                  ? _rashiName(row.rashiCode)
-                                                  : '',
-                                              style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface,
-                                                fontSize: 13.0,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          color: const Color(0xFF10002B),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 9,
-                                              vertical: 6,
-                                            ),
-                                            child: Text(
-                                              '${_grahaGlyph[row.grahaKey] ?? '•'} ${_grahaLabel[row.grahaKey] ?? row.grahaKey.toUpperCase()}',
-                                              style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface,
-                                                fontSize: 11.9,
-                                                fontWeight: FontWeight.w500,
-                                                letterSpacing: 0.18,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              bottom: houseBottomBorder,
-                                            ),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 6,
-                                            ),
-                                            child: Text(
-                                              row.showHouse
-                                                  ? '${row.house}'
-                                                  : '',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface,
-                                                fontSize: 13.3,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    );
-                                  }).toList(growable: false),
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              width: 28,
-                              child: Align(
-                                alignment: Alignment.bottomRight,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      right: 4, bottom: 8),
-                                  child: Text(
-                                    'H\nO\nU\nS\nE\nS',
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                      fontSize: 11.2,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                      letterSpacing: 1.3,
-                                      fontWeight: FontWeight.w600,
+                              SizedBox(
+                                width: 28,
+                                child: Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        right: 4, bottom: 8),
+                                    child: Text(
+                                      'H\nO\nU\nS\nE\nS',
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                        fontSize: 11.2,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                        letterSpacing: 1.3,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
