@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
@@ -62,7 +63,7 @@ class ProfilePage extends StatelessWidget {
       return UniversalDockScaffold(
         activeItem: AppDockItem.profile,
         onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
-        appBar: AppBar(title: const Text('Profile')),
+        appBar: buildTrikaalAppBar(context),
         body: const AstroPageBackground(
           child: Center(
             child: Text('Profile is available after chart computation.'),
@@ -89,7 +90,7 @@ class ProfilePage extends StatelessWidget {
     return UniversalDockScaffold(
       activeItem: AppDockItem.profile,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: buildTrikaalAppBar(context),
       body: AstroPageBackground(
         child: SafeArea(
           child: Column(

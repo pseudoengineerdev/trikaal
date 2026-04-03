@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/chart_api_client.dart';
 import '../../subscription/data/models/subscription_models.dart';
@@ -40,7 +41,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   Widget build(BuildContext context) {
     return UniversalDockScaffold(
-      appBar: AppBar(title: const Text('Premium')),
+      appBar: buildTrikaalAppBar(context),
       activeItem: AppDockItem.premium,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(

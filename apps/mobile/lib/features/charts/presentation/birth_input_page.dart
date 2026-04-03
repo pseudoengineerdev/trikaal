@@ -6,6 +6,7 @@ import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../dasha/data/models/dasha_models.dart';
 import '../data/models/compute_report_models.dart';
 import '../data/models/place_search_models.dart';
@@ -119,7 +120,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Trikaal Birth Chart')),
+      appBar: buildTrikaalAppBar(context),
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           _controller,

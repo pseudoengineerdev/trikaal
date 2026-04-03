@@ -4,6 +4,7 @@ import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../shared/widgets/terminology_toggle.dart';
 import 'widgets/dasha_state_widgets.dart';
 
@@ -22,7 +23,7 @@ class DashaPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dasha')),
+      appBar: buildTrikaalAppBar(context),
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           birthInputState,

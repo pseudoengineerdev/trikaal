@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
 import '../../shared/astrology/sign_trio_insights.dart';
@@ -38,16 +39,6 @@ class FeaturesGridPage extends StatelessWidget {
       icon: Icons.donut_large_rounded,
     ),
     _FeatureTileData(
-      code: 'dream',
-      title: 'Dream Interpretation',
-      icon: Icons.bedtime_rounded,
-    ),
-    _FeatureTileData(
-      code: 'astrocartography',
-      title: 'Astrocartography',
-      icon: Icons.public_rounded,
-    ),
-    _FeatureTileData(
       code: 'compatibility',
       title: 'Compatibility',
       icon: Icons.volunteer_activism_rounded,
@@ -57,37 +48,14 @@ class FeaturesGridPage extends StatelessWidget {
       title: 'Rising Sign',
       icon: Icons.wb_twilight_rounded,
     ),
-    _FeatureTileData(
-      code: 'celebrity_compatibility',
-      title: 'Celebrity Compatibility',
-      icon: Icons.people_alt_rounded,
-    ),
-    _FeatureTileData(
-      code: 'fortune_cookie',
-      title: 'Fortune Cookie',
-      icon: Icons.cookie_rounded,
-    ),
-    _FeatureTileData(
-      code: 'druid',
-      title: 'Druid Horoscope',
-      icon: Icons.hub_rounded,
-    ),
-    _FeatureTileData(
-      code: 'chinese',
-      title: 'Chinese Horoscope',
-      icon: Icons.cyclone_rounded,
-    ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final displayName = birthInputState.firstName.trim().isEmpty
-        ? 'You'
-        : birthInputState.firstName.trim();
     final report = birthInputState.computedReport;
 
     return UniversalDockScaffold(
-      appBar: AppBar(title: const Text('Features')),
+      appBar: buildTrikaalAppBar(context),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(
@@ -95,26 +63,15 @@ class FeaturesGridPage extends StatelessWidget {
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               const spacing = 12.0;
-              final tileWidth = (constraints.maxWidth - 16 - 16 - spacing) / 2;
-              const smallCardHeight = 106.0;
+              final tileWidth = ((constraints.maxWidth - 16 - 16 - spacing) / 2)
+                  .floorToDouble();
+              const smallCardHeight = 112.0;
               const bigCardHeight = (smallCardHeight * 2) + spacing;
               return SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 140),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      'Hello, $displayName',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Explore all astrology features in one place.',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
                     ..._buildMosaicSections(
                       context: context,
                       report: report,
@@ -192,6 +149,7 @@ class FeaturesGridPage extends StatelessWidget {
       );
       final stackedSmallCards = SizedBox(
         width: tileWidth,
+        height: bigCardHeight,
         child: Column(
           children: <Widget>[
             _FeatureGridCard(
@@ -214,13 +172,16 @@ class FeaturesGridPage extends StatelessWidget {
       );
 
       sections.add(
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            if (bigOnLeft) bigCard else stackedSmallCards,
-            SizedBox(width: spacing),
-            if (bigOnLeft) stackedSmallCards else bigCard,
-          ],
+        SizedBox(
+          height: bigCardHeight,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              if (bigOnLeft) bigCard else stackedSmallCards,
+              SizedBox(width: spacing),
+              if (bigOnLeft) stackedSmallCards else bigCard,
+            ],
+          ),
         ),
       );
       if (start + 3 < _featureTiles.length) {
@@ -288,10 +249,10 @@ class _FeatureGridCard extends StatelessWidget {
     final isTall = height > 180;
     final colorScheme = Theme.of(context).colorScheme;
     final isBirthChartCard = chartPreviewLines != null;
-    final titleFontSize = isBirthChartCard ? 20.0 : (isTall ? 22.0 : 16.0);
-    final titleLineHeight = isTall ? 1.05 : 1.1;
+    final titleFontSize = isTall ? 17.0 : 15.0;
+    final titleLineHeight = isTall ? 1.08 : 1.12;
     final titleMaxLines = isBirthChartCard ? 2 : (isTall ? 3 : 2);
-    final iconSize = isBirthChartCard ? 30.0 : (isTall ? 34.0 : 24.0);
+    final iconSize = isTall ? 28.0 : 22.0;
     return InkWell(
       borderRadius: BorderRadius.circular(14),
       onTap: onTap,
