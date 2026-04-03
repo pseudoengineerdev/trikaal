@@ -853,7 +853,6 @@ class _VedicWheelPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: 0.28);
     canvas.drawCircle(center, coreRadius, framePaint);
     canvas.drawCircle(center, maxRadius * 0.49, framePaint);
-    canvas.drawCircle(center, maxRadius * 0.25, framePaint);
 
     final houseLinePaint = Paint()
       ..style = PaintingStyle.stroke
