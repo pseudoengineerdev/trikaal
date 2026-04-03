@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../shared/astrology/sign_trio_insights.dart';
 
@@ -19,17 +20,7 @@ class HomeOverviewPage extends StatelessWidget {
     final report = birthInputState.computedReport;
     if (report == null) {
       return UniversalDockScaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          title: Text(
-            'Trikaal',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontFamily: 'Samarkan',
-                  fontSize: 40,
-                  fontWeight: FontWeight.w500,
-                ),
-          ),
-        ),
+        appBar: buildTrikaalAppBar(context),
         activeItem: AppDockItem.home,
         onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
         body: AstroPageBackground(
@@ -62,17 +53,7 @@ class HomeOverviewPage extends StatelessWidget {
         : birthInputState.firstName.trim();
 
     return UniversalDockScaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'Trikaal',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontFamily: 'Samarkan',
-                fontSize: 40,
-                fontWeight: FontWeight.w500,
-              ),
-        ),
-      ),
+      appBar: buildTrikaalAppBar(context),
       activeItem: AppDockItem.home,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(

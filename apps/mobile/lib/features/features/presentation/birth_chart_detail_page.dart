@@ -7,8 +7,13 @@ import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
+import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
+import '../../charts/data/chart_api_client.dart';
+import '../../charts/data/models/compute_chart_models.dart';
 import '../../charts/data/models/compute_report_models.dart';
+import '../domain/vedic_dominants.dart';
+import '../domain/report_refresh_policy.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
 import '../../shared/astrology/term_localizer.dart';
 import '../../shared/widgets/terminology_toggle.dart';
@@ -95,19 +100,27 @@ class BirthChartDetailPage extends StatefulWidget {
 class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
   late final TerminologyModeState _terminologyModeState;
   late final AstrologyTermsState _astrologyTermsState;
+  late final ChartApiClient _chartApiClient;
   _BirthChartMainTab _mainTab = _BirthChartMainTab.chart;
   _ChartSubTab _chartSubTab = _ChartSubTab.planets;
+  bool _autoRefreshingReport = false;
+  bool _autoRefreshAttempted = false;
 
   @override
   void initState() {
     super.initState();
     _terminologyModeState = TerminologyModeState();
     _astrologyTermsState = AstrologyTermsState();
+    _chartApiClient = ChartApiClient();
     _astrologyTermsState.load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _maybeRefreshReportForToday();
+    });
   }
 
   @override
   void dispose() {
+    _chartApiClient.dispose();
     _terminologyModeState.dispose();
     _astrologyTermsState.dispose();
     super.dispose();
@@ -118,8 +131,8 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
     final report = widget.birthInputState.computedReport;
 
     return UniversalDockScaffold(
-      appBar: AppBar(
-        title: const Text('Birth Chart'),
+      appBar: buildTrikaalAppBar(
+        context,
         actions: <Widget>[
           IconButton(
             onPressed: () {
@@ -151,27 +164,32 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-                    child: Row(
+                    child: Column(
                       children: <Widget>[
-                        Expanded(
-                          child: _PillTabs<_BirthChartMainTab>(
-                            options: _BirthChartMainTab.values,
-                            selected: _mainTab,
-                            labelFor: (_BirthChartMainTab option) =>
-                                option.label,
-                            onSelected: (_BirthChartMainTab value) {
-                              setState(() => _mainTab = value);
-                            },
-                          ),
+                        _PillTabs<_BirthChartMainTab>(
+                          options: _BirthChartMainTab.values,
+                          selected: _mainTab,
+                          labelFor: (_BirthChartMainTab option) => option.label,
+                          onSelected: (_BirthChartMainTab value) {
+                            setState(() => _mainTab = value);
+                          },
                         ),
-                        const SizedBox(width: 10),
-                        TerminologyToggle(
-                          mode: _terminologyModeState.mode,
-                          onChanged: _terminologyModeState.setMode,
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TerminologyToggle(
+                            mode: _terminologyModeState.mode,
+                            onChanged: _terminologyModeState.setMode,
+                          ),
                         ),
                       ],
                     ),
                   ),
+                  if (_autoRefreshingReport)
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(16, 4, 16, 0),
+                      child: LinearProgressIndicator(minHeight: 2),
+                    ),
                   const SizedBox(height: 4),
                   Expanded(
                     child: report == null
@@ -530,32 +548,91 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
   }
 
   Widget _buildDominantsTab(ComputeReportResponse report) {
-    final navagraha = _wheelPlanetOrder
-        .map(report.snapshot.grahaTable.entryByKey)
-        .toList(growable: false);
-    final elementCounts = _elementCounts(navagraha);
+    final mode = _terminologyModeState.mode;
+    final dominance = computeVedicDominanceSnapshot(
+      grahaTable: report.snapshot.grahaTable,
+      dasha: report.dasha,
+    );
+    final strongestGraha = dominance.strongestGraha;
+    final strongestElement = dominance.strongestElement;
+    final strongestGrahaName = localizeGraha(
+      strongestGraha.grahaKey,
+      mode,
+      termsState: _astrologyTermsState,
+    );
+    final strongestElementPercent = strongestElement.percent.toStringAsFixed(1);
+    final mahaDashaDisplay = dominance.mahaDashaLordKey == null
+        ? report.dasha.currentMahaDasha
+        : localizeGraha(
+            dominance.mahaDashaLordKey!,
+            mode,
+            termsState: _astrologyTermsState,
+          );
+    final antarDashaDisplay = dominance.antarDashaLordKey == null
+        ? report.dasha.currentAntarDasha
+        : localizeGraha(
+            dominance.antarDashaLordKey!,
+            mode,
+            termsState: _astrologyTermsState,
+          );
+    final lastUpdated = formatReportAsOfForDisplay(report.dasha.asOfIso);
+    final activeWindowDisplay = formatActiveWindowForDisplay(
+      report.dasha.activeFrom,
+      report.dasha.activeUntil,
+    );
 
     return ListView(
       key: const ValueKey<String>('dominants_tab'),
-      padding: const EdgeInsets.fromLTRB(16, 2, 16, 120),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
       children: <Widget>[
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Current Dasha Influence',
+                  'Vedic Signature Snapshot',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                 ),
                 const SizedBox(height: 8),
-                Text('Maha Dasha: ${report.dasha.currentMahaDasha}'),
-                Text('Antar Dasha: ${report.dasha.currentAntarDasha}'),
                 Text(
-                  'Active Window: ${report.dasha.activeFrom} to ${report.dasha.activeUntil}',
+                  'Last updated: $lastUpdated',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                _SnapshotMetricRow(
+                  label: 'Strongest Graha',
+                  value:
+                      '$strongestGrahaName (${strongestGraha.totalPoints} pts · ${strongestGraha.dominantPercent.toStringAsFixed(1)}%)',
+                ),
+                const SizedBox(height: 8),
+                _SnapshotMetricRow(
+                  label: 'Dominant Element',
+                  value:
+                      '${strongestElement.element} ($strongestElementPercent%)',
+                ),
+                const SizedBox(height: 8),
+                _SnapshotMetricRow(
+                  label: 'Maha Dasha',
+                  value: mahaDashaDisplay,
+                ),
+                const SizedBox(height: 6),
+                _SnapshotMetricRow(
+                  label: 'Antar Dasha',
+                  value: antarDashaDisplay,
+                ),
+                const SizedBox(height: 6),
+                _SnapshotMetricRow(
+                  label: 'Active Window',
+                  value: activeWindowDisplay,
+                  valueStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
               ],
             ),
@@ -568,17 +645,104 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  'Element Balance (Navagraha)',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        'Dominant Graha (Vedic)',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                       ),
+                    ),
+                    IconButton(
+                      tooltip: 'How scoring works',
+                      onPressed: () => _showDominanceScoringInfo(context),
+                      icon: const Icon(Icons.info_outline_rounded, size: 18),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ...List<Widget>.generate(dominance.grahaScores.length, (index) {
+                  final row = dominance.grahaScores[index];
+                  final grahaName = localizeGraha(
+                    row.grahaKey,
+                    mode,
+                    termsState: _astrologyTermsState,
+                  );
+                  final rashiName = localizeRashi(
+                    row.rashi,
+                    mode,
+                    termsState: _astrologyTermsState,
+                  );
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index == dominance.grahaScores.length - 1 ? 0 : 8,
+                    ),
+                    child: _DominantGrahaRow(
+                      rank: index + 1,
+                      grahaName: grahaName,
+                      grahaKey: row.grahaKey,
+                      rashiName: rashiName,
+                      rashiSymbol: _rashiSymbol(row.rashi),
+                      house: row.house,
+                      points: row.totalPoints,
+                      percent: row.dominantPercent,
+                      dignityTag: row.dignityTag,
+                      mahaActive: row.mahaDashaActive,
+                      antarActive: row.antarDashaActive,
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        'Element Balance',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'About element balance',
+                      onPressed: () => _showElementBalanceInfo(context),
+                      icon: const Icon(Icons.info_outline_rounded, size: 18),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
-                ...elementCounts.entries.map(
+                Text(
+                  'Weighted influence rank across graha, dignity, house strength, and dasha activation.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                ...dominance.elementScores.map(
                   (entry) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text('${entry.key}: ${entry.value}'),
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: _ElementMeterRow(
+                      label: entry.element,
+                      points: entry.points,
+                      placements: entry.placements,
+                      percent: entry.percent,
+                    ),
                   ),
                 ),
               ],
@@ -587,7 +751,7 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Detailed Vedic dominance scoring (Graha influence matrix) will be added next.',
+          'Scoring uses Vedic house placement, house lordship from Lagna, D1/D9 dignity, motion/combust state, and active dasha weighting.',
           style:
               TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
@@ -597,21 +761,6 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
 
   List<ReportGrahaEntry> _planetEntries(ReportGrahaTable table) {
     return _planetOrder.map(table.entryByKey).toList(growable: false);
-  }
-
-  Map<String, int> _elementCounts(List<ReportGrahaEntry> entries) {
-    final counts = <String, int>{
-      'Fire': 0,
-      'Earth': 0,
-      'Air': 0,
-      'Water': 0,
-    };
-    for (final entry in entries) {
-      final rashi = rashiInsightFor(entry.rashi);
-      final element = rashi.element;
-      counts[element] = (counts[element] ?? 0) + 1;
-    }
-    return counts;
   }
 
   String _rashiSymbol(String rashiCode) {
@@ -651,6 +800,174 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
       birthInputState: widget.birthInputState,
       homeBehavior: DockHomeBehavior.popToRoot,
       chartsBehavior: DockChartsBehavior.popOne,
+    );
+  }
+
+  Future<void> _maybeRefreshReportForToday() async {
+    if (_autoRefreshAttempted) {
+      return;
+    }
+    _autoRefreshAttempted = true;
+
+    final report = widget.birthInputState.computedReport;
+    if (report == null) {
+      return;
+    }
+    if (widget.birthInputState.dateOfBirth.trim().isEmpty ||
+        widget.birthInputState.timeOfBirth.trim().isEmpty ||
+        widget.birthInputState.placeOfBirth.trim().isEmpty) {
+      return;
+    }
+    if (!_isReportStale(report)) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _autoRefreshingReport = true;
+    });
+
+    try {
+      final refreshed = await _chartApiClient.computeReport(
+        ComputeChartRequest(
+          dateOfBirth: widget.birthInputState.dateOfBirth,
+          timeOfBirth: widget.birthInputState.timeOfBirth,
+          placeOfBirth: widget.birthInputState.placeOfBirth,
+          customPlace: widget.birthInputState.customPlace,
+        ),
+      );
+      if (!mounted) {
+        return;
+      }
+      widget.birthInputState.markReportComputed(refreshed);
+    } catch (_) {
+      // Keep existing report data if background refresh fails.
+    } finally {
+      if (mounted) {
+        setState(() {
+          _autoRefreshingReport = false;
+        });
+      }
+    }
+  }
+
+  bool _isReportStale(ComputeReportResponse report) {
+    return shouldAutoRefreshReportForDay(
+      report.dasha.asOfIso,
+      now: DateTime.now(),
+    );
+  }
+
+  void _showDominanceScoringInfo(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'How Dominant Score Works',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Each graha gets points from:',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                '• House placement strength (Kendra/Trikona/Upachaya/Dusthana)',
+              ),
+              const Text(
+                '• House lordship strength from your Lagna (1/5/9, 4/7/10, etc.)',
+              ),
+              const Text(
+                '• Dignity in D1 and D9 (Exalted/Mooltrikona/Own/Friendly/Neutral/Inimical/Debilitated)',
+              ),
+              const Text('• Motion and condition (Retrograde, Combust)'),
+              const Text('• Current Dasha activation (Maha/Antar)'),
+              const SizedBox(height: 10),
+              Text(
+                'Percent is each graha’s share of total weighted points. Element bars use weighted graha totals (not flat counts), so they update as chart + dasha context changes.',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showElementBalanceInfo(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Element Balance (Vedic)',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'What this is:',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'A quick distribution of Fire, Earth, Air, and Water in your chart profile.',
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Why it is important:',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'It summarizes temperament tendencies: drive (Fire), stability (Earth), communication/intellect (Air), and emotional depth (Water).',
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'How we calculate it:',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Each graha is mapped to its rashi element. Then we sum weighted dominance points by element, with Lagna/Moon/Sun given slightly higher influence. Percentages come from those weighted totals.',
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -745,6 +1062,237 @@ class _StatusChip extends StatelessWidget {
         label,
         style: Theme.of(context).textTheme.labelMedium,
       ),
+    );
+  }
+}
+
+class _DominantGrahaRow extends StatelessWidget {
+  const _DominantGrahaRow({
+    required this.rank,
+    required this.grahaName,
+    required this.grahaKey,
+    required this.rashiName,
+    required this.rashiSymbol,
+    required this.house,
+    required this.points,
+    required this.percent,
+    required this.dignityTag,
+    required this.mahaActive,
+    required this.antarActive,
+  });
+
+  final int rank;
+  final String grahaName;
+  final String grahaKey;
+  final String rashiName;
+  final String rashiSymbol;
+  final int house;
+  final int points;
+  final double percent;
+  final String dignityTag;
+  final bool mahaActive;
+  final bool antarActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final hasDashaBadge = mahaActive || antarActive;
+    return Container(
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: 0.32),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.85)),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.78),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '$rank',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${_grahaGlyph[grahaKey] ?? '•'} $grahaName',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: <Widget>[
+                  Text(
+                    '$points pts',
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  Text(
+                    '${percent.toStringAsFixed(1)}%',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '$rashiName $rashiSymbol • House $house',
+            style: TextStyle(
+              color: colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: <Widget>[
+              _smallTag(context, dignityTag),
+              if (mahaActive) _smallTag(context, 'Maha Dasha'),
+              if (antarActive) _smallTag(context, 'Antar Dasha'),
+              if (!hasDashaBadge) _smallTag(context, 'No active Dasha'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _smallTag(BuildContext context, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall,
+      ),
+    );
+  }
+}
+
+class _SnapshotMetricRow extends StatelessWidget {
+  const _SnapshotMetricRow({
+    required this.label,
+    required this.value,
+    this.valueStyle,
+  });
+
+  final String label;
+  final String value;
+  final TextStyle? valueStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        );
+    final resolvedValueStyle =
+        valueStyle ?? Theme.of(context).textTheme.bodyMedium;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        SizedBox(
+          width: 122,
+          child: Text(
+            label,
+            style: labelStyle,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: resolvedValueStyle,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ElementMeterRow extends StatelessWidget {
+  const _ElementMeterRow({
+    required this.label,
+    required this.points,
+    required this.placements,
+    required this.percent,
+  });
+
+  final String label;
+  final double points;
+  final int placements;
+  final double percent;
+
+  @override
+  Widget build(BuildContext context) {
+    final barColor =
+        Theme.of(context).colorScheme.primary.withValues(alpha: 0.9);
+    final baseColor =
+        Theme.of(context).colorScheme.surface.withValues(alpha: 0.45);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            Text(
+              '${percent.toStringAsFixed(1)}%',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 1),
+        Text(
+          '${points.toStringAsFixed(1)} pts • $placements placement${placements == 1 ? '' : 's'}',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: LinearProgressIndicator(
+            value: percent / 100,
+            minHeight: 7,
+            backgroundColor: baseColor,
+            valueColor: AlwaysStoppedAnimation<Color>(barColor),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -858,7 +1406,7 @@ class _VedicWheelPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0
       ..color = Colors.white.withValues(alpha: 0.2);
-    final houseLineStartRadius = maxRadius * 0.48;
+    final houseLineStartRadius = maxRadius * 0.49;
     for (var i = 0; i < segmentCount; i += 1) {
       final houseDeg = (lagnaSiderealDeg + (i * 30)) % 360;
       final angle = _degToRad(houseDeg);
@@ -928,12 +1476,12 @@ class _VedicWheelPainter extends CustomPainter {
 
     final webPrimaryPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1
-      ..color = const Color(0xFF70D6FF).withValues(alpha: 0.28);
+      ..strokeWidth = 1.2
+      ..color = const Color(0xFF70D6FF).withValues(alpha: 0.42);
     final webSecondaryPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1
-      ..color = const Color(0xFFFF8FCF).withValues(alpha: 0.24);
+      ..strokeWidth = 1.2
+      ..color = const Color(0xFFFF8FCF).withValues(alpha: 0.36);
     for (var i = 0; i < planetLayouts.length; i += 1) {
       if (planetLayouts.length < 4) {
         break;
