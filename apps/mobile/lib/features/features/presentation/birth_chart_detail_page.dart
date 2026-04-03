@@ -857,15 +857,20 @@ class _VedicWheelPainter extends CustomPainter {
     final houseLinePaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0
-      ..color = Colors.white.withValues(alpha: 0.22);
+      ..color = Colors.white.withValues(alpha: 0.2);
+    final houseLineStartRadius = maxRadius * 0.33;
     for (var i = 0; i < segmentCount; i += 1) {
       final houseDeg = (lagnaSiderealDeg + (i * 30)) % 360;
       final angle = _degToRad(houseDeg);
+      final start = Offset(
+        center.dx + (math.cos(angle) * houseLineStartRadius),
+        center.dy + (math.sin(angle) * houseLineStartRadius),
+      );
       final end = Offset(
         center.dx + (math.cos(angle) * coreRadius),
         center.dy + (math.sin(angle) * coreRadius),
       );
-      canvas.drawLine(center, end, houseLinePaint);
+      canvas.drawLine(start, end, houseLinePaint);
     }
 
     for (var i = 0; i < segmentCount; i += 1) {
