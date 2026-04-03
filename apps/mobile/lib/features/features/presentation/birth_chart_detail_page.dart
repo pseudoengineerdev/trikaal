@@ -757,98 +757,262 @@ class _VedicWheelPainter extends CustomPainter {
 
   final double lagnaSiderealDeg;
   final List<ReportGrahaEntry> planets;
+  static const List<Color> _zodiacRingColors = <Color>[
+    Color(0xFF7B2CBF),
+    Color(0xFF5A189A),
+    Color(0xFF3C096C),
+    Color(0xFF4E148C),
+    Color(0xFF6A2FB5),
+    Color(0xFF53208D),
+    Color(0xFF7B2CBF),
+    Color(0xFF5A189A),
+    Color(0xFF3C096C),
+    Color(0xFF4E148C),
+    Color(0xFF6A2FB5),
+    Color(0xFF53208D),
+  ];
+  static const List<Color> _zodiacGlyphColors = <Color>[
+    Color(0xFFFF8A3C),
+    Color(0xFFFFC84A),
+    Color(0xFFE0AAFF),
+    Color(0xFF7DB7FF),
+    Color(0xFFF8D775),
+    Color(0xFF9CCC65),
+    Color(0xFFE0AAFF),
+    Color(0xFF4DD0E1),
+    Color(0xFFFFCC80),
+    Color(0xFFB0BEC5),
+    Color(0xFF80CBC4),
+    Color(0xFFFF9CCC),
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = math.min(size.width, size.height) / 2;
-    final outerRect = Rect.fromCircle(center: center, radius: radius * 0.93);
+    final maxRadius = math.min(size.width, size.height) / 2;
+    final ringOuterRadius = maxRadius * 0.94;
+    final ringInnerRadius = maxRadius * 0.74;
+    final glyphOrbitRadius = maxRadius * 0.81;
+    final planetOrbitRadius = maxRadius * 0.55;
+    final coreRadius = maxRadius * 0.67;
+    const segmentCount = 12;
+    final segmentSweep = (math.pi * 2) / segmentCount;
+    final segmentGap = segmentSweep * 0.05;
 
-    final ringColors = <Color>[
-      const Color(0xFF3C096C),
-      const Color(0xFF5A189A),
-      const Color(0xFF240046),
-      const Color(0xFF7B2CBF),
-    ];
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = radius * 0.19;
-    final ringSweep = (math.pi * 2) / 12;
-    for (var i = 0; i < 12; i += 1) {
-      ringPaint.color =
-          ringColors[i % ringColors.length].withValues(alpha: 0.88);
-      canvas.drawArc(
-        outerRect,
-        _degToRad(i * 30),
-        ringSweep,
-        false,
-        ringPaint,
+    final wheelBackdropPaint = Paint()
+      ..shader = RadialGradient(
+        colors: <Color>[
+          const Color(0xFF2A0B4B).withValues(alpha: 0.85),
+          const Color(0xFF180437).withValues(alpha: 0.95),
+          const Color(0xFF0F022A).withValues(alpha: 1),
+        ],
+        stops: const <double>[0, 0.62, 1],
+      ).createShader(
+        Rect.fromCircle(center: center, radius: ringOuterRadius),
+      );
+    canvas.drawCircle(center, ringOuterRadius, wheelBackdropPaint);
+
+    final ringOuterRect =
+        Rect.fromCircle(center: center, radius: ringOuterRadius);
+    final ringInnerRect =
+        Rect.fromCircle(center: center, radius: ringInnerRadius);
+    for (var i = 0; i < segmentCount; i += 1) {
+      final start = _degToRad(i * 30) + (segmentGap / 2);
+      final sweep = segmentSweep - segmentGap;
+      final segmentPath = Path()
+        ..arcTo(ringOuterRect, start, sweep, false)
+        ..arcTo(ringInnerRect, start + sweep, -sweep, false)
+        ..close();
+      canvas.drawPath(
+        segmentPath,
+        Paint()..color = _zodiacRingColors[i].withValues(alpha: 0.92),
       );
     }
+
+    final ringStrokePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = const Color(0xFFD9C4FF).withValues(alpha: 0.35);
+    canvas.drawCircle(center, ringOuterRadius, ringStrokePaint);
+    canvas.drawCircle(center, ringInnerRadius, ringStrokePaint);
+
+    final coreGlowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: <Color>[
+          const Color(0xFF3E1172).withValues(alpha: 0.45),
+          const Color(0xFF180437).withValues(alpha: 0),
+        ],
+      ).createShader(
+        Rect.fromCircle(center: center, radius: coreRadius),
+      );
+    canvas.drawCircle(center, coreRadius, coreGlowPaint);
 
     final framePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
-      ..color = Colors.white.withValues(alpha: 0.32);
-    canvas.drawCircle(center, radius * 0.84, framePaint);
-    canvas.drawCircle(center, radius * 0.62, framePaint);
-    canvas.drawCircle(center, radius * 0.30, framePaint);
+      ..strokeWidth = 1.2
+      ..color = Colors.white.withValues(alpha: 0.28);
+    canvas.drawCircle(center, coreRadius, framePaint);
+    canvas.drawCircle(center, maxRadius * 0.49, framePaint);
+    canvas.drawCircle(center, maxRadius * 0.25, framePaint);
 
-    final housePaint = Paint()
+    final houseLinePaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = Colors.white.withValues(alpha: 0.26);
-    for (var i = 0; i < 12; i += 1) {
+      ..strokeWidth = 1.0
+      ..color = Colors.white.withValues(alpha: 0.22);
+    for (var i = 0; i < segmentCount; i += 1) {
       final houseDeg = (lagnaSiderealDeg + (i * 30)) % 360;
       final angle = _degToRad(houseDeg);
       final end = Offset(
-        center.dx + math.cos(angle) * radius * 0.84,
-        center.dy + math.sin(angle) * radius * 0.84,
+        center.dx + (math.cos(angle) * coreRadius),
+        center.dy + (math.sin(angle) * coreRadius),
       );
-      canvas.drawLine(center, end, housePaint);
+      canvas.drawLine(center, end, houseLinePaint);
     }
 
-    for (var i = 0; i < 12; i += 1) {
+    for (var i = 0; i < segmentCount; i += 1) {
       final mid = _degToRad((i * 30) + 15);
-      final labelPoint = Offset(
-        center.dx + math.cos(mid) * radius * 0.78,
-        center.dy + math.sin(mid) * radius * 0.78,
+      final chipCenter = Offset(
+        center.dx + (math.cos(mid) * glyphOrbitRadius),
+        center.dy + (math.sin(mid) * glyphOrbitRadius),
+      );
+      final chipRadius = maxRadius * 0.035;
+      final chipColor = _zodiacGlyphColors[i];
+      canvas.drawCircle(
+        chipCenter,
+        chipRadius,
+        Paint()..color = const Color(0xFF190433).withValues(alpha: 0.95),
+      );
+      canvas.drawCircle(
+        chipCenter,
+        chipRadius,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.4
+          ..color = chipColor.withValues(alpha: 0.95),
       );
       _drawText(
         canvas,
         _zodiacSymbols[i],
-        labelPoint,
-        fontSize: radius * 0.085,
-        color: Colors.white.withValues(alpha: 0.86),
+        chipCenter,
+        fontSize: maxRadius * 0.052,
+        color: chipColor,
       );
     }
 
-    for (final planet in planets) {
+    final sortedPlanets = <ReportGrahaEntry>[...planets]
+      ..sort((a, b) => a.siderealDeg.compareTo(b.siderealDeg));
+    final planetLayouts = <({ReportGrahaEntry planet, Offset position})>[];
+    var clusterIndex = 0;
+    double? previousDegree;
+    for (final planet in sortedPlanets) {
+      if (previousDegree != null &&
+          _angularSeparation(previousDegree, planet.siderealDeg) < 9.5) {
+        clusterIndex += 1;
+      } else {
+        clusterIndex = 0;
+      }
+      final lane = _laneForCluster(clusterIndex);
+      final orbit = planetOrbitRadius + (lane * maxRadius * 0.03);
       final angle = _degToRad(planet.siderealDeg);
       final point = Offset(
-        center.dx + math.cos(angle) * radius * 0.52,
-        center.dy + math.sin(angle) * radius * 0.52,
+        center.dx + (math.cos(angle) * orbit),
+        center.dy + (math.sin(angle) * orbit),
       );
+      planetLayouts.add((planet: planet, position: point));
+      previousDegree = planet.siderealDeg;
+    }
+
+    final webPrimaryPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.1
+      ..color = const Color(0xFF70D6FF).withValues(alpha: 0.28);
+    final webSecondaryPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.1
+      ..color = const Color(0xFFFF8FCF).withValues(alpha: 0.24);
+    for (var i = 0; i < planetLayouts.length; i += 1) {
+      if (planetLayouts.length < 4) {
+        break;
+      }
+      final p1 = planetLayouts[i].position;
+      if (i.isEven) {
+        final p2 = planetLayouts[(i + 3) % planetLayouts.length].position;
+        canvas.drawLine(p1, p2, webPrimaryPaint);
+      }
+      if (i % 3 == 0) {
+        final p3 = planetLayouts[(i + 4) % planetLayouts.length].position;
+        canvas.drawLine(p1, p3, webSecondaryPaint);
+      }
+    }
+
+    for (final entry in planetLayouts) {
+      final planet = entry.planet;
+      final point = entry.position;
       final color = _planetDotColor[planet.key] ?? const Color(0xFFE0AAFF);
-      canvas.drawCircle(point, radius * 0.020, Paint()..color = color);
+      canvas.drawCircle(
+        point,
+        maxRadius * 0.04,
+        Paint()..color = color.withValues(alpha: 0.3),
+      );
+      canvas.drawCircle(
+        point,
+        maxRadius * 0.028,
+        Paint()..color = const Color(0xFF14032E),
+      );
+      canvas.drawCircle(
+        point,
+        maxRadius * 0.028,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5
+          ..color = color.withValues(alpha: 0.95),
+      );
       _drawText(
         canvas,
         _grahaGlyph[planet.key] ?? '•',
-        Offset(point.dx, point.dy - (radius * 0.040)),
-        fontSize: radius * 0.06,
+        point,
+        fontSize: maxRadius * 0.05,
         color: color,
       );
     }
 
-    _drawText(
-      canvas,
-      'As',
-      Offset(
-        center.dx + math.cos(_degToRad(lagnaSiderealDeg)) * radius * 0.95,
-        center.dy + math.sin(_degToRad(lagnaSiderealDeg)) * radius * 0.95,
-      ),
-      fontSize: radius * 0.06,
-      color: Colors.white.withValues(alpha: 0.8),
+    _drawAngleLabel(
+      canvas: canvas,
+      center: center,
+      radius: ringOuterRadius * 1.035,
+      degree: lagnaSiderealDeg,
+      label: 'As',
+      fontSize: maxRadius * 0.055,
+    );
+    _drawAngleLabel(
+      canvas: canvas,
+      center: center,
+      radius: ringOuterRadius * 1.035,
+      degree: (lagnaSiderealDeg + 180) % 360,
+      label: 'Ds',
+      fontSize: maxRadius * 0.042,
+    );
+    _drawAngleLabel(
+      canvas: canvas,
+      center: center,
+      radius: ringOuterRadius * 1.035,
+      degree: (lagnaSiderealDeg + 270) % 360,
+      label: 'Mc',
+      fontSize: maxRadius * 0.04,
+    );
+    _drawAngleLabel(
+      canvas: canvas,
+      center: center,
+      radius: ringOuterRadius * 1.035,
+      degree: (lagnaSiderealDeg + 90) % 360,
+      label: 'Ic',
+      fontSize: maxRadius * 0.04,
+    );
+
+    canvas.drawCircle(
+      center,
+      maxRadius * 0.01,
+      Paint()..color = Colors.white.withValues(alpha: 0.8),
     );
   }
 
@@ -870,6 +1034,37 @@ class _VedicWheelPainter extends CustomPainter {
   }
 
   double _degToRad(double degree) => ((degree - 90) * math.pi) / 180;
+  double _angularSeparation(double a, double b) {
+    final diff = (a - b).abs() % 360;
+    return diff > 180 ? 360 - diff : diff;
+  }
+
+  int _laneForCluster(int clusterIndex) {
+    const lanes = <int>[0, -1, 1, -2, 2, -3, 3];
+    return lanes[clusterIndex % lanes.length];
+  }
+
+  void _drawAngleLabel({
+    required Canvas canvas,
+    required Offset center,
+    required double radius,
+    required double degree,
+    required String label,
+    required double fontSize,
+  }) {
+    final angle = _degToRad(degree);
+    final point = Offset(
+      center.dx + (math.cos(angle) * radius),
+      center.dy + (math.sin(angle) * radius),
+    );
+    _drawText(
+      canvas,
+      label,
+      point,
+      fontSize: fontSize,
+      color: Colors.white.withValues(alpha: 0.8),
+    );
+  }
 
   void _drawText(
     Canvas canvas,
