@@ -20,7 +20,7 @@ import '../../shared/widgets/terminology_toggle.dart';
 
 enum _BirthChartMainTab {
   chart(label: 'Chart'),
-  tables(label: 'Tables'),
+  tables(label: 'Table'),
   dominants(label: 'Dominants');
 
   const _BirthChartMainTab({required this.label});
@@ -382,9 +382,6 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
       termsState: _astrologyTermsState,
     );
     final symbol = _rashiSymbol(house.rashi);
-    final cusp = _formatDegree(
-      (snapshot.grahaTable.lagna.siderealDeg + ((houseIndex - 1) * 30)) % 360,
-    );
     final occupants = house.occupants.map((occupant) {
       final name = localizeGraha(
         occupant,
@@ -410,7 +407,7 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Degree: $cusp',
+                'House System: Whole Sign',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -479,63 +476,6 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
                       DataCell(Text(entry.house.toString())),
                       DataCell(
                           Text(entry.retrograde ? 'Retrograde' : 'Direct')),
-                    ],
-                  );
-                }).toList(growable: false),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        Text(
-          'Houses',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                headingTextStyle: Theme.of(context).textTheme.titleSmall,
-                dataTextStyle: Theme.of(context).textTheme.bodyMedium,
-                columns: const <DataColumn>[
-                  DataColumn(label: Text('House')),
-                  DataColumn(label: Text('Sign')),
-                  DataColumn(label: Text('Degree')),
-                  DataColumn(label: Text('Occupants')),
-                ],
-                rows: snapshot.varga.d1.sortedHouses.map((houseEntry) {
-                  final index = houseEntry.key;
-                  final house = houseEntry.value;
-                  final rashi = localizeRashi(
-                    house.rashi,
-                    mode,
-                    termsState: _astrologyTermsState,
-                  );
-                  final degree = _formatDegree(
-                    (snapshot.grahaTable.lagna.siderealDeg +
-                            ((index - 1) * 30)) %
-                        360,
-                  );
-                  final occupants = house.occupants.isEmpty
-                      ? '—'
-                      : house.occupants
-                          .map(
-                            (key) => localizeGraha(
-                              key,
-                              mode,
-                              termsState: _astrologyTermsState,
-                            ),
-                          )
-                          .join(', ');
-                  return DataRow(
-                    cells: <DataCell>[
-                      DataCell(Text(index.toString())),
-                      DataCell(Text('$rashi ${_rashiSymbol(house.rashi)}')),
-                      DataCell(Text(degree)),
-                      DataCell(SizedBox(width: 220, child: Text(occupants))),
                     ],
                   );
                 }).toList(growable: false),
@@ -769,10 +709,10 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
 
   String _formatDegree(double siderealDeg) {
     final normalized = ((siderealDeg % 30) + 30) % 30;
-    final degrees = normalized.floor();
-    final minuteFloat = (normalized - degrees) * 60;
-    final minutes = minuteFloat.floor();
-    final seconds = ((minuteFloat - minutes) * 60).round();
+    final totalSeconds = (normalized * 3600).round().clamp(0, 107999);
+    final degrees = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
     return '${degrees.toString().padLeft(2, '0')}°${minutes.toString().padLeft(2, '0')}\'${seconds.toString().padLeft(2, '0')}"';
   }
 
