@@ -90,13 +90,18 @@ class _OnboardingFlowPageState extends State<OnboardingFlowPage> {
       ),
       body: AstroPageBackground(
         child: SafeArea(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            child: switch (_step) {
-              _OnboardingStep.firstName => _buildFirstNameStep(context),
-              _OnboardingStep.birthMix => _buildBirthMixStep(context),
-              _OnboardingStep.computing => _buildComputingStep(context),
-              _OnboardingStep.aboutYou => _buildAboutYouStep(context),
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (BuildContext context, Widget? _) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 260),
+                child: switch (_step) {
+                  _OnboardingStep.firstName => _buildFirstNameStep(context),
+                  _OnboardingStep.birthMix => _buildBirthMixStep(context),
+                  _OnboardingStep.computing => _buildComputingStep(context),
+                  _OnboardingStep.aboutYou => _buildAboutYouStep(context),
+                },
+              );
             },
           ),
         ),
