@@ -96,18 +96,21 @@ class BirthChartController extends ChangeNotifier {
       return;
     }
 
-    _placeSearchDebounce = Timer(const Duration(milliseconds: 300), () {
+    _placeSearchDebounce = Timer(const Duration(milliseconds: 220), () {
       _fetchPlaceSuggestions(query);
     });
   }
 
   Future<void> _fetchPlaceSuggestions(String query) async {
     final requestId = ++_placeSearchRequestId;
+    placeSuggestions = <PlaceMatch>[PlaceMatch.custom(query)];
     loadingPlaceSuggestions = true;
     notifyListeners();
 
     try {
-      final response = await _apiClient.searchPlaces(query);
+      final response = await _apiClient
+          .searchPlaces(query)
+          .timeout(const Duration(seconds: 4));
       if (requestId != _placeSearchRequestId) {
         return;
       }
