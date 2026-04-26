@@ -6,6 +6,7 @@ import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
+import '../../pancha_pakshi/presentation/pancha_pakshi_page.dart';
 import '../../shared/astrology/sign_trio_insights.dart';
 import 'birth_chart_detail_page.dart';
 
@@ -37,6 +38,11 @@ class FeaturesGridPage extends StatelessWidget {
       code: 'birth_chart',
       title: 'Birth Chart',
       icon: Icons.donut_large_rounded,
+    ),
+    _FeatureTileData(
+      code: 'pancha_pakshi',
+      title: 'Pancha Pakshi',
+      icon: Icons.schedule_rounded,
     ),
     _FeatureTileData(
       code: 'compatibility',
@@ -207,6 +213,16 @@ class FeaturesGridPage extends StatelessWidget {
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
             return BirthChartDetailPage(birthInputState: birthInputState);
+          },
+        ),
+      );
+      return;
+    }
+    if (tile.code == 'pancha_pakshi') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return PanchaPakshiPage(birthInputState: birthInputState);
           },
         ),
       );

@@ -5,6 +5,7 @@ import '../../shared/network/json_api_helpers.dart';
 import 'models/compute_chart_models.dart';
 import 'models/compute_report_models.dart';
 import 'models/place_search_models.dart';
+import '../../pancha_pakshi/data/models/pancha_pakshi_models.dart';
 import '../../subscription/data/models/subscription_models.dart';
 
 class ChartApiException implements Exception {
@@ -83,6 +84,22 @@ class ChartApiClient {
       ),
     );
     return SubscriptionPlansResponse.fromJson(body);
+  }
+
+  Future<PanchaPakshiResponse> computePanchaPakshi(
+    PanchaPakshiRequest request,
+  ) async {
+    final uri = Uri.parse('$_baseUrl/v1/pancha-pakshi/compute');
+    final body = await postJson(
+      client: _httpClient,
+      uri: uri,
+      payload: request.toJson(),
+      exceptionBuilder: (message, statusCode) => ChartApiException(
+        message,
+        statusCode: statusCode,
+      ),
+    );
+    return PanchaPakshiResponse.fromJson(body);
   }
 
   void dispose() {

@@ -3,6 +3,7 @@
 from vedic_engine.calculator import compute_chart_snapshot
 from vedic_engine.dasha import compute_vimshottari_dasha
 from vedic_engine.domain import BirthEvent, CalculationProfile, ChartSnapshot
+from vedic_engine.pancha_pakshi import compute_pancha_pakshi_live
 
 __all__ = [
     "BirthEvent",
@@ -10,4 +11,5 @@ __all__ = [
     "ChartSnapshot",
     "compute_chart_snapshot",
     "compute_vimshottari_dasha",
+    "compute_pancha_pakshi_live",
 ]
