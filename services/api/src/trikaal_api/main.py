@@ -17,6 +17,11 @@ from trikaal_api.chart import (
 )
 from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
 from trikaal_api.metadata import AstrologyTermsResponse, load_astrology_terms
+from trikaal_api.pancha_pakshi import (
+    PanchaPakshiComputeRequest,
+    PanchaPakshiComputeResponse,
+    compute_pancha_pakshi,
+)
 from trikaal_api.parity import (
     ParityResult,
     ParitySuiteResult,
@@ -105,6 +110,16 @@ def dasha_compute(request: DashaComputeRequest) -> DashaComputeResponse:
 def reports_compute(request: ComputeReportRequest) -> ComputeReportResponse:
     try:
         return compute_report(request)
+    except PlaceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+
+
+@app.post("/v1/pancha-pakshi/compute", response_model=PanchaPakshiComputeResponse)
+def pancha_pakshi_compute(request: PanchaPakshiComputeRequest) -> PanchaPakshiComputeResponse:
+    try:
+        return compute_pancha_pakshi(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ZoneInfoNotFoundError as exc:
