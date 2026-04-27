@@ -1,0 +1,761 @@
+{
+  "version": "v1",
+  "cases": [
+    {
+      "id": "mumbai_krishna_day",
+      "description": "Canonical baseline in birth location during Krishna day phase.",
+      "request": {
+        "date_of_birth": "1999-07-04",
+        "time_of_birth": "12:22",
+        "place_of_birth": "Mumbai",
+        "custom_place": {
+          "place_label": "Mumbai, Maharashtra, India",
+          "latitude": 19.076,
+          "longitude": 72.8777,
+          "timezone": "Asia/Kolkata",
+          "elevation_m": 14.0
+        },
+        "runtime_custom_place": null,
+        "as_of_local_iso": "2026-04-09T11:00:00+05:30"
+      },
+      "expected": {
+        "birth": {
+          "nakshatra_number": 25,
+          "nakshatra_name": "P Bhadrapada",
+          "paksha": "Krishna",
+          "pakshi": "Vulture"
+        },
+        "runtime": {
+          "reference_timezone": "Asia/Kolkata",
+          "reference_place_label": "Mumbai, Maharashtra, India",
+          "weekday": "Thursday",
+          "paksha": "Krishna",
+          "phase": "day"
+        },
+        "active": {
+          "major_index": 2,
+          "main_bird": "Vulture",
+          "main_activity": "Walking",
+          "sub_activity": {
+            "bird": "Peacock",
+            "activity": "Sleeping",
+            "relation": "Friend",
+            "effect": "Average"
+          }
+        },
+        "timeline_signature": {
+          "major_activity_sequence": [
+            "Ruling",
+            "Walking",
+            "Eating",
+            "Dying",
+            "Sleeping",
+            "Walking",
+            "Dying",
+            "Ruling",
+            "Eating",
+            "Sleeping"
+          ],
+          "major_bird_sequence": [
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture"
+          ],
+          "phase_sequence": [
+            "day",
+            "day",
+            "day",
+            "day",
+            "day",
+            "night",
+            "night",
+            "night",
+            "night",
+            "night"
+          ],
+          "paksha_sequence": [
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna"
+          ],
+          "first_window_sub_relations": [
+            {
+              "bird": "Vulture",
+              "relation": "Same",
+              "activity": "Ruling"
+            },
+            {
+              "bird": "Cock",
+              "relation": "Enemy",
+              "activity": "Walking"
+            },
+            {
+              "bird": "Owl",
+              "relation": "Enemy",
+              "activity": "Eating"
+            },
+            {
+              "bird": "Peacock",
+              "relation": "Friend",
+              "activity": "Dying"
+            },
+            {
+              "bird": "Crow",
+              "relation": "Friend",
+              "activity": "Sleeping"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "detroit_krishna_night",
+      "description": "Detroit runtime override during Krishna night phase.",
+      "request": {
+        "date_of_birth": "1999-07-04",
+        "time_of_birth": "12:22",
+        "place_of_birth": "Mumbai",
+        "custom_place": {
+          "place_label": "Mumbai, Maharashtra, India",
+          "latitude": 19.076,
+          "longitude": 72.8777,
+          "timezone": "Asia/Kolkata",
+          "elevation_m": 14.0
+        },
+        "runtime_custom_place": {
+          "place_label": "Detroit, Michigan, United States",
+          "latitude": 42.3314,
+          "longitude": -83.0458,
+          "timezone": "America/Detroit",
+          "elevation_m": 190.0
+        },
+        "as_of_local_iso": "2026-04-09T21:15:00-04:00"
+      },
+      "expected": {
+        "birth": {
+          "nakshatra_number": 25,
+          "nakshatra_name": "P Bhadrapada",
+          "paksha": "Krishna",
+          "pakshi": "Vulture"
+        },
+        "runtime": {
+          "reference_timezone": "America/Detroit",
+          "reference_place_label": "Detroit, Michigan, United States",
+          "weekday": "Thursday",
+          "paksha": "Krishna",
+          "phase": "night"
+        },
+        "active": {
+          "major_index": 1,
+          "main_bird": "Vulture",
+          "main_activity": "Walking",
+          "sub_activity": {
+            "bird": "Cock",
+            "activity": "Ruling",
+            "relation": "Enemy",
+            "effect": "Average"
+          }
+        },
+        "timeline_signature": {
+          "major_activity_sequence": [
+            "Walking",
+            "Dying",
+            "Ruling",
+            "Eating",
+            "Sleeping",
+            "Eating",
+            "Dying",
+            "Sleeping",
+            "Ruling",
+            "Walking"
+          ],
+          "major_bird_sequence": [
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture"
+          ],
+          "phase_sequence": [
+            "night",
+            "night",
+            "night",
+            "night",
+            "night",
+            "day",
+            "day",
+            "day",
+            "day",
+            "day"
+          ],
+          "paksha_sequence": [
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna"
+          ],
+          "first_window_sub_relations": [
+            {
+              "bird": "Vulture",
+              "relation": "Same",
+              "activity": "Walking"
+            },
+            {
+              "bird": "Peacock",
+              "relation": "Friend",
+              "activity": "Dying"
+            },
+            {
+              "bird": "Cock",
+              "relation": "Enemy",
+              "activity": "Ruling"
+            },
+            {
+              "bird": "Crow",
+              "relation": "Friend",
+              "activity": "Eating"
+            },
+            {
+              "bird": "Owl",
+              "relation": "Enemy",
+              "activity": "Sleeping"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "london_shukla_night_dst_start",
+      "description": "London DST start night transition with Shukla paksha.",
+      "request": {
+        "date_of_birth": "1999-07-04",
+        "time_of_birth": "12:22",
+        "place_of_birth": "Mumbai",
+        "custom_place": {
+          "place_label": "Mumbai, Maharashtra, India",
+          "latitude": 19.076,
+          "longitude": 72.8777,
+          "timezone": "Asia/Kolkata",
+          "elevation_m": 14.0
+        },
+        "runtime_custom_place": {
+          "place_label": "London, United Kingdom",
+          "latitude": 51.5074,
+          "longitude": -0.1278,
+          "timezone": "Europe/London",
+          "elevation_m": 35.0
+        },
+        "as_of_local_iso": "2026-03-29T02:30:00+01:00"
+      },
+      "expected": {
+        "birth": {
+          "nakshatra_number": 25,
+          "nakshatra_name": "P Bhadrapada",
+          "paksha": "Krishna",
+          "pakshi": "Vulture"
+        },
+        "runtime": {
+          "reference_timezone": "Europe/London",
+          "reference_place_label": "London, United Kingdom",
+          "weekday": "Saturday",
+          "paksha": "Shukla",
+          "phase": "night"
+        },
+        "active": {
+          "major_index": 4,
+          "main_bird": "Vulture",
+          "main_activity": "Sleeping",
+          "sub_activity": {
+            "bird": "Vulture",
+            "activity": "Sleeping",
+            "relation": "Same",
+            "effect": "Bad"
+          }
+        },
+        "timeline_signature": {
+          "major_activity_sequence": [
+            "Ruling",
+            "Dying",
+            "Walking",
+            "Sleeping",
+            "Eating",
+            "Eating",
+            "Walking",
+            "Ruling",
+            "Sleeping",
+            "Dying"
+          ],
+          "major_bird_sequence": [
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture"
+          ],
+          "phase_sequence": [
+            "night",
+            "night",
+            "night",
+            "night",
+            "night",
+            "day",
+            "day",
+            "day",
+            "day",
+            "day"
+          ],
+          "paksha_sequence": [
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla"
+          ],
+          "first_window_sub_relations": [
+            {
+              "bird": "Vulture",
+              "relation": "Same",
+              "activity": "Ruling"
+            },
+            {
+              "bird": "Peacock",
+              "relation": "Friend",
+              "activity": "Dying"
+            },
+            {
+              "bird": "Cock",
+              "relation": "Enemy",
+              "activity": "Walking"
+            },
+            {
+              "bird": "Crow",
+              "relation": "Enemy",
+              "activity": "Sleeping"
+            },
+            {
+              "bird": "Owl",
+              "relation": "Friend",
+              "activity": "Eating"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "detroit_shukla_day",
+      "description": "Detroit runtime override during Shukla day phase.",
+      "request": {
+        "date_of_birth": "1999-07-04",
+        "time_of_birth": "12:22",
+        "place_of_birth": "Mumbai",
+        "custom_place": {
+          "place_label": "Mumbai, Maharashtra, India",
+          "latitude": 19.076,
+          "longitude": 72.8777,
+          "timezone": "Asia/Kolkata",
+          "elevation_m": 14.0
+        },
+        "runtime_custom_place": {
+          "place_label": "Detroit, Michigan, United States",
+          "latitude": 42.3314,
+          "longitude": -83.0458,
+          "timezone": "America/Detroit",
+          "elevation_m": 190.0
+        },
+        "as_of_local_iso": "2026-04-24T09:00:00-04:00"
+      },
+      "expected": {
+        "birth": {
+          "nakshatra_number": 25,
+          "nakshatra_name": "P Bhadrapada",
+          "paksha": "Krishna",
+          "pakshi": "Vulture"
+        },
+        "runtime": {
+          "reference_timezone": "America/Detroit",
+          "reference_place_label": "Detroit, Michigan, United States",
+          "weekday": "Friday",
+          "paksha": "Shukla",
+          "phase": "day"
+        },
+        "active": {
+          "major_index": 1,
+          "main_bird": "Vulture",
+          "main_activity": "Ruling",
+          "sub_activity": {
+            "bird": "Peacock",
+            "activity": "Walking",
+            "relation": "Friend",
+            "effect": "Good"
+          }
+        },
+        "timeline_signature": {
+          "major_activity_sequence": [
+            "Ruling",
+            "Sleeping",
+            "Dying",
+            "Eating",
+            "Walking",
+            "Eating",
+            "Ruling",
+            "Dying",
+            "Walking",
+            "Sleeping"
+          ],
+          "major_bird_sequence": [
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture"
+          ],
+          "phase_sequence": [
+            "day",
+            "day",
+            "day",
+            "day",
+            "day",
+            "night",
+            "night",
+            "night",
+            "night",
+            "night"
+          ],
+          "paksha_sequence": [
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla",
+            "Shukla"
+          ],
+          "first_window_sub_relations": [
+            {
+              "bird": "Vulture",
+              "relation": "Same",
+              "activity": "Ruling"
+            },
+            {
+              "bird": "Owl",
+              "relation": "Friend",
+              "activity": "Sleeping"
+            },
+            {
+              "bird": "Crow",
+              "relation": "Enemy",
+              "activity": "Dying"
+            },
+            {
+              "bird": "Cock",
+              "relation": "Enemy",
+              "activity": "Eating"
+            },
+            {
+              "bird": "Peacock",
+              "relation": "Friend",
+              "activity": "Walking"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "detroit_krishna_night_dst_start",
+      "description": "US spring-forward DST edge case in Detroit.",
+      "request": {
+        "date_of_birth": "1999-07-04",
+        "time_of_birth": "12:22",
+        "place_of_birth": "Mumbai",
+        "custom_place": {
+          "place_label": "Mumbai, Maharashtra, India",
+          "latitude": 19.076,
+          "longitude": 72.8777,
+          "timezone": "Asia/Kolkata",
+          "elevation_m": 14.0
+        },
+        "runtime_custom_place": {
+          "place_label": "Detroit, Michigan, United States",
+          "latitude": 42.3314,
+          "longitude": -83.0458,
+          "timezone": "America/Detroit",
+          "elevation_m": 190.0
+        },
+        "as_of_local_iso": "2026-03-08T03:30:00-04:00"
+      },
+      "expected": {
+        "birth": {
+          "nakshatra_number": 25,
+          "nakshatra_name": "P Bhadrapada",
+          "paksha": "Krishna",
+          "pakshi": "Vulture"
+        },
+        "runtime": {
+          "reference_timezone": "America/Detroit",
+          "reference_place_label": "Detroit, Michigan, United States",
+          "weekday": "Saturday",
+          "paksha": "Krishna",
+          "phase": "night"
+        },
+        "active": {
+          "major_index": 4,
+          "main_bird": "Vulture",
+          "main_activity": "Sleeping",
+          "sub_activity": {
+            "bird": "Peacock",
+            "activity": "Walking",
+            "relation": "Friend",
+            "effect": "Average"
+          }
+        },
+        "timeline_signature": {
+          "major_activity_sequence": [
+            "Dying",
+            "Ruling",
+            "Eating",
+            "Sleeping",
+            "Walking",
+            "Walking",
+            "Eating",
+            "Dying",
+            "Sleeping",
+            "Ruling"
+          ],
+          "major_bird_sequence": [
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture"
+          ],
+          "phase_sequence": [
+            "night",
+            "night",
+            "night",
+            "night",
+            "night",
+            "day",
+            "day",
+            "day",
+            "day",
+            "day"
+          ],
+          "paksha_sequence": [
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna"
+          ],
+          "first_window_sub_relations": [
+            {
+              "bird": "Vulture",
+              "relation": "Same",
+              "activity": "Dying"
+            },
+            {
+              "bird": "Peacock",
+              "relation": "Friend",
+              "activity": "Ruling"
+            },
+            {
+              "bird": "Cock",
+              "relation": "Enemy",
+              "activity": "Eating"
+            },
+            {
+              "bird": "Crow",
+              "relation": "Friend",
+              "activity": "Sleeping"
+            },
+            {
+              "bird": "Owl",
+              "relation": "Enemy",
+              "activity": "Walking"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "newyork_krishna_night_dst_fall",
+      "description": "US fall-back DST edge case in New York (first 1:30 occurrence).",
+      "request": {
+        "date_of_birth": "1999-07-04",
+        "time_of_birth": "12:22",
+        "place_of_birth": "Mumbai",
+        "custom_place": {
+          "place_label": "Mumbai, Maharashtra, India",
+          "latitude": 19.076,
+          "longitude": 72.8777,
+          "timezone": "Asia/Kolkata",
+          "elevation_m": 14.0
+        },
+        "runtime_custom_place": {
+          "place_label": "New York, New York, United States",
+          "latitude": 40.7128,
+          "longitude": -74.006,
+          "timezone": "America/New_York",
+          "elevation_m": 10.0
+        },
+        "as_of_local_iso": "2026-11-01T01:30:00-04:00"
+      },
+      "expected": {
+        "birth": {
+          "nakshatra_number": 25,
+          "nakshatra_name": "P Bhadrapada",
+          "paksha": "Krishna",
+          "pakshi": "Vulture"
+        },
+        "runtime": {
+          "reference_timezone": "America/New_York",
+          "reference_place_label": "New York, New York, United States",
+          "weekday": "Saturday",
+          "paksha": "Krishna",
+          "phase": "night"
+        },
+        "active": {
+          "major_index": 3,
+          "main_bird": "Vulture",
+          "main_activity": "Eating",
+          "sub_activity": {
+            "bird": "Crow",
+            "activity": "Dying",
+            "relation": "Friend",
+            "effect": "Average"
+          }
+        },
+        "timeline_signature": {
+          "major_activity_sequence": [
+            "Dying",
+            "Ruling",
+            "Eating",
+            "Sleeping",
+            "Walking",
+            "Walking",
+            "Eating",
+            "Dying",
+            "Sleeping",
+            "Ruling"
+          ],
+          "major_bird_sequence": [
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture",
+            "Vulture"
+          ],
+          "phase_sequence": [
+            "night",
+            "night",
+            "night",
+            "night",
+            "night",
+            "day",
+            "day",
+            "day",
+            "day",
+            "day"
+          ],
+          "paksha_sequence": [
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna",
+            "Krishna"
+          ],
+          "first_window_sub_relations": [
+            {
+              "bird": "Vulture",
+              "relation": "Same",
+              "activity": "Dying"
+            },
+            {
+              "bird": "Peacock",
+              "relation": "Friend",
+              "activity": "Ruling"
+            },
+            {
+              "bird": "Cock",
+              "relation": "Enemy",
+              "activity": "Eating"
+            },
+            {
+              "bird": "Crow",
+              "relation": "Friend",
+              "activity": "Sleeping"
+            },
+            {
+              "bird": "Owl",
+              "relation": "Enemy",
+              "activity": "Walking"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
