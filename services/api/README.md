@@ -279,28 +279,6 @@ To include provisional engine-seed fixtures too:
 curl "http://127.0.0.1:8000/v1/engine/parity/reference-suite?include_unverified=true"
 ```
 
-## Accuracy Lock (Pancha Pakshi Realtime)
-
-Pancha Pakshi accuracy lock is fixture-based and validates:
-
-- Shukla + Krishna paksha behavior
-- Day + night phase timelines
-- Multi-city runtime location behavior
-- DST boundary cases (spring-forward and fall-back)
-- Timeline invariants (10 major windows, 5 sub windows each, no gaps/overlaps)
-
-Run lock tests:
-
-```bash
-cd services/api
-source .venv/bin/activate
-pytest tests/test_pancha_pakshi_compute.py tests/test_pancha_pakshi_accuracy_lock.py
-```
-
-Shared fixture source:
-
-- `libs/reference-fixtures/fixtures/pancha_pakshi/realtime_lock_cases_v1.json`
-
 Current suite status:
 
 - All fixtures are verified Reference references (`unverified_fixture_count = 0`).
