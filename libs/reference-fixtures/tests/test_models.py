@@ -37,3 +37,26 @@ def test_canonical_fixture_is_present_in_suite() -> None:
     }
 
     assert "reference_mumbai_1999_07_04_1222_v1" in fixture_ids
+
+
+def test_pancha_pakshi_lock_fixture_has_required_coverage() -> None:
+    fixture_path = (
+        Path(__file__).resolve().parents[1]
+        / "fixtures"
+        / "pancha_pakshi"
+        / "realtime_lock_cases_v1.json"
+    )
+    payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+
+    assert payload["version"] == "v1"
+    cases = payload["cases"]
+    assert len(cases) >= 6
+
+    phases = {case["expected"]["runtime"]["phase"] for case in cases}
+    pakshas = {case["expected"]["runtime"]["paksha"] for case in cases}
+    assert phases == {"day", "night"}
+    assert pakshas == {"Shukla", "Krishna"}
+
+    case_ids = {case["id"] for case in cases}
+    assert "detroit_krishna_night_dst_start" in case_ids
+    assert "newyork_krishna_night_dst_fall" in case_ids
