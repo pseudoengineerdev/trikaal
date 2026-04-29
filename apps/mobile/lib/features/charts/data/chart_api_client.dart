@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../../../config/app_config.dart';
 import '../../shared/network/json_api_helpers.dart';
 import 'models/compute_chart_models.dart';
+import 'models/compute_compatibility_models.dart';
 import 'models/compute_report_models.dart';
 import 'models/place_search_models.dart';
 import '../../pancha_pakshi/data/models/pancha_pakshi_models.dart';
@@ -100,6 +101,22 @@ class ChartApiClient {
       ),
     );
     return PanchaPakshiResponse.fromJson(body);
+  }
+
+  Future<ComputeCompatibilityResponse> computeCompatibility(
+    ComputeCompatibilityRequest request,
+  ) async {
+    final uri = Uri.parse('$_baseUrl/v1/compatibility/compute');
+    final body = await postJson(
+      client: _httpClient,
+      uri: uri,
+      payload: request.toJson(),
+      exceptionBuilder: (message, statusCode) => ChartApiException(
+        message,
+        statusCode: statusCode,
+      ),
+    );
+    return ComputeCompatibilityResponse.fromJson(body);
   }
 
   void dispose() {
