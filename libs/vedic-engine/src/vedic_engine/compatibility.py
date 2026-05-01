@@ -49,6 +49,9 @@ _KUTA_WEIGHTS = (
     ("nadi", "Nadi", 8.0),
 )
 
+_BHAKOOT_MAX_SCORE = 7.0
+_NADI_MAX_SCORE = 8.0
+
 # Moon-rashi to varna index (0 highest .. 3 lowest) per Drik tutorial mapping.
 _VARNA_BY_RASHI = {
     1: 1,   # Mesh  -> Kshatriya
@@ -72,15 +75,15 @@ _VASHYA_CATEGORIES = (
     "Manava",
     "Jalachara",
     "Vanachara",
-    "Keeta",
+    "Keet",
 )
 
 _VASHYA_MATRIX = (
-    (2.0, 0.5, 1.0, 0.0, 1.0),
-    (0.5, 2.0, 0.0, 0.0, 0.0),
-    (1.0, 0.0, 2.0, 2.0, 2.0),
-    (0.0, 0.0, 2.0, 2.0, 0.0),
-    (1.0, 0.0, 1.0, 0.0, 2.0),
+    (2.0, 1.0, 1.0, 0.0, 1.0),
+    (1.0, 2.0, 0.5, 0.0, 1.0),
+    (1.0, 0.5, 2.0, 1.0, 1.0),
+    (0.0, 0.0, 1.0, 2.0, 0.0),
+    (1.0, 1.0, 1.0, 0.0, 2.0),
 )
 
 _YONI_MAPPING_BY_NAKSHATRA = (
@@ -124,27 +127,27 @@ _YONI_NAMES = (
     "Cow",
     "Buffalo",
     "Tiger",
-    "Deer",
+    "Hare",
     "Monkey",
     "Mongoose",
     "Lion",
 )
 
 _YONI_MATRIX = (
-    (4.0, 2.0, 2.0, 3.0, 2.0, 2.0, 2.0, 1.0, 0.0, 1.0, 1.0, 3.0, 2.0, 1.0),
-    (2.0, 4.0, 3.0, 3.0, 2.0, 2.0, 2.0, 2.0, 3.0, 1.0, 2.0, 3.0, 2.0, 0.0),
-    (2.0, 3.0, 4.0, 2.0, 1.0, 2.0, 1.0, 3.0, 3.0, 1.0, 2.0, 0.0, 3.0, 1.0),
-    (3.0, 3.0, 2.0, 4.0, 2.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 0.0, 2.0),
-    (2.0, 2.0, 1.0, 2.0, 4.0, 2.0, 1.0, 2.0, 2.0, 1.0, 0.0, 2.0, 1.0, 1.0),
-    (2.0, 2.0, 2.0, 1.0, 2.0, 4.0, 0.0, 2.0, 2.0, 1.0, 3.0, 3.0, 2.0, 1.0),
-    (2.0, 2.0, 1.0, 1.0, 1.0, 0.0, 4.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0),
-    (1.0, 2.0, 3.0, 1.0, 2.0, 2.0, 2.0, 4.0, 3.0, 0.0, 3.0, 2.0, 2.0, 1.0),
-    (0.0, 3.0, 3.0, 1.0, 2.0, 2.0, 2.0, 3.0, 4.0, 1.0, 2.0, 2.0, 2.0, 1.0),
-    (1.0, 1.0, 1.0, 2.0, 1.0, 1.0, 2.0, 0.0, 1.0, 4.0, 1.0, 1.0, 2.0, 1.0),
-    (1.0, 2.0, 2.0, 2.0, 0.0, 3.0, 2.0, 3.0, 2.0, 1.0, 4.0, 2.0, 2.0, 1.0),
-    (3.0, 3.0, 0.0, 2.0, 2.0, 3.0, 2.0, 2.0, 2.0, 1.0, 2.0, 4.0, 3.0, 2.0),
-    (2.0, 2.0, 3.0, 0.0, 1.0, 2.0, 1.0, 2.0, 2.0, 2.0, 2.0, 3.0, 4.0, 2.0),
-    (1.0, 0.0, 1.0, 2.0, 1.0, 1.0, 2.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 4.0),
+    (4.0, 2.0, 3.0, 1.0, 2.0, 3.0, 3.0, 3.0, 0.0, 1.0, 3.0, 2.0, 2.0, 1.0),
+    (2.0, 4.0, 2.0, 2.0, 2.0, 3.0, 2.0, 2.0, 2.0, 1.0, 2.0, 2.0, 2.0, 0.0),
+    (3.0, 2.0, 4.0, 1.0, 2.0, 3.0, 2.0, 3.0, 3.0, 1.0, 3.0, 0.0, 3.0, 1.0),
+    (1.0, 2.0, 1.0, 4.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0),
+    (2.0, 2.0, 2.0, 1.0, 4.0, 1.0, 1.0, 1.0, 2.0, 1.0, 0.0, 2.0, 1.0, 1.0),
+    (3.0, 3.0, 3.0, 1.0, 1.0, 4.0, 0.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0),
+    (3.0, 2.0, 2.0, 1.0, 1.0, 0.0, 4.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0),
+    (3.0, 2.0, 3.0, 1.0, 1.0, 2.0, 2.0, 4.0, 3.0, 0.0, 2.0, 2.0, 2.0, 1.0),
+    (0.0, 3.0, 3.0, 2.0, 2.0, 2.0, 2.0, 3.0, 4.0, 1.0, 2.0, 2.0, 2.0, 1.0),
+    (1.0, 1.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.0, 1.0, 4.0, 1.0, 1.0, 2.0, 2.0),
+    (3.0, 2.0, 3.0, 1.0, 0.0, 2.0, 2.0, 2.0, 3.0, 1.0, 4.0, 2.0, 2.0, 1.0),
+    (2.0, 2.0, 0.0, 1.0, 2.0, 2.0, 2.0, 2.0, 2.0, 1.0, 2.0, 4.0, 2.0, 2.0),
+    (2.0, 2.0, 3.0, 0.0, 1.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 4.0, 2.0),
+    (1.0, 0.0, 1.0, 2.0, 1.0, 2.0, 1.0, 1.0, 1.0, 2.0, 1.0, 2.0, 2.0, 4.0),
 )
 
 _GANA_BY_NAKSHATRA = (
@@ -180,9 +183,9 @@ _GANA_BY_NAKSHATRA = (
 _GANA_NAMES = ("Deva", "Manushya", "Rakshasa")
 
 _GANA_MATRIX = (
+    (6.0, 5.0, 1.0),
     (6.0, 6.0, 0.0),
-    (5.0, 6.0, 0.0),
-    (1.0, 0.0, 6.0),
+    (0.0, 0.0, 6.0),
 )
 
 # Sign lord index by rashi number (Sun=0, Moon=1, Mars=2, Mercury=3, Jupiter=4, Venus=5, Saturn=6).
@@ -245,6 +248,82 @@ _NADI_GROUP_BY_NAKSHATRA = (
 
 _NADI_NAMES = ("Adi", "Madhya", "Antya")
 
+_RASHI_DISPLAY_NAMES = (
+    "Aries",
+    "Taurus",
+    "Gemini",
+    "Cancer",
+    "Leo",
+    "Virgo",
+    "Libra",
+    "Scorpio",
+    "Sagittarius",
+    "Capricorn",
+    "Aquarius",
+    "Pisces",
+)
+
+_GANA_DISPLAY_NAMES = ("Deva", "Manava", "Rakshasa")
+_NADI_DISPLAY_NAMES = ("Aadi", "Madhya", "Antya")
+
+_TARA_NAMES = {
+    1: "Janma",
+    2: "Sampat",
+    3: "Vipat",
+    4: "Kshema",
+    5: "Pratyari",
+    6: "Sadhaka",
+    7: "Naidhana",
+    8: "Mitra",
+    0: "Parama Mitra",
+}
+
+_KUTA_AREA_OF_LIFE = {
+    "varna": "Obedience",
+    "vashya": "Mutual Control",
+    "tara": "Luck",
+    "yoni": "Sexual Aspects",
+    "graha_maitri": "Affection",
+    "gana": "Nature",
+    "bhakoot": "Love",
+    "nadi": "Health",
+}
+
+_KUTA_DESCRIPTIONS = {
+    "varna": (
+        "Varna Kuta is assigned 1 point. It reflects mutual love, comfort, obedience, "
+        "and the grade of spiritual development."
+    ),
+    "vashya": (
+        "Vashya Kuta is assigned 2 points. It reflects mutual control or dominance, "
+        "plus friendship and amenability between the couple."
+    ),
+    "tara": (
+        "Tara Kuta is assigned 3 points. It reflects luck, auspiciousness, and mutual "
+        "benefic support in the relationship."
+    ),
+    "yoni": (
+        "Yoni Kuta is assigned 4 points. It reflects sexual and physical compatibility, "
+        "including attraction and intimate comfort."
+    ),
+    "graha_maitri": (
+        "Graha Maitri Kuta is assigned 5 points. It reflects psychological disposition, "
+        "mental qualities, and affection between partners."
+    ),
+    "gana": (
+        "Gana Kuta is assigned 6 points. It reflects nature, temperament, prosperity, "
+        "longevity, and harmony in behavior."
+    ),
+    "bhakoot": (
+        "Bhakoot Kuta is assigned 7 points. It reflects family growth, comforts, "
+        "well-being, and long-term relationship support."
+    ),
+    "nadi": (
+        "Nadi Kuta is assigned 8 points. It reflects temperament, vitality, and health "
+        "compatibility, and is treated as a high-priority factor in matching."
+    ),
+}
+
 _ELEMENT_BY_RASHI_INDEX = {
     1: "Fire",
     2: "Earth",
@@ -269,6 +348,7 @@ class _MoonProfile:
     rashi_code: str
     nakshatra_number: int
     pada: int
+    moon_degree_in_rashi: float
 
 
 def compute_kundali_compatibility(
@@ -307,6 +387,12 @@ def _compute_ashta_kuta(*, boy: _MoonProfile, girl: _MoonProfile) -> dict[str, A
     gana_score = _gana_score(boy=boy, girl=girl)
     bhakoot_score = _bhakoot_score(boy=boy, girl=girl)
     nadi_score = _nadi_score(boy=boy, girl=girl)
+    bhakoot_score, nadi_score = _apply_drik_same_nakshatra_overrides(
+        boy=boy,
+        girl=girl,
+        bhakoot_score=bhakoot_score,
+        nadi_score=nadi_score,
+    )
     raw_scores = {
         "varna": varna_score,
         "vashya": vashya_score,
@@ -317,22 +403,29 @@ def _compute_ashta_kuta(*, boy: _MoonProfile, girl: _MoonProfile) -> dict[str, A
         "bhakoot": bhakoot_score,
         "nadi": nadi_score,
     }
-    components = [
-        {
-            "key": key,
-            "label": label,
-            "score": _round_2(raw_scores[key]),
-            "max_score": max_score,
-            "percent": _round_2((raw_scores[key] / max_score) * 100.0),
-        }
-        for key, label, max_score in _KUTA_WEIGHTS
-    ]
-    total = sum(raw_scores.values())
+    components = []
+    for key, label, max_score in _KUTA_WEIGHTS:
+        boy_value, girl_value = _kuta_value_labels(key=key, boy=boy, girl=girl)
+        components.append(
+            {
+                "key": key,
+                "label": label,
+                "score": _round_2(raw_scores[key]),
+                "max_score": max_score,
+                "percent": _round_2((raw_scores[key] / max_score) * 100.0),
+                "boy_value": boy_value,
+                "girl_value": girl_value,
+                "area_of_life": _KUTA_AREA_OF_LIFE[key],
+                "description": _KUTA_DESCRIPTIONS[key],
+            }
+        )
+    total_raw = sum(raw_scores.values())
+    total_display = float(int(total_raw))
     return {
-        "total_score": _round_2(total),
+        "total_score": total_display,
         "max_score": 36.0,
-        "percentage": _round_2((total / 36.0) * 100.0),
-        "classification": _ashta_classification(total=total, bhakoot_score=bhakoot_score),
+        "percentage": _round_2((total_display / 36.0) * 100.0),
+        "classification": _ashta_classification(total=total_display, bhakoot_score=bhakoot_score),
         "components": components,
         "nadi_match": nadi_score > 0.0,
         "bhakoot_match": bhakoot_score > 0.0,
@@ -372,13 +465,64 @@ def _varna_score(*, boy: _MoonProfile, girl: _MoonProfile) -> float:
     return 1.0 if boy_varna <= girl_varna else 0.0
 
 
-def _vashya_category(*, rashi_index: int, pada: int) -> int:
+def _kuta_value_labels(*, key: str, boy: _MoonProfile, girl: _MoonProfile) -> tuple[str, str]:
+    if key == "varna":
+        boy_varna = _VARNA_BY_RASHI[boy.rashi_index]
+        girl_varna = _VARNA_BY_RASHI[girl.rashi_index]
+        return _VARNA_NAMES[boy_varna], _VARNA_NAMES[girl_varna]
+
+    if key == "vashya":
+        boy_cat = _vashya_category(
+            rashi_index=boy.rashi_index,
+            moon_degree_in_rashi=boy.moon_degree_in_rashi,
+        )
+        girl_cat = _vashya_category(
+            rashi_index=girl.rashi_index,
+            moon_degree_in_rashi=girl.moon_degree_in_rashi,
+        )
+        return _VASHYA_CATEGORIES[boy_cat], _VASHYA_CATEGORIES[girl_cat]
+
+    if key == "tara":
+        from_boy = _count_cycle(start=boy.nakshatra_number, end=girl.nakshatra_number, size=27)
+        from_girl = _count_cycle(start=girl.nakshatra_number, end=boy.nakshatra_number, size=27)
+        return _tara_name(from_boy % 9), _tara_name(from_girl % 9)
+
+    if key == "yoni":
+        boy_yoni = _YONI_MAPPING_BY_NAKSHATRA[boy.nakshatra_number - 1]
+        girl_yoni = _YONI_MAPPING_BY_NAKSHATRA[girl.nakshatra_number - 1]
+        return _YONI_NAMES[boy_yoni], _YONI_NAMES[girl_yoni]
+
+    if key == "graha_maitri":
+        boy_lord = _SIGN_LORD_BY_RASHI[boy.rashi_index - 1]
+        girl_lord = _SIGN_LORD_BY_RASHI[girl.rashi_index - 1]
+        return _LORD_NAMES[boy_lord], _LORD_NAMES[girl_lord]
+
+    if key == "gana":
+        boy_gana = _GANA_BY_NAKSHATRA[boy.nakshatra_number - 1]
+        girl_gana = _GANA_BY_NAKSHATRA[girl.nakshatra_number - 1]
+        return _GANA_DISPLAY_NAMES[boy_gana], _GANA_DISPLAY_NAMES[girl_gana]
+
+    if key == "bhakoot":
+        return (
+            _RASHI_DISPLAY_NAMES[boy.rashi_index - 1],
+            _RASHI_DISPLAY_NAMES[girl.rashi_index - 1],
+        )
+
+    if key == "nadi":
+        boy_nadi = _NADI_GROUP_BY_NAKSHATRA[boy.nakshatra_number - 1]
+        girl_nadi = _NADI_GROUP_BY_NAKSHATRA[girl.nakshatra_number - 1]
+        return _NADI_DISPLAY_NAMES[boy_nadi], _NADI_DISPLAY_NAMES[girl_nadi]
+
+    return "-", "-"
+
+
+def _vashya_category(*, rashi_index: int, moon_degree_in_rashi: float) -> int:
     if rashi_index in {1, 2}:  # Mesh, Vrish
         return 0
     if rashi_index == 9:  # Dhanu
-        return 0 if pada >= 3 else 1
+        return 1 if moon_degree_in_rashi < 15.0 else 0
     if rashi_index == 10:  # Makar
-        return 0 if pada <= 2 else 2
+        return 0 if moon_degree_in_rashi < 15.0 else 2
     if rashi_index in {3, 6, 7, 11}:  # Mith, Kany, Tula, Kumb
         return 1
     if rashi_index in {4, 12}:  # Kark, Meen
@@ -389,8 +533,14 @@ def _vashya_category(*, rashi_index: int, pada: int) -> int:
 
 
 def _vashya_score(*, boy: _MoonProfile, girl: _MoonProfile) -> float:
-    boy_cat = _vashya_category(rashi_index=boy.rashi_index, pada=boy.pada)
-    girl_cat = _vashya_category(rashi_index=girl.rashi_index, pada=girl.pada)
+    boy_cat = _vashya_category(
+        rashi_index=boy.rashi_index,
+        moon_degree_in_rashi=boy.moon_degree_in_rashi,
+    )
+    girl_cat = _vashya_category(
+        rashi_index=girl.rashi_index,
+        moon_degree_in_rashi=girl.moon_degree_in_rashi,
+    )
     return _VASHYA_MATRIX[girl_cat][boy_cat]
 
 
@@ -399,12 +549,12 @@ def _tara_score(*, boy: _MoonProfile, girl: _MoonProfile) -> float:
     from_boy = _count_cycle(start=boy.nakshatra_number, end=girl.nakshatra_number, size=27)
     girl_mod = from_girl % 9
     boy_mod = from_boy % 9
-    score = 0.0
-    if girl_mod in {3, 5, 7}:
-        score += 1.5
-    if boy_mod in {3, 5, 7}:
-        score += 1.5
-    return score
+    pair = (girl_mod, boy_mod)
+    if pair in {(0, 2), (1, 1), (2, 0)}:
+        return 3.0
+    if pair in {(3, 8), (4, 7), (5, 6), (6, 5), (7, 4), (8, 3)}:
+        return 1.5
+    return 0.0
 
 
 def _yoni_score(*, boy: _MoonProfile, girl: _MoonProfile) -> float:
@@ -433,7 +583,31 @@ def _bhakoot_score(*, boy: _MoonProfile, girl: _MoonProfile) -> float:
 def _nadi_score(*, boy: _MoonProfile, girl: _MoonProfile) -> float:
     boy_group = _NADI_GROUP_BY_NAKSHATRA[boy.nakshatra_number - 1]
     girl_group = _NADI_GROUP_BY_NAKSHATRA[girl.nakshatra_number - 1]
-    return 0.0 if boy_group == girl_group else 8.0
+    return 0.0 if boy_group == girl_group else _NADI_MAX_SCORE
+
+
+def _tara_name(mod9: int) -> str:
+    return _TARA_NAMES.get(mod9, "Unknown")
+
+
+def _apply_drik_same_nakshatra_overrides(
+    *,
+    boy: _MoonProfile,
+    girl: _MoonProfile,
+    bhakoot_score: float,
+    nadi_score: float,
+) -> tuple[float, float]:
+    """Apply Drik-parity exception rules for same-nakshatra matches.
+
+    Observed Drik behavior:
+    - Same Nakshatra + same Pada   => Bhakoot 0, Nadi 0.
+    - Same Nakshatra + different Pada => Bhakoot 7, Nadi 8.
+    """
+    if boy.nakshatra_number != girl.nakshatra_number:
+        return bhakoot_score, nadi_score
+    if boy.pada == girl.pada:
+        return 0.0, 0.0
+    return _BHAKOOT_MAX_SCORE, _NADI_MAX_SCORE
 
 
 def _compute_manglik_pair(
@@ -533,11 +707,13 @@ def _compute_d1_d9_checks(
 def _moon_profile_from_snapshot(snapshot: dict[str, Any]) -> _MoonProfile:
     vedic = snapshot["vedic"]
     panchanga = snapshot["panchanga"]
+    moon_sidereal_deg = float(snapshot["astronomy"]["moon_sidereal_deg"])
     return _MoonProfile(
         rashi_index=_rashi_index(vedic["moon_rashi"]),
         rashi_code=str(vedic["moon_rashi"]),
         nakshatra_number=int(panchanga["nakshatra"]["number"]),
         pada=int(vedic["moon_pada"]),
+        moon_degree_in_rashi=moon_sidereal_deg % 30.0,
     )
 
 

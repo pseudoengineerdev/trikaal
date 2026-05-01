@@ -197,6 +197,10 @@ class CompatibilityKutaComponent {
     required this.score,
     required this.maxScore,
     required this.percent,
+    required this.boyValue,
+    required this.girlValue,
+    required this.areaOfLife,
+    required this.description,
   });
 
   final String key;
@@ -204,6 +208,10 @@ class CompatibilityKutaComponent {
   final double score;
   final double maxScore;
   final double percent;
+  final String boyValue;
+  final String girlValue;
+  final String areaOfLife;
+  final String description;
 
   factory CompatibilityKutaComponent.fromJson(Map<String, dynamic> json) {
     return CompatibilityKutaComponent(
@@ -212,6 +220,10 @@ class CompatibilityKutaComponent {
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
       maxScore: (json['max_score'] as num?)?.toDouble() ?? 0.0,
       percent: (json['percent'] as num?)?.toDouble() ?? 0.0,
+      boyValue: (json['boy_value'] as String?) ?? '',
+      girlValue: (json['girl_value'] as String?) ?? '',
+      areaOfLife: (json['area_of_life'] as String?) ?? '',
+      description: (json['description'] as String?) ?? '',
     );
   }
 }
