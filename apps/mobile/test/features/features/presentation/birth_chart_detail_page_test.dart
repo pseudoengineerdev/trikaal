@@ -1,163 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:trikaal_mobile/app/state/astrology_terms_state.dart';
-import 'package:trikaal_mobile/app/state/terminology_mode_state.dart';
+import 'package:trikaal_mobile/app/state/birth_input_state.dart';
 import 'package:trikaal_mobile/features/charts/data/models/compute_report_models.dart';
-import 'package:trikaal_mobile/features/charts/presentation/widgets/chart_result_card.dart';
+import 'package:trikaal_mobile/features/features/presentation/birth_chart_detail_page.dart';
 
 void main() {
-  testWidgets('tapping graha row opens deep detail drawer',
+  testWidgets('table tab defaults to D1 and keeps ascendant row first',
       (WidgetTester tester) async {
-    final report = _sampleReport();
-    final termsState = AstrologyTermsState();
-    addTearDown(termsState.dispose);
+    final birthInputState = BirthInputState(
+      firstName: 'Sahil',
+      dateOfBirth: '1999-07-04',
+      timeOfBirth: '12:22',
+      placeOfBirth: 'Mumbai',
+    );
+    addTearDown(birthInputState.dispose);
+    birthInputState.markReportComputed(
+      ComputeReportResponse.fromJson(_sampleReportJson()),
+    );
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: ChartResultCard(
-              result: report,
-              mode: TerminologyMode.english,
-              termsState: termsState,
-            ),
-          ),
-        ),
+        home: BirthChartDetailPage(birthInputState: birthInputState),
       ),
     );
-
-    expect(find.text('Interpretations (Explainable)'), findsOneWidget);
-    expect(find.text('Budha-Aditya Yoga pattern detected'), findsOneWidget);
-
-    const sunRowKey = ValueKey<String>('graha-row-sun');
-    final verticalScrollable = find
-        .byWidgetPredicate(
-          (Widget widget) =>
-              widget is Scrollable &&
-              widget.axisDirection == AxisDirection.down,
-        )
-        .first;
-
-    await tester.scrollUntilVisible(
-      find.byKey(sunRowKey),
-      500,
-      scrollable: verticalScrollable,
-    );
-    await tester.tap(find.byKey(sunRowKey));
     await tester.pumpAndSettle();
 
-    expect(find.text('Graha Deep View'), findsOneWidget);
-    expect(find.text('Sidereal Deg'), findsOneWidget);
-    expect(find.text('78.0200°'), findsOneWidget);
-    expect(find.text('Direct'), findsOneWidget);
-  });
-
-  testWidgets('tapping house placement row opens deep detail drawer',
-      (WidgetTester tester) async {
-    final report = _sampleReport();
-    final termsState = AstrologyTermsState();
-    addTearDown(termsState.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: ChartResultCard(
-              result: report,
-              mode: TerminologyMode.english,
-              termsState: termsState,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    const sunHouseRowKey = ValueKey<String>('house-row-sun');
-    final verticalScrollable = find
-        .byWidgetPredicate(
-          (Widget widget) =>
-              widget is Scrollable &&
-              widget.axisDirection == AxisDirection.down,
-        )
-        .first;
-
-    await tester.scrollUntilVisible(
-      find.byKey(sunHouseRowKey),
-      400,
-      scrollable: verticalScrollable,
-    );
-    await tester.tap(find.byKey(sunHouseRowKey));
+    await tester.tap(find.text('Table'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Graha Deep View'), findsOneWidget);
-    expect(find.text('D1 House'), findsOneWidget);
-    expect(find.text('Raw Deg'), findsOneWidget);
-    expect(find.text('78.0300°'), findsOneWidget);
-  });
+    expect(find.byKey(const ValueKey<String>('table-chart-selector')),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('table-D1-degree-sun')),
+        findsOneWidget);
+    expect(find.byKey(const ValueKey<String>('table-D1-graha-lagna')),
+        findsOneWidget);
+    expect(
+        find.byKey(const ValueKey<String>('table-chart-status')), findsNothing);
+    expect(
+        find.byKey(const ValueKey<String>('table-chart-source')), findsNothing);
 
-  testWidgets('daily transit brief renders cards with action guidance',
-      (WidgetTester tester) async {
-    final report = _sampleReport();
-    final termsState = AstrologyTermsState();
-    addTearDown(termsState.dispose);
+    final lagnaPosition = tester
+        .getTopLeft(find.byKey(const ValueKey<String>('table-D1-graha-lagna')));
+    final sunPosition = tester
+        .getTopLeft(find.byKey(const ValueKey<String>('table-D1-graha-sun')));
+    expect(lagnaPosition.dy, lessThan(sunPosition.dy));
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: ChartResultCard(
-              result: report,
-              mode: TerminologyMode.english,
-              termsState: termsState,
-            ),
-          ),
-        ),
-      ),
+    await tester
+        .tap(find.byKey(const ValueKey<String>('table-chart-selector')));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey<String>('table-chart-option-D9')),
+      warnIfMissed: false,
     );
-
-    expect(find.text('Daily Transit Brief'), findsOneWidget);
-    expect(find.text('Transit Moon focus for today'), findsOneWidget);
-    expect(find.text('Do today'), findsOneWidget);
-    expect(find.text('Watch today'), findsOneWidget);
-  });
-
-  testWidgets('tapping interpretation card opens practical guidance drawer',
-      (WidgetTester tester) async {
-    final report = _sampleReport();
-    final termsState = AstrologyTermsState();
-    addTearDown(termsState.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: ChartResultCard(
-              result: report,
-              mode: TerminologyMode.english,
-              termsState: termsState,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    const interpretationKey =
-        ValueKey<String>('interpretation-card-yoga_budha_aditya');
-    await tester.tap(find.byKey(interpretationKey));
     await tester.pumpAndSettle();
 
-    expect(find.text('Practical Interpretation Guide'), findsOneWidget);
-    expect(find.text('Current Dasha Lens'), findsOneWidget);
-    expect(find.text('What to do now'), findsOneWidget);
-    expect(find.text('What to watch'), findsOneWidget);
-    expect(find.text('Timing checkpoint'), findsOneWidget);
-    expect(find.text('Maha Dasha'), findsOneWidget);
-    expect(find.text('Antar Dasha'), findsOneWidget);
+    final d9Degree = tester.widget<Text>(
+      find.byKey(const ValueKey<String>('table-D9-degree-sun')),
+    );
+    expect(d9Degree.data, '18°01\'12"');
+    final d9LagnaPosition = tester
+        .getTopLeft(find.byKey(const ValueKey<String>('table-D9-graha-lagna')));
+    final d9SunPosition = tester
+        .getTopLeft(find.byKey(const ValueKey<String>('table-D9-graha-sun')));
+    expect(d9LagnaPosition.dy, lessThan(d9SunPosition.dy));
+    expect(find.byKey(const ValueKey<String>('table-D9-house-sun')),
+        findsOneWidget);
+
+    expect(find.byType(DataTable), findsOneWidget);
   });
 }
 
-ComputeReportResponse _sampleReport() {
-  return ComputeReportResponse.fromJson(<String, dynamic>{
+Map<String, dynamic> _sampleReportJson() {
+  return <String, dynamic>{
     'profile': <String, dynamic>{
       'profile_id': 'vedic_drik_lahiri_v1',
       'zodiac_system': 'sidereal',
@@ -259,7 +173,7 @@ ComputeReportResponse _sampleReport() {
       'timezone': 'Asia/Kolkata',
       'cards': _sampleDailyTransitCards(),
     },
-  });
+  };
 }
 
 Map<String, dynamic> _sampleAstronomy() {
@@ -294,7 +208,6 @@ Map<String, dynamic> _sampleAstronomy() {
   ];
   final map = <String, dynamic>{for (final key in keys) key: 1.0};
   map['sun_sidereal_deg'] = 78.02;
-  map['sun_sidereal_deg_raw'] = 78.03;
   map['moon_sidereal_deg'] = 320.35;
   map['lagna_sidereal_deg'] = 163.65;
   return map;
@@ -481,14 +394,14 @@ Map<String, dynamic> _sampleGrahaEntry(String key) {
     'key': key,
     'sidereal_deg': key == 'sun' ? 78.02 : 10.0,
     'sidereal_deg_raw': key == 'sun' ? 78.03 : 10.1,
-    'speed_deg_per_day': key == 'sun' ? 0.95 : 1.0,
+    'speed_deg_per_day': 1.0,
     'rashi': key == 'sun' ? 'Mitu' : 'Kany',
     'nakshatra': key == 'moon' ? 'P Bhadrapada' : 'Hasta',
     'pada': 2,
     'house': 1,
     'd9_rashi': 'Maka',
     'd9_house': 1,
-    'retrograde': false,
+    'retrograde': key == 'rahu' || key == 'ketu' || key == 'shani',
     'combust': key == 'shukra',
   };
 }

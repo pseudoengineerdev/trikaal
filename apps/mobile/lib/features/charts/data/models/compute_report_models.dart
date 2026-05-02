@@ -695,15 +695,50 @@ class ReportVarga {
   const ReportVarga({
     required this.d1,
     required this.d9,
+    this.additionalDivisions = const <String, ReportDivision>{},
   });
 
   final ReportDivision d1;
   final ReportDivision d9;
+  final Map<String, ReportDivision> additionalDivisions;
+
+  Map<String, ReportDivision> get divisionsByCode {
+    return <String, ReportDivision>{
+      'd1': d1,
+      'd9': d9,
+      ...additionalDivisions,
+    };
+  }
+
+  ReportDivision? divisionByCode(String chartCode) {
+    final normalized = chartCode.trim().toLowerCase();
+    return divisionsByCode[normalized];
+  }
 
   factory ReportVarga.fromJson(Map<String, dynamic> json) {
+    final parsed = <String, ReportDivision>{};
+    for (final entry in json.entries) {
+      final key = entry.key.trim().toLowerCase();
+      if (!RegExp(r'^d([1-9]|[1-5][0-9]|60)$').hasMatch(key)) {
+        continue;
+      }
+      parsed[key] = ReportDivision.fromJson(
+        _asMap(entry.value, 'varga.$key'),
+      );
+    }
+    final d1 = parsed['d1'];
+    final d9 = parsed['d9'];
+    if (d1 == null || d9 == null) {
+      throw const FormatException(
+        'Varga payload must include d1 and d9 divisions',
+      );
+    }
+    parsed.remove('d1');
+    parsed.remove('d9');
     return ReportVarga(
-      d1: ReportDivision.fromJson(_readMap(json, 'd1')),
-      d9: ReportDivision.fromJson(_readMap(json, 'd9')),
+      d1: d1,
+      d9: d9,
+      additionalDivisions: parsed,
     );
   }
 }
@@ -712,10 +747,12 @@ class ReportDivision {
   const ReportDivision({
     required this.lagnaRashi,
     required this.houses,
+    required this.grahaPositions,
   });
 
   final String lagnaRashi;
   final Map<int, ReportHouse> houses;
+  final Map<String, ReportDivisionGrahaPosition> grahaPositions;
 
   List<MapEntry<int, ReportHouse>> get sortedHouses {
     final entries = houses.entries.toList(growable: false);
@@ -745,10 +782,84 @@ class ReportDivision {
         !houses.keys.toSet().containsAll(expectedKeys)) {
       throw const FormatException('Division houses must contain keys 1..12');
     }
+    final expectedGrahaKeys = <String>{
+      'sun',
+      'moon',
+      'mangal',
+      'budha',
+      'guru',
+      'shukra',
+      'shani',
+      'rahu',
+      'ketu',
+      'spashth_rahu',
+      'spashth_ketu',
+      'lagna',
+    };
+    final grahaPositions = <String, ReportDivisionGrahaPosition>{};
+    if (json.containsKey('graha_positions')) {
+      final rawGrahaPositions = _readMap(json, 'graha_positions');
+      for (final entry in rawGrahaPositions.entries) {
+        final key = entry.key.trim().toLowerCase();
+        grahaPositions[key] = ReportDivisionGrahaPosition.fromJson(
+          _asMap(entry.value, 'division.graha_positions.$key'),
+        );
+      }
+    } else {
+      for (final houseEntry in houses.entries) {
+        for (final occupant in houseEntry.value.occupants) {
+          final key = occupant.trim().toLowerCase();
+          grahaPositions[key] = ReportDivisionGrahaPosition(
+            rashi: houseEntry.value.rashi,
+            house: houseEntry.key,
+            degreeInSignDeg: null,
+          );
+        }
+      }
+    }
+    if (grahaPositions.keys.toSet().length != expectedGrahaKeys.length ||
+        !grahaPositions.keys.toSet().containsAll(expectedGrahaKeys)) {
+      throw const FormatException(
+        'Division graha_positions must include canonical graha keys',
+      );
+    }
+    for (final grahaEntry in grahaPositions.entries) {
+      final houseIndex = grahaEntry.value.house;
+      if (houseIndex < 1 || houseIndex > 12) {
+        throw FormatException(
+          'Invalid house index "$houseIndex" for ${grahaEntry.key}',
+        );
+      }
+      final house = houses[houseIndex];
+      if (house == null) {
+        throw FormatException(
+          'Missing house $houseIndex for ${grahaEntry.key}',
+        );
+      }
+      if (house.rashi != grahaEntry.value.rashi) {
+        throw FormatException(
+          'Rashi mismatch for ${grahaEntry.key}: '
+          'house has ${house.rashi}, placement has ${grahaEntry.value.rashi}',
+        );
+      }
+      if (!house.occupants.contains(grahaEntry.key)) {
+        throw FormatException(
+          'House occupants for $houseIndex do not contain ${grahaEntry.key}',
+        );
+      }
+    }
+    final lagnaPosition = grahaPositions['lagna'];
+    if (lagnaPosition == null ||
+        lagnaPosition.rashi != _readString(json, 'lagna_rashi')) {
+      throw const FormatException(
+        'Division lagna placement must match lagna_rashi',
+      );
+    }
 
     return ReportDivision(
       lagnaRashi: _readString(json, 'lagna_rashi'),
       houses: houses,
+      grahaPositions: grahaPositions,
     );
   }
 }
@@ -766,6 +877,26 @@ class ReportHouse {
     return ReportHouse(
       rashi: _readString(json, 'rashi'),
       occupants: _readStringList(json, 'occupants'),
+    );
+  }
+}
+
+class ReportDivisionGrahaPosition {
+  const ReportDivisionGrahaPosition({
+    required this.rashi,
+    required this.house,
+    required this.degreeInSignDeg,
+  });
+
+  final String rashi;
+  final int house;
+  final double? degreeInSignDeg;
+
+  factory ReportDivisionGrahaPosition.fromJson(Map<String, dynamic> json) {
+    return ReportDivisionGrahaPosition(
+      rashi: _readString(json, 'rashi'),
+      house: _readInt(json, 'house'),
+      degreeInSignDeg: (json['degree_in_sign'] as num?)?.toDouble(),
     );
   }
 }

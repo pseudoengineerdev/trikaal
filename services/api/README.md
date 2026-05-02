@@ -23,7 +23,9 @@ pip install -e ".[dev]"
 ```bash
 cd services/api
 source .venv/bin/activate
-uvicorn trikaal_api.main:app --reload
+uvicorn trikaal_api.main:app --reload \
+  --reload-dir src \
+  --reload-dir ../../libs/vedic-engine/src
 ```
 
 ## Endpoints (Current)
@@ -178,8 +180,16 @@ Response shape (trimmed):
       "sunset": { "local_time": "19:13" }
     },
     "varga": {
-      "d1": { "lagna_rashi": "Kany" },
-      "d9": { "lagna_rashi": "Maka" }
+      "d1": {
+        "lagna_rashi": "Kany",
+        "houses": { "1": { "rashi": "Kany", "occupants": ["lagna"] } },
+        "graha_positions": {
+          "sun": { "rashi": "Mitu", "house": 10, "degree_in_sign": 18.02 }
+        }
+      },
+      "d9": { "lagna_rashi": "Maka" },
+      "d10": { "lagna_rashi": "Kany" },
+      "d60": { "lagna_rashi": "Dhanu" }
     },
     "graha_table": {
       "sun": {

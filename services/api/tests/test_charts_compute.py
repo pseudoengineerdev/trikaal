@@ -24,6 +24,12 @@ def test_charts_compute_returns_snapshot_for_simple_birth_input() -> None:
     assert payload["snapshot"]["vedic"]["sun_rashi"] == "Mitu"
     assert payload["snapshot"]["varga"]["d1"]["lagna_rashi"] == "Kany"
     assert payload["snapshot"]["varga"]["d9"]["lagna_rashi"]
+    assert payload["snapshot"]["varga"]["d10"]["lagna_rashi"]
+    assert payload["snapshot"]["varga"]["d60"]["lagna_rashi"]
+    assert payload["snapshot"]["varga"]["d1"]["graha_positions"]["sun"]["rashi"] == "Mitu"
+    assert payload["snapshot"]["varga"]["d9"]["graha_positions"]["sun"]["house"] >= 1
+    assert payload["snapshot"]["varga"]["d60"]["graha_positions"]["lagna"]["rashi"]
+    assert len([key for key in payload["snapshot"]["varga"] if key.startswith("d")]) == 60
     assert payload["snapshot"]["graha_table"]["sun"]["rashi"] == "Mitu"
     assert payload["snapshot"]["graha_table"]["sun"]["house"] == 10
     assert "retrograde" in payload["snapshot"]["graha_table"]["sun"]
