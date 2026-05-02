@@ -118,8 +118,21 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["bhava"]["spashth_ketu_house"] == 5
     assert snapshot["varga"]["d1"]["lagna_rashi"] == "Kany"
     assert snapshot["varga"]["d9"]["lagna_rashi"] == snapshot["graha_table"]["lagna"]["d9_rashi"]
+    assert snapshot["varga"]["d10"]["lagna_rashi"] == "Kany"
+    assert snapshot["varga"]["d60"]["lagna_rashi"] == "Dhanu"
+    assert snapshot["varga"]["d1"]["graha_positions"]["sun"]["rashi"] == "Mitu"
+    assert snapshot["varga"]["d1"]["graha_positions"]["sun"]["house"] == 10
+    assert snapshot["varga"]["d1"]["graha_positions"]["sun"]["degree_in_sign"] == 18.0229
+    assert snapshot["varga"]["d9"]["graha_positions"]["sun"]["rashi"] == snapshot["graha_table"]["sun"]["d9_rashi"]
+    assert snapshot["varga"]["d10"]["graha_positions"]["lagna"]["rashi"] == "Kany"
+    assert snapshot["varga"]["d60"]["graha_positions"]["lagna"]["rashi"] == "Dhanu"
+    assert len([key for key in snapshot["varga"] if key.startswith("d")]) == 60
     assert len(snapshot["varga"]["d1"]["houses"]) == 12
     assert len(snapshot["varga"]["d9"]["houses"]) == 12
+    assert len(snapshot["varga"]["d60"]["houses"]) == 12
+    assert len(snapshot["varga"]["d1"]["graha_positions"]) == 12
+    assert len(snapshot["varga"]["d9"]["graha_positions"]) == 12
+    assert len(snapshot["varga"]["d60"]["graha_positions"]) == 12
     assert isinstance(snapshot["varga"]["d1"]["houses"]["1"]["occupants"], list)
     assert "lagna" in snapshot["varga"]["d1"]["houses"]["1"]["occupants"]
     assert snapshot["graha_table"]["sun"]["rashi"] == "Mitu"

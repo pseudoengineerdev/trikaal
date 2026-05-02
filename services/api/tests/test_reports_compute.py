@@ -25,6 +25,12 @@ def test_reports_compute_returns_chart_and_dasha_in_one_response() -> None:
     assert payload["snapshot"]["panchanga"]["nakshatra"]["name_vedic"] == "P Bhadrapada"
     assert payload["snapshot"]["panchanga"]["yoga"]["name_vedic"] == "Ayushman"
     assert payload["snapshot"]["panchanga"]["karana"]["name_vedic"] == "Garija"
+    assert payload["snapshot"]["varga"]["d1"]["lagna_rashi"] == "Kany"
+    assert payload["snapshot"]["varga"]["d10"]["lagna_rashi"]
+    assert payload["snapshot"]["varga"]["d60"]["lagna_rashi"]
+    assert payload["snapshot"]["varga"]["d1"]["graha_positions"]["sun"]["rashi"] == "Mitu"
+    assert payload["snapshot"]["varga"]["d9"]["graha_positions"]["sun"]["house"] >= 1
+    assert payload["snapshot"]["varga"]["d60"]["graha_positions"]["lagna"]["rashi"]
     assert len(payload["dasha"]["maha_timeline"]) == 9
     assert len(payload["dasha"]["antar_timeline_current_maha"]) == 9
     assert payload["interpretations"]["version"] == "v1"
