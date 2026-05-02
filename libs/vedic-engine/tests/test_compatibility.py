@@ -328,6 +328,18 @@ def test_drik_parity_sahil_candace_case_matches_pdf_breakdown_and_manglik_v2() -
     assert manglik["boy"]["dosha_percent"] == 0
     assert manglik["boy"]["raw_dosha_percent"] == 150
     assert manglik["girl"]["dosha_percent"] == 150
+    assert (
+        "Mars in Second House *considered by South astrologers"
+        in manglik["boy"]["dosha_reasons"]
+    )
+    assert "Shani is helping Mangal" in manglik["boy"]["dosha_reasons"]
+    assert (
+        "Brihaspati 7th sight aspects Mangal"
+        in manglik["boy"]["nullification_reasons"]
+    )
+    assert "Mars in Fourth House" in manglik["girl"]["dosha_reasons"]
+    assert "Surya is helping Mangal" in manglik["girl"]["dosha_reasons"]
+    assert manglik["girl"]["nullification_reasons"] == []
 
 
 def test_manglik_payload_includes_rule_profile_and_reference_evidence() -> None:
@@ -381,7 +393,7 @@ def test_manglik_pair_unbalanced_case_reports_evidence_trace() -> None:
     boy_snapshot = {
         "graha_table": {"mangal": {"d9_house": 7}},
         "vedic": {
-            "mangal_rashi": "Mesh",
+            "mangal_rashi": "Vrish",
             "moon_rashi": "Mesh",
             "shukra_rashi": "Mesh",
         },
@@ -390,7 +402,7 @@ def test_manglik_pair_unbalanced_case_reports_evidence_trace() -> None:
     girl_snapshot = {
         "graha_table": {"mangal": {"d9_house": 5}},
         "vedic": {
-            "mangal_rashi": "Mesh",
+            "mangal_rashi": "Vrish",
             "moon_rashi": "Dhanu",
             "shukra_rashi": "Dhanu",
         },
@@ -455,11 +467,13 @@ def _rashi_for_house_from_mars(*, mars_rashi: str, house_from_reference: int) ->
 @pytest.mark.parametrize(
     ("mars_house", "mars_rashi", "expected_rule_id"),
     [
+        (1, "Mesh", "house_1_mesha_exception"),
         (2, "Mith", "house_2_mercury_sign_exception"),
         (4, "Mesh", "house_4_mars_sign_exception"),
         (7, "Kark", "house_7_cancer_capricorn_exception"),
         (8, "Dhanu", "house_8_jupiter_sign_exception"),
         (12, "Vrish", "house_12_venus_sign_exception"),
+        (12, "Dhanu", "house_12_dhanu_muhurta_exception"),
     ],
 )
 def test_manglik_v2_house_sign_exception_matrix_applies_to_all_references(
@@ -535,3 +549,100 @@ def test_manglik_v2_non_exception_house_sign_pairs_remain_active(
         assert evidence["effective_triggered"] is True
         assert evidence["cancelled"] is False
         assert evidence["exception_rule_id"] is None
+
+
+@pytest.mark.parametrize(
+    ("mars_rashi", "expected_reason"),
+    [
+        ("Simh", "Mangal in Simha coinciding any House creating Dosha"),
+        ("Kumb", "Mangal in Kumbha coinciding any House creating Dosha"),
+    ],
+)
+def test_manglik_v2_any_house_sign_exception_cancels_triggered_references(
+    mars_rashi: str,
+    expected_reason: str,
+) -> None:
+    reference_rashi = _rashi_for_house_from_mars(
+        mars_rashi=mars_rashi,
+        house_from_reference=7,
+    )
+    snapshot = {
+        "graha_table": {"mangal": {"d9_house": 9}},
+        "vedic": {
+            "mangal_rashi": mars_rashi,
+            "moon_rashi": reference_rashi,
+            "shukra_rashi": reference_rashi,
+        },
+        "bhava": {"mangal_house": 7},
+    }
+
+    person = compatibility_module._compute_manglik_for_snapshot(snapshot)
+    assert person["is_manglik"] is False
+    assert person["trigger_count"] == 0
+    assert expected_reason in person["nullification_reasons"]
+
+
+@pytest.mark.parametrize(
+    ("field_name", "expected_reason"),
+    [
+        ("guru_rashi", "Brihaspati conjoins Mangal"),
+        ("moon_rashi", "Chandra conjoins Mangal"),
+        ("rahu_rashi", "Rahu conjoins Mangal"),
+    ],
+)
+def test_manglik_v2_conjunction_cancellations_are_reported(
+    field_name: str,
+    expected_reason: str,
+) -> None:
+    reference_rashi = _rashi_for_house_from_mars(
+        mars_rashi="Vrish",
+        house_from_reference=7,
+    )
+    vedic = {
+        "mangal_rashi": "Vrish",
+        "moon_rashi": reference_rashi,
+        "shukra_rashi": reference_rashi,
+    }
+    vedic[field_name] = "Vrish"
+    snapshot = {
+        "graha_table": {"mangal": {"d9_house": 9}},
+        "vedic": vedic,
+        "bhava": {"mangal_house": 7},
+    }
+
+    person = compatibility_module._compute_manglik_for_snapshot(snapshot)
+    assert person["is_manglik"] is False
+    assert person["trigger_count"] == 0
+    assert expected_reason in person["nullification_reasons"]
+
+
+@pytest.mark.parametrize(
+    ("bhava_overrides", "expected_reason"),
+    [
+        ({"guru_house": 1}, "Brihaspati in Lagna house in the chart"),
+        ({"shukra_house": 1}, "Shukra in Lagna house in the chart"),
+        ({"shukra_house": 7}, "Shukra in Seventh house"),
+    ],
+)
+def test_manglik_v2_lagna_house_cancellations_are_reported(
+    bhava_overrides: dict[str, int],
+    expected_reason: str,
+) -> None:
+    reference_rashi = _rashi_for_house_from_mars(
+        mars_rashi="Vrish",
+        house_from_reference=7,
+    )
+    snapshot = {
+        "graha_table": {"mangal": {"d9_house": 9}},
+        "vedic": {
+            "mangal_rashi": "Vrish",
+            "moon_rashi": reference_rashi,
+            "shukra_rashi": reference_rashi,
+        },
+        "bhava": {"mangal_house": 7, **bhava_overrides},
+    }
+
+    person = compatibility_module._compute_manglik_for_snapshot(snapshot)
+    assert person["is_manglik"] is False
+    assert person["trigger_count"] == 0
+    assert expected_reason in person["nullification_reasons"]

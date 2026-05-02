@@ -416,6 +416,8 @@ class _SoulmatePageState extends State<SoulmatePage> {
     required String title,
     required CompatibilityManglikPerson person,
   }) {
+    final List<String> doshaReasons = person.doshaReasons;
+    final List<String> nullificationReasons = person.nullificationReasons;
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -475,8 +477,61 @@ class _SoulmatePageState extends State<SoulmatePage> {
               ),
             );
           }),
+          if (doshaReasons.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 8),
+            _mangalReasonList(
+              title: 'Dosha Reason',
+              reasons: doshaReasons,
+              titleColor: const Color(0xFFFFE7B3),
+              textColor: const Color(0xFFD8C8F5),
+            ),
+          ],
+          if (nullificationReasons.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 8),
+            _mangalReasonList(
+              title: 'Dosha Nullified',
+              reasons: nullificationReasons,
+              titleColor: const Color(0xFFFFD27D),
+              textColor: const Color(0xFFFFEBC1),
+            ),
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _mangalReasonList({
+    required String title,
+    required List<String> reasons,
+    required Color titleColor,
+    required Color textColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          title,
+          style: TextStyle(
+            color: titleColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        ...reasons.map(
+          (String reason) => Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Text(
+              '• $reason',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 12,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

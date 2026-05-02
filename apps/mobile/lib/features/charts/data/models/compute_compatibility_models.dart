@@ -305,6 +305,8 @@ class CompatibilityManglikPerson {
     this.cancelledReferences = const <String>[],
     this.cancellationApplied = false,
     this.cancellationReasons = const <String>[],
+    this.doshaReasons = const <String>[],
+    this.nullificationReasons = const <String>[],
     this.referenceEvidence =
         const <String, CompatibilityManglikReferenceEvidence>{},
     this.marsHouseFromLagna = 0,
@@ -323,6 +325,8 @@ class CompatibilityManglikPerson {
   final List<String> cancelledReferences;
   final bool cancellationApplied;
   final List<String> cancellationReasons;
+  final List<String> doshaReasons;
+  final List<String> nullificationReasons;
   final Map<String, CompatibilityManglikReferenceEvidence> referenceEvidence;
   final int marsHouseFromLagna;
   final int marsHouseFromMoon;
@@ -348,6 +352,8 @@ class CompatibilityManglikPerson {
       cancelledReferences: _readStringList(json['cancelled_references']),
       cancellationApplied: (json['cancellation_applied'] as bool?) ?? false,
       cancellationReasons: _readStringList(json['cancellation_reasons']),
+      doshaReasons: _readStringList(json['dosha_reasons']),
+      nullificationReasons: _readStringList(json['nullification_reasons']),
       referenceEvidence: referenceEvidence,
       marsHouseFromLagna: (json['mars_house_from_lagna'] as num?)?.toInt() ?? 0,
       marsHouseFromMoon: (json['mars_house_from_moon'] as num?)?.toInt() ?? 0,
@@ -378,6 +384,8 @@ class CompatibilityManglikReferenceEvidence {
     this.exceptionReason = '',
     this.cancellationRuleIds = const <String>[],
     this.cancellationReasons = const <String>[],
+    this.doshaReasons = const <String>[],
+    this.nullificationReasons = const <String>[],
     this.ruleHouses = const <int>[],
     this.reason = '',
   });
@@ -402,6 +410,8 @@ class CompatibilityManglikReferenceEvidence {
   final String exceptionReason;
   final List<String> cancellationRuleIds;
   final List<String> cancellationReasons;
+  final List<String> doshaReasons;
+  final List<String> nullificationReasons;
   final List<int> ruleHouses;
   final String reason;
 
@@ -437,6 +447,8 @@ class CompatibilityManglikReferenceEvidence {
       exceptionReason: (json['exception_reason'] as String?) ?? '',
       cancellationRuleIds: _readStringList(json['cancellation_rule_ids']),
       cancellationReasons: _readStringList(json['cancellation_reasons']),
+      doshaReasons: _readStringList(json['dosha_reasons']),
+      nullificationReasons: _readStringList(json['nullification_reasons']),
       ruleHouses: _readIntList(json['rule_houses']),
       reason: (json['reason'] as String?) ?? '',
     );

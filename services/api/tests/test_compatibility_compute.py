@@ -101,6 +101,18 @@ def test_compatibility_compute_sahil_candace_pdf_case_matches_36_with_custom_pla
     assert compatibility["manglik"]["boy"]["dosha_percent"] == 0
     assert compatibility["manglik"]["boy"]["raw_dosha_percent"] == 150
     assert compatibility["manglik"]["girl"]["dosha_percent"] == 150
+    assert (
+        "Mars in Second House *considered by South astrologers"
+        in compatibility["manglik"]["boy"]["dosha_reasons"]
+    )
+    assert (
+        "Brihaspati 7th sight aspects Mangal"
+        in compatibility["manglik"]["boy"]["nullification_reasons"]
+    )
+    assert (
+        "Mars in Fourth House"
+        in compatibility["manglik"]["girl"]["dosha_reasons"]
+    )
 
 
 def test_compatibility_compute_respects_primary_role_direction() -> None:
