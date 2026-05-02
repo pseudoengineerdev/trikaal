@@ -346,16 +346,113 @@ Map<String, dynamic> _sampleBhava() {
 }
 
 Map<String, dynamic> _sampleDivision({required String lagnaRashi}) {
+  const zodiac = <String>[
+    'Mesh',
+    'Vrish',
+    'Mitu',
+    'Kark',
+    'Simh',
+    'Kany',
+    'Tula',
+    'Vrsc',
+    'Dhanu',
+    'Maka',
+    'Kumb',
+    'Meen',
+  ];
+  final lagnaIndex = zodiac.indexOf(lagnaRashi);
+  if (lagnaIndex == -1) {
+    throw ArgumentError.value(lagnaRashi, 'lagnaRashi');
+  }
+
   final houses = <String, dynamic>{};
   for (int index = 1; index <= 12; index++) {
+    final rashi = zodiac[(lagnaIndex + index - 1) % 12];
     houses['$index'] = <String, dynamic>{
-      'rashi': index == 1 ? lagnaRashi : 'Rashi$index',
-      'occupants': index == 1 ? <String>['lagna'] : <String>[],
+      'rashi': rashi,
+      'occupants': <String>[],
     };
   }
+  houses['1']!['occupants'] = <String>['sun', 'lagna'];
+  houses['2']!['occupants'] = <String>['moon'];
+  houses['3']!['occupants'] = <String>['mangal'];
+  houses['4']!['occupants'] = <String>['budha'];
+  houses['5']!['occupants'] = <String>['guru'];
+  houses['6']!['occupants'] = <String>['shukra'];
+  houses['7']!['occupants'] = <String>['shani'];
+  houses['8']!['occupants'] = <String>['rahu'];
+  houses['9']!['occupants'] = <String>['ketu'];
+  houses['10']!['occupants'] = <String>['spashth_rahu'];
+  houses['11']!['occupants'] = <String>['spashth_ketu'];
+
+  String rashiForHouse(int house) => houses['$house']!['rashi'] as String;
+  final grahaPositions = <String, dynamic>{
+    'sun': <String, dynamic>{
+      'rashi': rashiForHouse(1),
+      'house': 1,
+      'degree_in_sign': 18.02
+    },
+    'moon': <String, dynamic>{
+      'rashi': rashiForHouse(2),
+      'house': 2,
+      'degree_in_sign': 7.30
+    },
+    'mangal': <String, dynamic>{
+      'rashi': rashiForHouse(3),
+      'house': 3,
+      'degree_in_sign': 13.11
+    },
+    'budha': <String, dynamic>{
+      'rashi': rashiForHouse(4),
+      'house': 4,
+      'degree_in_sign': 26.55
+    },
+    'guru': <String, dynamic>{
+      'rashi': rashiForHouse(5),
+      'house': 5,
+      'degree_in_sign': 1.91
+    },
+    'shukra': <String, dynamic>{
+      'rashi': rashiForHouse(6),
+      'house': 6,
+      'degree_in_sign': 22.44
+    },
+    'shani': <String, dynamic>{
+      'rashi': rashiForHouse(7),
+      'house': 7,
+      'degree_in_sign': 5.03
+    },
+    'rahu': <String, dynamic>{
+      'rashi': rashiForHouse(8),
+      'house': 8,
+      'degree_in_sign': 9.88
+    },
+    'ketu': <String, dynamic>{
+      'rashi': rashiForHouse(9),
+      'house': 9,
+      'degree_in_sign': 9.88
+    },
+    'spashth_rahu': <String, dynamic>{
+      'rashi': rashiForHouse(10),
+      'house': 10,
+      'degree_in_sign': 11.21
+    },
+    'spashth_ketu': <String, dynamic>{
+      'rashi': rashiForHouse(11),
+      'house': 11,
+      'degree_in_sign': 11.21
+    },
+    'lagna': <String, dynamic>{
+      'rashi': lagnaRashi,
+      'house': 1,
+      'degree_in_sign': 13.65
+    },
+  };
+
   return <String, dynamic>{
     'lagna_rashi': lagnaRashi,
     'houses': houses,
+    'graha_positions': grahaPositions,
   };
 }
 

@@ -104,6 +104,42 @@
       "karana": {
         "name_vedic": "Garija"
       }
+    },
+    "varga": {
+      "d10": {
+        "lagna_rashi": "Kany",
+        "houses": {
+          "1": { "rashi": "Kany" },
+          "2": { "rashi": "Tula" },
+          "3": { "rashi": "Vrsc" },
+          "4": { "rashi": "Dhanu" },
+          "5": { "rashi": "Maka" },
+          "6": { "rashi": "Kumb" },
+          "7": { "rashi": "Meen" },
+          "8": { "rashi": "Mesh" },
+          "9": { "rashi": "Vrish" },
+          "10": { "rashi": "Mitu" },
+          "11": { "rashi": "Kark" },
+          "12": { "rashi": "Simh" }
+        }
+      },
+      "d60": {
+        "lagna_rashi": "Dhanu",
+        "houses": {
+          "1": { "rashi": "Dhanu" },
+          "2": { "rashi": "Maka" },
+          "3": { "rashi": "Kumb" },
+          "4": { "rashi": "Meen" },
+          "5": { "rashi": "Mesh" },
+          "6": { "rashi": "Vrish" },
+          "7": { "rashi": "Mitu" },
+          "8": { "rashi": "Kark" },
+          "9": { "rashi": "Simh" },
+          "10": { "rashi": "Kany" },
+          "11": { "rashi": "Tula" },
+          "12": { "rashi": "Vrsc" }
+        }
+      }
     }
   },
   "comparison_rules": {

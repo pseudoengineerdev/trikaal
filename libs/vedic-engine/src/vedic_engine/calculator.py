@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import contextlib
+import importlib
+import io
 from datetime import datetime, timedelta
+from functools import lru_cache
 from math import trunc
 from zoneinfo import ZoneInfo
 
@@ -245,6 +249,36 @@ GRAHA_ORDER = [
     "spashth_ketu",
     "lagna",
 ]
+VARGA_FACTORS = tuple(range(1, 61))
+_VARGA_GRAHA_KEYS = (
+    "sun",
+    "moon",
+    "mangal",
+    "budha",
+    "guru",
+    "shukra",
+    "shani",
+    "rahu",
+    "ketu",
+    "spashth_rahu",
+    "spashth_ketu",
+    "lagna",
+)
+_JHORA_PLANET_ID_BY_KEY = {
+    "sun": 0,
+    "moon": 1,
+    "mangal": 2,
+    "budha": 3,
+    "guru": 4,
+    "shukra": 5,
+    "shani": 6,
+    "rahu": 7,
+    "ketu": 8,
+    # We reserve ids 9/10 for true node placements in the generated divisional map.
+    "spashth_rahu": 9,
+    "spashth_ketu": 10,
+}
+_JHORA_KEY_BY_PLANET_ID = {value: key for key, value in _JHORA_PLANET_ID_BY_KEY.items()}
 
 
 def compute_chart_snapshot(
@@ -345,37 +379,36 @@ def compute_chart_snapshot(
     spashth_rahu_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=true_rahu_rashi)
     spashth_ketu_house = _house_from_lagna(lagna_rashi=lagna_rashi, target_rashi=true_ketu_rashi)
 
-    sun_d9_rashi = _navamsa_rashi(sun_display)
-    moon_d9_rashi = _navamsa_rashi(moon_display)
-    lagna_d9_rashi = _navamsa_rashi(lagna_display)
-    mars_d9_rashi = _navamsa_rashi(mars_display)
-    mercury_d9_rashi = _navamsa_rashi(mercury_display)
-    jupiter_d9_rashi = _navamsa_rashi(jupiter_display)
-    venus_d9_rashi = _navamsa_rashi(venus_display)
-    saturn_d9_rashi = _navamsa_rashi(saturn_display)
-    mean_rahu_d9_rashi = _navamsa_rashi(mean_rahu_display)
-    mean_ketu_d9_rashi = _navamsa_rashi(mean_ketu_display)
-    true_rahu_d9_rashi = _navamsa_rashi(true_rahu_display)
-    true_ketu_d9_rashi = _navamsa_rashi(true_ketu_display)
+    display_degrees_by_key = {
+        "sun": sun_display,
+        "moon": moon_display,
+        "mangal": mars_display,
+        "budha": mercury_display,
+        "guru": jupiter_display,
+        "shukra": venus_display,
+        "shani": saturn_display,
+        "rahu": mean_rahu_display,
+        "ketu": mean_ketu_display,
+        "spashth_rahu": true_rahu_display,
+        "spashth_ketu": true_ketu_display,
+        "lagna": lagna_display,
+    }
+    varga_charts, varga_placements_by_key = _compute_varga_from_display_degrees(
+        display_degrees_by_key=display_degrees_by_key,
+    )
 
-    sun_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=sun_d9_rashi)
-    moon_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=moon_d9_rashi)
-    lagna_d9_house = 1
-    mangal_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=mars_d9_rashi)
-    budha_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=mercury_d9_rashi)
-    guru_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=jupiter_d9_rashi)
-    shukra_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=venus_d9_rashi)
-    shani_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=saturn_d9_rashi)
-    rahu_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=mean_rahu_d9_rashi)
-    ketu_d9_house = _house_from_lagna(lagna_rashi=lagna_d9_rashi, target_rashi=mean_ketu_d9_rashi)
-    spashth_rahu_d9_house = _house_from_lagna(
-        lagna_rashi=lagna_d9_rashi,
-        target_rashi=true_rahu_d9_rashi,
-    )
-    spashth_ketu_d9_house = _house_from_lagna(
-        lagna_rashi=lagna_d9_rashi,
-        target_rashi=true_ketu_d9_rashi,
-    )
+    sun_d9 = varga_placements_by_key["sun"]["d9"]
+    moon_d9 = varga_placements_by_key["moon"]["d9"]
+    mars_d9 = varga_placements_by_key["mangal"]["d9"]
+    budha_d9 = varga_placements_by_key["budha"]["d9"]
+    guru_d9 = varga_placements_by_key["guru"]["d9"]
+    shukra_d9 = varga_placements_by_key["shukra"]["d9"]
+    shani_d9 = varga_placements_by_key["shani"]["d9"]
+    rahu_d9 = varga_placements_by_key["rahu"]["d9"]
+    ketu_d9 = varga_placements_by_key["ketu"]["d9"]
+    spashth_rahu_d9 = varga_placements_by_key["spashth_rahu"]["d9"]
+    spashth_ketu_d9 = varga_placements_by_key["spashth_ketu"]["d9"]
+    lagna_d9 = varga_placements_by_key["lagna"]["d9"]
 
     graha_table = {
         "sun": _graha_row(
@@ -387,8 +420,8 @@ def compute_chart_snapshot(
             nakshatra=sun_nakshatra,
             pada=sun_pada,
             house=sun_house,
-            d9_rashi=sun_d9_rashi,
-            d9_house=sun_d9_house,
+            d9_rashi=str(sun_d9["rashi"]),
+            d9_house=int(sun_d9["house"]),
             sun_degree=sun_display,
         ),
         "moon": _graha_row(
@@ -400,8 +433,8 @@ def compute_chart_snapshot(
             nakshatra=moon_nakshatra,
             pada=moon_pada,
             house=moon_house,
-            d9_rashi=moon_d9_rashi,
-            d9_house=moon_d9_house,
+            d9_rashi=str(moon_d9["rashi"]),
+            d9_house=int(moon_d9["house"]),
             sun_degree=sun_display,
         ),
         "mangal": _graha_row(
@@ -413,8 +446,8 @@ def compute_chart_snapshot(
             nakshatra=mars_nakshatra,
             pada=mars_pada,
             house=mangal_house,
-            d9_rashi=mars_d9_rashi,
-            d9_house=mangal_d9_house,
+            d9_rashi=str(mars_d9["rashi"]),
+            d9_house=int(mars_d9["house"]),
             sun_degree=sun_display,
         ),
         "budha": _graha_row(
@@ -426,8 +459,8 @@ def compute_chart_snapshot(
             nakshatra=mercury_nakshatra,
             pada=mercury_pada,
             house=budha_house,
-            d9_rashi=mercury_d9_rashi,
-            d9_house=budha_d9_house,
+            d9_rashi=str(budha_d9["rashi"]),
+            d9_house=int(budha_d9["house"]),
             sun_degree=sun_display,
         ),
         "guru": _graha_row(
@@ -439,8 +472,8 @@ def compute_chart_snapshot(
             nakshatra=jupiter_nakshatra,
             pada=jupiter_pada,
             house=guru_house,
-            d9_rashi=jupiter_d9_rashi,
-            d9_house=guru_d9_house,
+            d9_rashi=str(guru_d9["rashi"]),
+            d9_house=int(guru_d9["house"]),
             sun_degree=sun_display,
         ),
         "shukra": _graha_row(
@@ -452,8 +485,8 @@ def compute_chart_snapshot(
             nakshatra=venus_nakshatra,
             pada=venus_pada,
             house=shukra_house,
-            d9_rashi=venus_d9_rashi,
-            d9_house=shukra_d9_house,
+            d9_rashi=str(shukra_d9["rashi"]),
+            d9_house=int(shukra_d9["house"]),
             sun_degree=sun_display,
         ),
         "shani": _graha_row(
@@ -465,8 +498,8 @@ def compute_chart_snapshot(
             nakshatra=saturn_nakshatra,
             pada=saturn_pada,
             house=shani_house,
-            d9_rashi=saturn_d9_rashi,
-            d9_house=shani_d9_house,
+            d9_rashi=str(shani_d9["rashi"]),
+            d9_house=int(shani_d9["house"]),
             sun_degree=sun_display,
         ),
         "rahu": _graha_row(
@@ -478,8 +511,8 @@ def compute_chart_snapshot(
             nakshatra=mean_rahu_nakshatra,
             pada=mean_rahu_pada,
             house=rahu_house,
-            d9_rashi=mean_rahu_d9_rashi,
-            d9_house=rahu_d9_house,
+            d9_rashi=str(rahu_d9["rashi"]),
+            d9_house=int(rahu_d9["house"]),
             sun_degree=sun_display,
         ),
         "ketu": _graha_row(
@@ -491,8 +524,8 @@ def compute_chart_snapshot(
             nakshatra=mean_ketu_nakshatra,
             pada=mean_ketu_pada,
             house=ketu_house,
-            d9_rashi=mean_ketu_d9_rashi,
-            d9_house=ketu_d9_house,
+            d9_rashi=str(ketu_d9["rashi"]),
+            d9_house=int(ketu_d9["house"]),
             sun_degree=sun_display,
         ),
         "spashth_rahu": _graha_row(
@@ -504,8 +537,8 @@ def compute_chart_snapshot(
             nakshatra=true_rahu_nakshatra,
             pada=true_rahu_pada,
             house=spashth_rahu_house,
-            d9_rashi=true_rahu_d9_rashi,
-            d9_house=spashth_rahu_d9_house,
+            d9_rashi=str(spashth_rahu_d9["rashi"]),
+            d9_house=int(spashth_rahu_d9["house"]),
             sun_degree=sun_display,
         ),
         "spashth_ketu": _graha_row(
@@ -517,8 +550,8 @@ def compute_chart_snapshot(
             nakshatra=true_ketu_nakshatra,
             pada=true_ketu_pada,
             house=spashth_ketu_house,
-            d9_rashi=true_ketu_d9_rashi,
-            d9_house=spashth_ketu_d9_house,
+            d9_rashi=str(spashth_ketu_d9["rashi"]),
+            d9_house=int(spashth_ketu_d9["house"]),
             sun_degree=sun_display,
         ),
         "lagna": _graha_row(
@@ -530,24 +563,11 @@ def compute_chart_snapshot(
             nakshatra=lagna_nakshatra,
             pada=lagna_pada,
             house=1,
-            d9_rashi=lagna_d9_rashi,
-            d9_house=lagna_d9_house,
+            d9_rashi=str(lagna_d9["rashi"]),
+            d9_house=int(lagna_d9["house"]),
             sun_degree=sun_display,
         ),
     }
-
-    d1_chart = _build_divisional_chart(
-        lagna_rashi=lagna_rashi,
-        graha_table=graha_table,
-        house_key="house",
-        rashi_key="rashi",
-    )
-    d9_chart = _build_divisional_chart(
-        lagna_rashi=lagna_d9_rashi,
-        graha_table=graha_table,
-        house_key="d9_house",
-        rashi_key="d9_rashi",
-    )
 
     panchanga = _compute_panchanga(
         local_dt=local_dt,
@@ -651,10 +671,7 @@ def compute_chart_snapshot(
             "spashth_rahu_house": spashth_rahu_house,
             "spashth_ketu_house": spashth_ketu_house,
         },
-        "varga": {
-            "d1": d1_chart,
-            "d9": d9_chart,
-        },
+        "varga": varga_charts,
         "graha_table": graha_table,
     }
 
@@ -691,12 +708,112 @@ def _graha_row(
     }
 
 
-def _build_divisional_chart(
+def _compute_varga_from_display_degrees(
     *,
+    display_degrees_by_key: dict[str, float],
+) -> tuple[dict[str, dict[str, object]], dict[str, dict[str, dict[str, object]]]]:
+    charts_module = _load_jhora_charts_module()
+    base_positions = _jhora_positions_from_display_degrees(
+        display_degrees_by_key=display_degrees_by_key,
+    )
+    varga_placements_by_key = {
+        key: {} for key in _VARGA_GRAHA_KEYS
+    }
+    varga_charts: dict[str, dict[str, object]] = {}
+
+    for factor in VARGA_FACTORS:
+        chart_key = _chart_key_for_factor(factor)
+        raw_positions = charts_module.divisional_positions_from_rasi_positions(
+            base_positions,
+            divisional_chart_factor=factor,
+            chart_method=1,
+        )
+        placements_for_chart = _normalize_jhora_division_positions(raw_positions)
+        lagna_rashi = str(placements_for_chart["lagna"]["rashi"])
+        for key in _VARGA_GRAHA_KEYS:
+            placement = placements_for_chart[key]
+            rashi = str(placement["rashi"])
+            house = _house_from_lagna(
+                lagna_rashi=lagna_rashi,
+                target_rashi=rashi,
+            )
+            varga_placements_by_key[key][chart_key] = {
+                "rashi": rashi,
+                "house": house,
+                "degree_in_sign": _truncate_4(float(placement["degree_in_sign"])),
+            }
+        varga_charts[chart_key] = _build_divisional_chart_from_placements(
+            chart_key=chart_key,
+            lagna_rashi=lagna_rashi,
+            varga_placements_by_key=varga_placements_by_key,
+        )
+
+    return varga_charts, varga_placements_by_key
+
+
+@lru_cache(maxsize=1)
+def _load_jhora_charts_module():
+    try:
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            return importlib.import_module("jhora.horoscope.chart.charts")
+    except Exception as exc:  # pragma: no cover - exercised via integration tests
+        raise RuntimeError(
+            "Divisional chart computation requires pyjhora to be installed and importable."
+        ) from exc
+
+
+def _jhora_positions_from_display_degrees(
+    *,
+    display_degrees_by_key: dict[str, float],
+) -> list[list[object]]:
+    positions: list[list[object]] = []
+    ordered_keys = ["lagna", *[key for key in _VARGA_GRAHA_KEYS if key != "lagna"]]
+    for key in ordered_keys:
+        degree = display_degrees_by_key[key] % 360.0
+        sign_index = int(degree // 30.0)
+        degree_in_sign = degree % 30.0
+        marker: object = "L" if key == "lagna" else _JHORA_PLANET_ID_BY_KEY[key]
+        positions.append([marker, (sign_index, degree_in_sign)])
+    return positions
+
+
+def _normalize_jhora_division_positions(
+    raw_positions: list[list[object]],
+) -> dict[str, dict[str, object]]:
+    normalized: dict[str, dict[str, object]] = {}
+    for raw in raw_positions:
+        if not isinstance(raw, (list, tuple)) or len(raw) < 2:
+            continue
+        marker = raw[0]
+        raw_position = raw[1]
+        if not isinstance(raw_position, (list, tuple)) or len(raw_position) < 2:
+            continue
+        if marker == "L":
+            key = "lagna"
+        elif isinstance(marker, int):
+            key = _JHORA_KEY_BY_PLANET_ID.get(marker)
+            if key is None:
+                continue
+        else:
+            continue
+        sign_index = int(raw_position[0])
+        degree_in_sign = float(raw_position[1])
+        normalized[key] = {
+            "rashi": _rashi_name_from_index(sign_index),
+            "degree_in_sign": degree_in_sign,
+        }
+
+    missing = [key for key in _VARGA_GRAHA_KEYS if key not in normalized]
+    if missing:
+        raise RuntimeError(f"Missing divisional placements for keys: {missing}")
+    return normalized
+
+
+def _build_divisional_chart_from_placements(
+    *,
+    chart_key: str,
     lagna_rashi: str,
-    graha_table: dict[str, dict[str, object]],
-    house_key: str,
-    rashi_key: str,
+    varga_placements_by_key: dict[str, dict[str, dict[str, object]]],
 ) -> dict[str, object]:
     lagna_internal = REFERENCE_ALIAS_TO_INTERNAL_RASHI.get(lagna_rashi, lagna_rashi)
     lagna_index = RASHI_NAMES.index(lagna_internal)
@@ -709,20 +826,47 @@ def _build_divisional_chart(
             "occupants": [],
         }
 
-    for key, row in graha_table.items():
-        house = int(row[house_key])
+    for key in GRAHA_ORDER:
+        placement = varga_placements_by_key[key][chart_key]
+        house = int(placement["house"])
         houses[str(house)]["occupants"].append(key)
+    lagna_house = int(varga_placements_by_key["lagna"][chart_key]["house"])
+    houses[str(lagna_house)]["occupants"].append("lagna")
 
     order_index = {key: idx for idx, key in enumerate(GRAHA_ORDER)}
+    order_index["lagna"] = len(GRAHA_ORDER)
     for house in houses.values():
         occupants = house["occupants"]
         if isinstance(occupants, list):
             occupants.sort(key=lambda key: order_index.get(str(key), 999))
 
+    graha_positions = {
+        key: {
+            "rashi": str(varga_placements_by_key[key][chart_key]["rashi"]),
+            "house": int(varga_placements_by_key[key][chart_key]["house"]),
+            "degree_in_sign": _truncate_4(
+                float(varga_placements_by_key[key][chart_key]["degree_in_sign"])
+            ),
+        }
+        for key in GRAHA_ORDER
+    }
+
     return {
         "lagna_rashi": lagna_rashi,
         "houses": houses,
+        "graha_positions": graha_positions,
     }
+
+
+def _chart_key_for_factor(factor: int) -> str:
+    if factor < 1 or factor > 60:
+        raise ValueError(f"Unsupported varga factor: {factor}")
+    return f"d{factor}"
+
+
+def _rashi_name_from_index(index: int) -> str:
+    internal_name = RASHI_NAMES[index % 12]
+    return REFERENCE_RASHI_ALIASES.get(internal_name, internal_name)
 
 
 def _is_retrograde(*, key: str, speed: float) -> bool:
@@ -744,23 +888,6 @@ def _angular_distance(left: float, right: float) -> float:
     return min(raw, 360.0 - raw)
 
 
-def _navamsa_rashi(degree: float) -> str:
-    normalized_degree = degree % 360.0
-    sign_index = int(normalized_degree // 30.0)
-    offset_in_sign = normalized_degree % 30.0
-    navamsa_index = int(offset_in_sign // (30.0 / 9.0))
-    modality = sign_index % 3
-    if modality == 0:
-        start_index = sign_index
-    elif modality == 1:
-        start_index = (sign_index + 8) % 12
-    else:
-        start_index = (sign_index + 4) % 12
-    navamsa_sign_index = (start_index + navamsa_index) % 12
-    internal_name = RASHI_NAMES[navamsa_sign_index]
-    return REFERENCE_RASHI_ALIASES.get(internal_name, internal_name)
-
-
 def _nakshatra_and_pada(degree: float) -> tuple[str, int]:
     normalized_degree = degree % 360.0
     nakshatra_span = 360.0 / 27.0
@@ -779,6 +906,10 @@ def _rashi_name(degree: float) -> str:
 
 def _truncate_2(value: float) -> float:
     return trunc(value * 100.0) / 100.0
+
+
+def _truncate_4(value: float) -> float:
+    return trunc(value * 10_000.0) / 10_000.0
 
 
 def _house_from_lagna(*, lagna_rashi: str, target_rashi: str) -> int:
