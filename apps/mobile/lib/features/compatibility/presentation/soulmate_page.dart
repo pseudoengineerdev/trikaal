@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/models/compatibility_partner_profile.dart';
 import '../../../app/models/custom_place_payload.dart';
 import '../../../app/models/person_gender.dart';
 import '../../../app/navigation/app_dock_navigation.dart';
@@ -13,13 +14,24 @@ import '../../charts/presentation/widgets/chart_state_widgets.dart';
 import '../../shared/birth_input/birth_input_formatters.dart';
 import 'state/soulmate_controller.dart';
 
+enum SoulmateEntryPoint {
+  soulmate,
+  mangalDosh,
+}
+
+const List<int> _defaultManglikTriggerHouses = <int>[1, 2, 4, 7, 8, 12];
+
 class SoulmatePage extends StatefulWidget {
   const SoulmatePage({
     required this.birthInputState,
+    this.entryPoint = SoulmateEntryPoint.soulmate,
+    this.startWithPartnerForm = false,
     super.key,
   });
 
   final BirthInputState birthInputState;
+  final SoulmateEntryPoint entryPoint;
+  final bool startWithPartnerForm;
 
   @override
   State<SoulmatePage> createState() => _SoulmatePageState();
@@ -27,12 +39,32 @@ class SoulmatePage extends StatefulWidget {
 
 class _SoulmatePageState extends State<SoulmatePage> {
   late final SoulmateController _controller;
-  _PartnerProfileDraft? _partner;
+  CompatibilityPartnerProfile? _partner;
+  bool _autoComputeAttempted = false;
+  bool _autoPartnerFormAttempted = false;
 
   @override
   void initState() {
     super.initState();
     _controller = SoulmateController();
+    _partner = widget.birthInputState.compatibilityPartnerProfile;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if (widget.startWithPartnerForm &&
+          !_autoPartnerFormAttempted &&
+          (_partner == null || !_partner!.isComplete)) {
+        _autoPartnerFormAttempted = true;
+        _openPartnerForm();
+      }
+      if (widget.entryPoint == SoulmateEntryPoint.mangalDosh &&
+          !_autoComputeAttempted &&
+          _canCompute) {
+        _autoComputeAttempted = true;
+        _computeCompatibility();
+      }
+    });
   }
 
   @override
@@ -119,7 +151,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
                       label: Text(
                         _controller.loading
                             ? 'Computing compatibility...'
-                            : 'Find Compatibility',
+                            : _computeActionLabel(),
                       ),
                     ),
                   ),
@@ -132,15 +164,22 @@ class _SoulmatePageState extends State<SoulmatePage> {
                   ],
                   if (_controller.result != null) ...<Widget>[
                     const SizedBox(height: 16),
-                    _compatibilitySummaryCard(
-                      context,
-                      _controller.result!.compatibility.summary,
-                    ),
-                    const SizedBox(height: 12),
-                    _kutaBreakdownCard(
-                      context,
-                      _controller.result!.compatibility.ashtaKuta,
-                    ),
+                    if (widget.entryPoint ==
+                        SoulmateEntryPoint.mangalDosh) ...<Widget>[
+                      _mangalDoshSummaryCard(context, _controller.result!),
+                      const SizedBox(height: 12),
+                      _mangalDoshLogicCard(context, _controller.result!),
+                    ] else ...<Widget>[
+                      _compatibilitySummaryCard(
+                        context,
+                        _controller.result!.compatibility.summary,
+                      ),
+                      const SizedBox(height: 12),
+                      _kutaBreakdownCard(
+                        context,
+                        _controller.result!.compatibility.ashtaKuta,
+                      ),
+                    ],
                   ],
                 ],
               );
@@ -156,12 +195,16 @@ class _SoulmatePageState extends State<SoulmatePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Your Soulmate',
+          widget.entryPoint == SoulmateEntryPoint.mangalDosh
+              ? 'Mangal Dosh'
+              : 'Your Soulmate',
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 6),
         Text(
-          'Match two birth charts with Ashta-Kuta and detailed guna insights.',
+          widget.entryPoint == SoulmateEntryPoint.mangalDosh
+              ? 'Using your saved partner profile, we evaluate Manglik alignment from both charts.'
+              : 'Match two birth charts with Ashta-Kuta and detailed guna insights.',
           style:
               TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
@@ -248,6 +291,191 @@ class _SoulmatePageState extends State<SoulmatePage> {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _mangalDoshSummaryCard(
+    BuildContext context,
+    ComputeCompatibilityResponse response,
+  ) {
+    final manglik = response.compatibility.manglik;
+    final (primary, partner) = _manglikPeopleForResponse(response);
+    final isBalanced = manglik.pairAlignment.trim().toLowerCase() == 'balanced';
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF240046).withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(16),
+        border:
+            Border.all(color: const Color(0xFF9D4EDD).withValues(alpha: 0.42)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Mangal Dosh Result',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: const Color(0xFFFFE7B3),
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${manglik.score.toStringAsFixed(1)} / ${manglik.maxScore.toStringAsFixed(0)}',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            manglik.verdict,
+            style: const TextStyle(
+              color: Color(0xFFD8C8F5),
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: <Widget>[
+              _pill(isBalanced ? 'Balanced' : 'Unbalanced'),
+              _pill(
+                'You: ${primary.isManglik ? 'Manglik' : 'Non-Manglik'}',
+              ),
+              _pill(
+                'Partner: ${partner.isManglik ? 'Manglik' : 'Non-Manglik'}',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _mangalDoshLogicCard(
+    BuildContext context,
+    ComputeCompatibilityResponse response,
+  ) {
+    final manglik = response.compatibility.manglik;
+    final (primary, partner) = _manglikPeopleForResponse(response);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF240046).withValues(alpha: 0.84),
+        borderRadius: BorderRadius.circular(16),
+        border:
+            Border.all(color: const Color(0xFF9D4EDD).withValues(alpha: 0.36)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Mangal Dosh Logic',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: const Color(0xFFFFE7B3),
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            manglik.method.isEmpty
+                ? 'Rule: Mars in houses 1, 2, 4, 7, 8, 12 from Lagna, Moon, and Venus.'
+                : 'Rule: ${_humanizeManglikMethod(manglik.method)}',
+            style: const TextStyle(
+              color: Color(0xFFD8C8F5),
+              height: 1.3,
+            ),
+          ),
+          if (manglik.ruleProfileId.isNotEmpty) ...<Widget>[
+            const SizedBox(height: 6),
+            Text(
+              'Rule profile: ${manglik.ruleProfileId}',
+              style: const TextStyle(
+                color: Color(0xFFC77DFF),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          _mangalReferenceBlock(
+            title: 'Your Profile',
+            person: primary,
+          ),
+          const SizedBox(height: 10),
+          _mangalReferenceBlock(
+            title: 'Partner Profile',
+            person: partner,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _mangalReferenceBlock({
+    required String title,
+    required CompatibilityManglikPerson person,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF3C096C),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF9D4EDD).withValues(alpha: 0.32),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFFFFE7B3),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            person.isManglik
+                ? 'Manglik'
+                : (person.cancelledReferences.isNotEmpty
+                    ? 'Non-Manglik (Nullified)'
+                    : 'Non-Manglik'),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          ...<String>['lagna', 'moon', 'venus'].map((String referenceKey) {
+            final reference = _resolveReferenceEvidence(person, referenceKey);
+            final isActiveTrigger = reference.effectiveTriggered;
+            final isNullified = reference.cancelled;
+            final stateLabel = isActiveTrigger
+                ? '✓ trigger'
+                : (isNullified ? '~ nullified' : '✗ no trigger');
+            final stateColor = isActiveTrigger
+                ? const Color(0xFF6DFFB3)
+                : (isNullified
+                    ? const Color(0xFFFFD27D)
+                    : const Color(0xFFD8C8F5));
+            final stateWeight = isActiveTrigger || isNullified
+                ? FontWeight.w700
+                : FontWeight.w500;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                '${reference.referenceLabel}: H${reference.marsHouse} $stateLabel',
+                style: TextStyle(
+                  color: stateColor,
+                  fontSize: 12,
+                  fontWeight: stateWeight,
+                ),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -656,6 +884,73 @@ class _SoulmatePageState extends State<SoulmatePage> {
     );
   }
 
+  String _computeActionLabel() {
+    if (widget.entryPoint == SoulmateEntryPoint.mangalDosh) {
+      return 'Check Mangal Dosh';
+    }
+    return 'Find Compatibility';
+  }
+
+  (CompatibilityManglikPerson, CompatibilityManglikPerson)
+      _manglikPeopleForResponse(ComputeCompatibilityResponse response) {
+    final isPrimaryBoy = response.roles.primary.trim().toLowerCase() == 'boy';
+    if (isPrimaryBoy) {
+      return (
+        response.compatibility.manglik.boy,
+        response.compatibility.manglik.girl
+      );
+    }
+    return (
+      response.compatibility.manglik.girl,
+      response.compatibility.manglik.boy
+    );
+  }
+
+  CompatibilityManglikReferenceEvidence _resolveReferenceEvidence(
+    CompatibilityManglikPerson person,
+    String referenceKey,
+  ) {
+    final existing = person.referenceEvidence[referenceKey];
+    if (existing != null) {
+      return existing;
+    }
+    final marsHouse = switch (referenceKey) {
+      'lagna' => person.marsHouseFromLagna,
+      'moon' => person.marsHouseFromMoon,
+      'venus' => person.marsHouseFromVenus,
+      _ => 0,
+    };
+    final triggerHouses = person.triggerHouses.isEmpty
+        ? _defaultManglikTriggerHouses
+        : person.triggerHouses;
+    final label = switch (referenceKey) {
+      'lagna' => 'Lagna',
+      'moon' => 'Moon',
+      'venus' => 'Venus',
+      _ => referenceKey,
+    };
+    final triggered = triggerHouses.contains(marsHouse);
+    return CompatibilityManglikReferenceEvidence(
+      referenceKey: referenceKey,
+      referenceLabel: label,
+      marsHouse: marsHouse,
+      triggered: triggered,
+      effectiveTriggered: triggered,
+      cancelled: false,
+      ruleHouses: triggerHouses,
+      reason: triggered
+          ? 'Mars in house $marsHouse from $label triggers the rule.'
+          : 'Mars in house $marsHouse from $label does not trigger the rule.',
+    );
+  }
+
+  String _humanizeManglikMethod(String method) {
+    if (method == 'mars_in_1_2_4_7_8_12_from_lagna_moon_venus') {
+      return 'Mars in houses 1, 2, 4, 7, 8, 12 from Lagna, Moon, and Venus.';
+    }
+    return method.replaceAll('_', ' ');
+  }
+
   bool _isPrimaryReady() {
     return widget.birthInputState.dateOfBirth.trim().isNotEmpty &&
         widget.birthInputState.timeOfBirth.trim().isNotEmpty &&
@@ -702,8 +997,8 @@ class _SoulmatePageState extends State<SoulmatePage> {
   }
 
   Future<void> _openPartnerForm() async {
-    final draft = await Navigator.of(context).push<_PartnerProfileDraft>(
-      MaterialPageRoute<_PartnerProfileDraft>(
+    final draft = await Navigator.of(context).push<CompatibilityPartnerProfile>(
+      MaterialPageRoute<CompatibilityPartnerProfile>(
         builder: (BuildContext context) {
           return _PartnerFormPage(
             initialDraft: _partner,
@@ -718,6 +1013,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
     setState(() {
       _partner = draft;
     });
+    widget.birthInputState.setCompatibilityPartnerProfile(draft);
     _controller.clearComputedResult();
   }
 
@@ -768,7 +1064,7 @@ class _PartnerFormPage extends StatefulWidget {
     required this.controller,
   });
 
-  final _PartnerProfileDraft? initialDraft;
+  final CompatibilityPartnerProfile? initialDraft;
   final SoulmateController controller;
 
   @override
@@ -1024,7 +1320,7 @@ class _PartnerFormPageState extends State<_PartnerFormPage> {
     if (state == null || !state.validate()) {
       return;
     }
-    final draft = _PartnerProfileDraft(
+    final draft = CompatibilityPartnerProfile(
       name: _nameController.text.trim(),
       gender: _gender,
       dateOfBirth: _dateController.text.trim(),
@@ -1033,31 +1329,5 @@ class _PartnerFormPageState extends State<_PartnerFormPage> {
       customPlace: _customPlace,
     );
     Navigator.of(context).pop(draft);
-  }
-}
-
-class _PartnerProfileDraft {
-  const _PartnerProfileDraft({
-    required this.name,
-    required this.gender,
-    required this.dateOfBirth,
-    required this.timeOfBirth,
-    required this.placeOfBirth,
-    required this.customPlace,
-  });
-
-  final String name;
-  final PersonGender gender;
-  final String dateOfBirth;
-  final String timeOfBirth;
-  final String placeOfBirth;
-  final CustomPlacePayload? customPlace;
-
-  bool get isComplete {
-    return name.trim().isNotEmpty &&
-        gender != PersonGender.unspecified &&
-        dateOfBirth.trim().isNotEmpty &&
-        timeOfBirth.trim().isNotEmpty &&
-        placeOfBirth.trim().isNotEmpty;
   }
 }
