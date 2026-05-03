@@ -49,7 +49,10 @@ class _SoulmatePageState extends State<SoulmatePage> {
   @override
   Widget build(BuildContext context) {
     return UniversalDockScaffold(
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+      ),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(

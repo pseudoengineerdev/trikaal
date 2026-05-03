@@ -62,7 +62,10 @@ class FeaturesGridPage extends StatelessWidget {
     final report = birthInputState.computedReport;
 
     return UniversalDockScaffold(
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+      ),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(

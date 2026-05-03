@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum AppDockItem { home, charts, profile, premium, menu }
+enum AppDockItem { home, charts, profile, learning, premium, menu }
 
 class UniversalDockScaffold extends StatelessWidget {
   const UniversalDockScaffold({
@@ -86,9 +86,9 @@ class UniversalCurvedDockBar extends StatelessWidget {
                         ),
                         const SizedBox(width: 56),
                         _DockIcon(
-                          icon: Icons.auto_awesome_outlined,
-                          isActive: activeItem == AppDockItem.premium,
-                          onTap: () => onItemSelected(AppDockItem.premium),
+                          icon: Icons.menu_book_rounded,
+                          isActive: activeItem == AppDockItem.learning,
+                          onTap: () => onItemSelected(AppDockItem.learning),
                         ),
                         _DockIcon(
                           icon: Icons.menu_rounded,
