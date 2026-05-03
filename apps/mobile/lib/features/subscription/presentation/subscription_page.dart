@@ -41,7 +41,10 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   @override
   Widget build(BuildContext context) {
     return UniversalDockScaffold(
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+      ),
       activeItem: AppDockItem.premium,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(

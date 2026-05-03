@@ -20,7 +20,10 @@ class HomeOverviewPage extends StatelessWidget {
     final report = birthInputState.computedReport;
     if (report == null) {
       return UniversalDockScaffold(
-        appBar: buildTrikaalAppBar(context),
+        appBar: buildTrikaalAppBar(
+          context,
+          onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+        ),
         activeItem: AppDockItem.home,
         onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
         body: AstroPageBackground(
@@ -53,7 +56,10 @@ class HomeOverviewPage extends StatelessWidget {
         : birthInputState.firstName.trim();
 
     return UniversalDockScaffold(
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+      ),
       activeItem: AppDockItem.home,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(

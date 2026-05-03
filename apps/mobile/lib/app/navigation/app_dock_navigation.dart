@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../state/birth_input_state.dart';
 import '../widgets/universal_dock_scaffold.dart';
 import '../../features/features/presentation/features_grid_page.dart';
+import '../../features/learning/presentation/learning_modules_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/subscription/presentation/subscription_page.dart';
 
@@ -59,6 +60,18 @@ void handleAppDockSelection({
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
             return SubscriptionPage(birthInputState: birthInputState);
+          },
+        ),
+      );
+      return;
+    case AppDockItem.learning:
+      if (activeItem == AppDockItem.learning) {
+        return;
+      }
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return LearningModulesPage(birthInputState: birthInputState);
           },
         ),
       );
