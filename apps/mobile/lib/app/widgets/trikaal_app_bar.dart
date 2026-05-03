@@ -2,43 +2,18 @@ import 'package:flutter/material.dart';
 
 PreferredSizeWidget buildTrikaalAppBar(
   BuildContext context, {
-  List<Widget>? actions,
   VoidCallback? onPremiumTap,
-  VoidCallback? onQuickAddTap,
+  List<Widget>? actions,
 }) {
-  List<Widget> defaultActions() {
-    return <Widget>[
+  final mergedActions = <Widget>[
+    if (onPremiumTap != null)
       IconButton(
         tooltip: 'Premium',
-        icon: const Icon(Icons.auto_awesome_outlined),
-        onPressed: onPremiumTap ??
-            () {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Premium features and plans are coming soon.'),
-                  ),
-                );
-            },
+        icon: const Icon(Icons.auto_awesome_rounded),
+        onPressed: onPremiumTap,
       ),
-      IconButton(
-        tooltip: 'Quick Add',
-        icon: const Icon(Icons.add_rounded),
-        onPressed: onQuickAddTap ??
-            () {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  const SnackBar(
-                    content: Text('Quick actions are coming soon.'),
-                  ),
-                );
-            },
-      ),
-    ];
-  }
+    ...?actions,
+  ];
 
   return AppBar(
     automaticallyImplyLeading: false,
@@ -66,6 +41,6 @@ PreferredSizeWidget buildTrikaalAppBar(
             fontWeight: FontWeight.w500,
           ),
     ),
-    actions: actions ?? defaultActions(),
+    actions: mergedActions.isEmpty ? null : mergedActions,
   );
 }

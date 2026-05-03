@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/models/custom_place_payload.dart';
+import '../../../app/models/person_gender.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../charts/data/models/place_search_models.dart';
@@ -37,6 +38,7 @@ class _OnboardingFlowPageState extends State<OnboardingFlowPage> {
   late final TextEditingController _dateController;
   late final TextEditingController _timeController;
   late final TextEditingController _placeController;
+  PersonGender _selectedGender = PersonGender.unspecified;
   _OnboardingStep _step = _OnboardingStep.firstName;
 
   @override
@@ -50,7 +52,9 @@ class _OnboardingFlowPageState extends State<OnboardingFlowPage> {
         TextEditingController(text: widget.birthInputState.timeOfBirth);
     _placeController =
         TextEditingController(text: widget.birthInputState.placeOfBirth);
-    if (_nameController.text.trim().isNotEmpty) {
+    _selectedGender = widget.birthInputState.gender;
+    if (_nameController.text.trim().isNotEmpty &&
+        _selectedGender != PersonGender.unspecified) {
       _step = _OnboardingStep.birthMix;
     }
   }
@@ -142,6 +146,35 @@ class _OnboardingFlowPageState extends State<OnboardingFlowPage> {
               setState(() {});
             },
           ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<PersonGender>(
+            initialValue: _selectedGender == PersonGender.unspecified
+                ? null
+                : _selectedGender,
+            decoration: const InputDecoration(
+              labelText: 'Gender',
+              hintText: 'Select gender',
+              prefixIcon: Icon(Icons.wc_rounded),
+            ),
+            items: const <DropdownMenuItem<PersonGender>>[
+              DropdownMenuItem<PersonGender>(
+                value: PersonGender.male,
+                child: Text('Male'),
+              ),
+              DropdownMenuItem<PersonGender>(
+                value: PersonGender.female,
+                child: Text('Female'),
+              ),
+            ],
+            onChanged: (PersonGender? value) {
+              if (value == null) {
+                return;
+              }
+              _selectedGender = value;
+              widget.birthInputState.updateGender(value);
+              setState(() {});
+            },
+          ),
           const SizedBox(height: 10),
           Text(
             '✨ A personal name makes your insights feel yours from day one.',
@@ -153,13 +186,15 @@ class _OnboardingFlowPageState extends State<OnboardingFlowPage> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _nameController.text.trim().isEmpty
+              onPressed: _nameController.text.trim().isEmpty ||
+                      _selectedGender == PersonGender.unspecified
                   ? null
                   : () {
                       widget.birthInputState.updateFirstName(
                         _nameController.text.trim(),
                         clearComputed: false,
                       );
+                      widget.birthInputState.updateGender(_selectedGender);
                       setState(() {
                         _step = _OnboardingStep.birthMix;
                       });

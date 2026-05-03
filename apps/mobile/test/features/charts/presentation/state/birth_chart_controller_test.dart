@@ -189,7 +189,7 @@ class _FakeChartApiClient extends ChartApiClient {
 }
 
 ComputeReportResponse _sampleComputeReportResponse() {
-  return const ComputeReportResponse(
+  return ComputeReportResponse(
     profile: ReportProfile(
       profileId: 'vedic_drik_lahiri_v1',
       zodiacSystem: 'sidereal',
@@ -337,6 +337,7 @@ ComputeReportResponse _sampleComputeReportResponse() {
                 rashi: 'Kark', occupants: <String>['budha', 'rahu']),
             12: ReportHouse(rashi: 'Simh', occupants: <String>['shukra']),
           },
+          grahaPositions: _sampleD1GrahaPositions(),
         ),
         d9: ReportDivision(
           lagnaRashi: 'Maka',
@@ -354,6 +355,7 @@ ComputeReportResponse _sampleComputeReportResponse() {
             11: ReportHouse(rashi: 'Vrsc', occupants: <String>[]),
             12: ReportHouse(rashi: 'Dhanu', occupants: <String>['rahu']),
           },
+          grahaPositions: _sampleD9GrahaPositions(),
         ),
       ),
       grahaTable: ReportGrahaTable(
@@ -604,4 +606,134 @@ ComputeReportResponse _sampleComputeReportResponse() {
       ],
     ),
   );
+}
+
+Map<String, ReportDivisionGrahaPosition> _sampleD1GrahaPositions() {
+  return <String, ReportDivisionGrahaPosition>{
+    'sun': const ReportDivisionGrahaPosition(
+      rashi: 'Mitu',
+      house: 10,
+      degreeInSignDeg: 18.0,
+    ),
+    'moon': const ReportDivisionGrahaPosition(
+      rashi: 'Kumb',
+      house: 6,
+      degreeInSignDeg: 20.0,
+    ),
+    'mangal': const ReportDivisionGrahaPosition(
+      rashi: 'Tula',
+      house: 2,
+      degreeInSignDeg: 5.0,
+    ),
+    'budha': const ReportDivisionGrahaPosition(
+      rashi: 'Kark',
+      house: 11,
+      degreeInSignDeg: 12.0,
+    ),
+    'guru': const ReportDivisionGrahaPosition(
+      rashi: 'Mesh',
+      house: 8,
+      degreeInSignDeg: 7.0,
+    ),
+    'shukra': const ReportDivisionGrahaPosition(
+      rashi: 'Simh',
+      house: 12,
+      degreeInSignDeg: 0.0,
+    ),
+    'shani': const ReportDivisionGrahaPosition(
+      rashi: 'Mesh',
+      house: 8,
+      degreeInSignDeg: 20.0,
+    ),
+    'rahu': const ReportDivisionGrahaPosition(
+      rashi: 'Kark',
+      house: 11,
+      degreeInSignDeg: 20.0,
+    ),
+    'ketu': const ReportDivisionGrahaPosition(
+      rashi: 'Maka',
+      house: 5,
+      degreeInSignDeg: 20.0,
+    ),
+    'spashth_rahu': const ReportDivisionGrahaPosition(
+      rashi: 'Kark',
+      house: 11,
+      degreeInSignDeg: 19.0,
+    ),
+    'spashth_ketu': const ReportDivisionGrahaPosition(
+      rashi: 'Maka',
+      house: 5,
+      degreeInSignDeg: 19.0,
+    ),
+    'lagna': const ReportDivisionGrahaPosition(
+      rashi: 'Kany',
+      house: 1,
+      degreeInSignDeg: 13.0,
+    ),
+  };
+}
+
+Map<String, ReportDivisionGrahaPosition> _sampleD9GrahaPositions() {
+  return <String, ReportDivisionGrahaPosition>{
+    'sun': const ReportDivisionGrahaPosition(
+      rashi: 'Meen',
+      house: 3,
+      degreeInSignDeg: 12.0,
+    ),
+    'moon': const ReportDivisionGrahaPosition(
+      rashi: 'Mitu',
+      house: 6,
+      degreeInSignDeg: 3.0,
+    ),
+    'mangal': const ReportDivisionGrahaPosition(
+      rashi: 'Kark',
+      house: 7,
+      degreeInSignDeg: 18.0,
+    ),
+    'budha': const ReportDivisionGrahaPosition(
+      rashi: 'Kany',
+      house: 9,
+      degreeInSignDeg: 11.0,
+    ),
+    'guru': const ReportDivisionGrahaPosition(
+      rashi: 'Maka',
+      house: 1,
+      degreeInSignDeg: 2.0,
+    ),
+    'shukra': const ReportDivisionGrahaPosition(
+      rashi: 'Tula',
+      house: 10,
+      degreeInSignDeg: 6.0,
+    ),
+    'shani': const ReportDivisionGrahaPosition(
+      rashi: 'Kumb',
+      house: 2,
+      degreeInSignDeg: 5.0,
+    ),
+    'rahu': const ReportDivisionGrahaPosition(
+      rashi: 'Dhanu',
+      house: 12,
+      degreeInSignDeg: 4.0,
+    ),
+    'ketu': const ReportDivisionGrahaPosition(
+      rashi: 'Tula',
+      house: 10,
+      degreeInSignDeg: 4.0,
+    ),
+    'spashth_rahu': const ReportDivisionGrahaPosition(
+      rashi: 'Dhanu',
+      house: 12,
+      degreeInSignDeg: 3.0,
+    ),
+    'spashth_ketu': const ReportDivisionGrahaPosition(
+      rashi: 'Tula',
+      house: 10,
+      degreeInSignDeg: 3.0,
+    ),
+    'lagna': const ReportDivisionGrahaPosition(
+      rashi: 'Maka',
+      house: 1,
+      degreeInSignDeg: 0.0,
+    ),
+  };
 }

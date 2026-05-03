@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/models/compatibility_partner_profile.dart';
 import '../../../app/models/custom_place_payload.dart';
+import '../../../app/models/person_gender.dart';
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
@@ -12,32 +14,115 @@ import '../../charts/presentation/widgets/chart_state_widgets.dart';
 import '../../shared/birth_input/birth_input_formatters.dart';
 import 'state/soulmate_controller.dart';
 
+enum SoulmateEntryPoint {
+  soulmate,
+  mangalDosh,
+}
+
+const List<int> _defaultManglikTriggerHouses = <int>[1, 2, 4, 7, 8, 12];
+const List<String> _mangalChartGrahaOrder = <String>[
+  'lagna',
+  'sun',
+  'moon',
+  'mangal',
+  'budha',
+  'guru',
+  'shukra',
+  'shani',
+  'rahu',
+  'ketu',
+];
+const Map<String, String> _mangalChartGrahaLabel = <String, String>{
+  'lagna': 'Ascendant',
+  'sun': 'Sun',
+  'moon': 'Moon',
+  'mangal': 'Mars',
+  'budha': 'Mercury',
+  'guru': 'Jupiter',
+  'shukra': 'Venus',
+  'shani': 'Saturn',
+  'rahu': 'Rahu',
+  'ketu': 'Ketu',
+};
+const Map<String, String> _mangalChartGrahaGlyph = <String, String>{
+  'lagna': '↑',
+  'sun': '☉',
+  'moon': '☽',
+  'mangal': '♂',
+  'budha': '☿',
+  'guru': '♃',
+  'shukra': '♀',
+  'shani': '♄',
+  'rahu': '☊',
+  'ketu': '☋',
+};
+const Map<String, String> _mangalChartRashiNames = <String, String>{
+  'Mesh': 'Aries',
+  'Vrish': 'Taurus',
+  'Mith': 'Gemini',
+  'Kark': 'Cancer',
+  'Simh': 'Leo',
+  'Kany': 'Virgo',
+  'Tula': 'Libra',
+  'Vrsc': 'Scorpio',
+  'Dhanu': 'Sagittarius',
+  'Makar': 'Capricorn',
+  'Kumb': 'Aquarius',
+  'Meen': 'Pisces',
+};
+
+enum _MangalChartAnchor {
+  lagna,
+  moon,
+  venus,
+}
+
 class SoulmatePage extends StatefulWidget {
   const SoulmatePage({
     required this.birthInputState,
+    this.entryPoint = SoulmateEntryPoint.soulmate,
+    this.startWithPartnerForm = false,
     super.key,
   });
 
   final BirthInputState birthInputState;
+  final SoulmateEntryPoint entryPoint;
+  final bool startWithPartnerForm;
 
   @override
   State<SoulmatePage> createState() => _SoulmatePageState();
 }
 
-enum _PrimaryRole {
-  boy,
-  girl,
-}
-
 class _SoulmatePageState extends State<SoulmatePage> {
   late final SoulmateController _controller;
-  _PartnerProfileDraft? _partner;
-  _PrimaryRole _primaryRole = _PrimaryRole.boy;
+  CompatibilityPartnerProfile? _partner;
+  _MangalChartAnchor _primaryChartAnchor = _MangalChartAnchor.lagna;
+  _MangalChartAnchor _partnerChartAnchor = _MangalChartAnchor.lagna;
+  bool _autoComputeAttempted = false;
+  bool _autoPartnerFormAttempted = false;
 
   @override
   void initState() {
     super.initState();
     _controller = SoulmateController();
+    _partner = widget.birthInputState.compatibilityPartnerProfile;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      if (widget.startWithPartnerForm &&
+          !_autoPartnerFormAttempted &&
+          (_partner == null || !_partner!.isComplete)) {
+        _autoPartnerFormAttempted = true;
+        _openPartnerForm();
+      }
+      if (widget.entryPoint == SoulmateEntryPoint.mangalDosh &&
+          !_autoComputeAttempted &&
+          _canCompute) {
+        _autoComputeAttempted = true;
+        _computeCompatibility();
+      }
+    });
   }
 
   @override
@@ -49,10 +134,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
   @override
   Widget build(BuildContext context) {
     return UniversalDockScaffold(
-      appBar: buildTrikaalAppBar(
-        context,
-        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
-      ),
+      appBar: buildTrikaalAppBar(context),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(
@@ -70,6 +152,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
                     context: context,
                     title: 'Your Profile',
                     name: _primaryName(),
+                    gender: _formatGenderLabel(widget.birthInputState.gender),
                     details:
                         '${widget.birthInputState.dateOfBirth} • ${widget.birthInputState.timeOfBirth}\n${widget.birthInputState.placeOfBirth}',
                     isReady: primaryReady,
@@ -100,6 +183,9 @@ class _SoulmatePageState extends State<SoulmatePage> {
                     context: context,
                     title: 'Partner Profile',
                     name: _partner?.name ?? 'Tap to add partner details',
+                    gender: _partner == null
+                        ? 'Not set'
+                        : _formatGenderLabel(_partner!.gender),
                     details: _partner == null
                         ? 'Date, time, and place are required for compatibility.'
                         : '${_partner!.dateOfBirth} • ${_partner!.timeOfBirth}\n${_partner!.placeOfBirth}',
@@ -108,8 +194,6 @@ class _SoulmatePageState extends State<SoulmatePage> {
                         _partner == null ? 'Add partner' : 'Edit partner',
                     onTap: _openPartnerForm,
                   ),
-                  const SizedBox(height: 12),
-                  _roleToggle(context),
                   const SizedBox(height: 14),
                   SizedBox(
                     width: double.infinity,
@@ -125,7 +209,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
                       label: Text(
                         _controller.loading
                             ? 'Computing compatibility...'
-                            : 'Find Compatibility',
+                            : _computeActionLabel(),
                       ),
                     ),
                   ),
@@ -138,18 +222,20 @@ class _SoulmatePageState extends State<SoulmatePage> {
                   ],
                   if (_controller.result != null) ...<Widget>[
                     const SizedBox(height: 16),
-                    _compatibilitySummaryCard(
-                      context,
-                      _controller.result!.compatibility.summary,
-                    ),
-                    const SizedBox(height: 12),
-                    _manglikCard(
-                        context, _controller.result!.compatibility.manglik),
-                    const SizedBox(height: 12),
-                    _kutaBreakdownCard(
-                      context,
-                      _controller.result!.compatibility.ashtaKuta,
-                    ),
+                    if (widget.entryPoint ==
+                        SoulmateEntryPoint.mangalDosh) ...<Widget>[
+                      _mangalDoshLogicCard(context, _controller.result!),
+                    ] else ...<Widget>[
+                      _compatibilitySummaryCard(
+                        context,
+                        _controller.result!.compatibility.summary,
+                      ),
+                      const SizedBox(height: 12),
+                      _kutaBreakdownCard(
+                        context,
+                        _controller.result!.compatibility.ashtaKuta,
+                      ),
+                    ],
                   ],
                 ],
               );
@@ -165,12 +251,16 @@ class _SoulmatePageState extends State<SoulmatePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Your Soulmate',
+          widget.entryPoint == SoulmateEntryPoint.mangalDosh
+              ? 'Mangal Dosh'
+              : 'Your Soulmate',
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: 6),
         Text(
-          'Match two birth charts with Ashta-Kuta, Manglik, and D1/D9 checks.',
+          widget.entryPoint == SoulmateEntryPoint.mangalDosh
+              ? 'Using your saved partner profile, we evaluate Manglik alignment from both charts.'
+              : 'Match two birth charts with Ashta-Kuta and detailed guna insights.',
           style:
               TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
@@ -182,6 +272,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
     required BuildContext context,
     required String title,
     required String name,
+    required String gender,
     required String details,
     required bool isReady,
     required String? actionLabel,
@@ -228,6 +319,14 @@ class _SoulmatePageState extends State<SoulmatePage> {
                     fontWeight: FontWeight.w700,
                   ),
             ),
+            const SizedBox(height: 2),
+            Text(
+              'Gender: $gender',
+              style: const TextStyle(
+                color: Color(0xFFCFB8F7),
+                fontSize: 13,
+              ),
+            ),
             const SizedBox(height: 4),
             Text(
               details,
@@ -252,68 +351,459 @@ class _SoulmatePageState extends State<SoulmatePage> {
     );
   }
 
-  Widget _roleToggle(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF240046).withValues(alpha: 0.78),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: const Color(0xFF9D4EDD).withValues(alpha: 0.35),
+  Widget _mangalDoshLogicCard(
+    BuildContext context,
+    ComputeCompatibilityResponse response,
+  ) {
+    final manglik = response.compatibility.manglik;
+    final (primary, partner) = _manglikPeopleForResponse(response);
+    final primarySnapshot = response.primary.snapshot;
+    final partnerSnapshot = response.partner.snapshot;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        _mangalReferenceBlock(
+          title: 'Your Profile',
+          person: primary,
+          snapshot: primarySnapshot,
+          selectedAnchor: _primaryChartAnchor,
+          onAnchorChanged: (_MangalChartAnchor value) {
+            if (_primaryChartAnchor == value) {
+              return;
+            }
+            setState(() {
+              _primaryChartAnchor = value;
+            });
+          },
         ),
-      ),
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Text(
-            'Compatibility Role Mapping',
-            style: TextStyle(
-              color: Color(0xFFFFE7B3),
-              fontWeight: FontWeight.w700,
-            ),
+        const SizedBox(height: 12),
+        Divider(
+          color: const Color(0xFF9D4EDD).withValues(alpha: 0.30),
+          thickness: 0.8,
+          height: 1,
+        ),
+        const SizedBox(height: 12),
+        _mangalReferenceBlock(
+          title: 'Partner Profile',
+          person: partner,
+          snapshot: partnerSnapshot,
+          selectedAnchor: _partnerChartAnchor,
+          onAnchorChanged: (_MangalChartAnchor value) {
+            if (_partnerChartAnchor == value) {
+              return;
+            }
+            setState(() {
+              _partnerChartAnchor = value;
+            });
+          },
+        ),
+        const SizedBox(height: 14),
+        Divider(
+          color: const Color(0xFF9D4EDD).withValues(alpha: 0.30),
+          thickness: 0.8,
+          height: 1,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Mangal Dosh Logic',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: const Color(0xFFFFE7B3),
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          manglik.method.isEmpty
+              ? 'Rule: Mars in houses 1, 2, 4, 7, 8, 12 from Lagna, Moon, and Venus.'
+              : 'Rule: ${_humanizeManglikMethod(manglik.method)}',
+          style: const TextStyle(
+            color: Color(0xFFD8C8F5),
+            height: 1.3,
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _mangalReferenceBlock({
+    required String title,
+    required CompatibilityManglikPerson person,
+    required Map<String, dynamic> snapshot,
+    required _MangalChartAnchor selectedAnchor,
+    required ValueChanged<_MangalChartAnchor> onAnchorChanged,
+  }) {
+    final selectedReferenceKey = _referenceKeyForAnchor(selectedAnchor);
+    final selectedReference =
+        _resolveReferenceEvidence(person, selectedReferenceKey);
+    final List<String> doshaReasons = selectedReference.doshaReasons;
+    final List<String> nullificationReasons =
+        selectedReference.nullificationReasons;
+    final chartRows = _buildMangalChartRows(
+      snapshot: snapshot,
+      anchor: selectedAnchor,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          title,
+          style: const TextStyle(
+            color: Color(0xFFFFE7B3),
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          person.isManglik
+              ? 'Manglik'
+              : (person.cancelledReferences.isNotEmpty
+                  ? 'Non-Manglik (Nullified)'
+                  : 'Non-Manglik'),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 6),
+        ...<String>['lagna', 'moon', 'venus'].map((String referenceKey) {
+          final reference = _resolveReferenceEvidence(person, referenceKey);
+          final isActiveTrigger = reference.effectiveTriggered;
+          final isNullified = reference.cancelled;
+          final stateLabel = isActiveTrigger
+              ? '✓ trigger'
+              : (isNullified ? '~ nullified' : '✗ no trigger');
+          final stateColor = isActiveTrigger
+              ? const Color(0xFF6DFFB3)
+              : (isNullified
+                  ? const Color(0xFFFFD27D)
+                  : const Color(0xFFD8C8F5));
+          final stateWeight = isActiveTrigger || isNullified
+              ? FontWeight.w700
+              : FontWeight.w500;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              '${reference.referenceLabel}: H${reference.marsHouse} $stateLabel',
+              style: TextStyle(
+                color: stateColor,
+                fontSize: 12,
+                fontWeight: stateWeight,
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 8),
+        _mangalAnchorTabs(
+          selectedAnchor: selectedAnchor,
+          onChanged: onAnchorChanged,
+        ),
+        const SizedBox(height: 8),
+        _mangalAnchorChart(
+          context: context,
+          rows: chartRows,
+          selectedAnchor: selectedAnchor,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${selectedReference.referenceLabel} status: ${selectedReference.reason}',
+          style: const TextStyle(
+            color: Color(0xFFD8C8F5),
+            fontSize: 11.8,
+            height: 1.2,
+          ),
+        ),
+        if (doshaReasons.isNotEmpty) ...<Widget>[
           const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: <Widget>[
-              ChoiceChip(
-                label: const Text('You = Boy'),
-                selected: _primaryRole == _PrimaryRole.boy,
-                onSelected: (selected) {
-                  if (!selected) {
-                    return;
-                  }
-                  setState(() {
-                    _primaryRole = _PrimaryRole.boy;
-                  });
-                  _controller.clearComputedResult();
-                },
-              ),
-              ChoiceChip(
-                label: const Text('You = Girl'),
-                selected: _primaryRole == _PrimaryRole.girl,
-                onSelected: (selected) {
-                  if (!selected) {
-                    return;
-                  }
-                  setState(() {
-                    _primaryRole = _PrimaryRole.girl;
-                  });
-                  _controller.clearComputedResult();
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'This preserves traditional Ashta-Kuta directionality used by Vedic matching systems.',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 12,
-            ),
+          _mangalReasonList(
+            title: '${selectedReference.referenceLabel} Dosha Reason',
+            reasons: doshaReasons,
+            titleColor: const Color(0xFFFFE7B3),
+            textColor: const Color(0xFFD8C8F5),
           ),
         ],
+        if (nullificationReasons.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 8),
+          _mangalReasonList(
+            title: '${selectedReference.referenceLabel} Dosha Nullified',
+            reasons: nullificationReasons,
+            titleColor: const Color(0xFFFFD27D),
+            textColor: const Color(0xFFFFEBC1),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _mangalAnchorTabs({
+    required _MangalChartAnchor selectedAnchor,
+    required ValueChanged<_MangalChartAnchor> onChanged,
+  }) {
+    Widget tabButton(_MangalChartAnchor anchor) {
+      final selected = selectedAnchor == anchor;
+      return Expanded(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () => onChanged(anchor),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 170),
+            padding: const EdgeInsets.symmetric(vertical: 7),
+            decoration: BoxDecoration(
+              color: selected
+                  ? const Color(0xFF5A189A).withValues(alpha: 0.95)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              _mangalAnchorLabel(anchor),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected
+                    ? const Color(0xFFFFE7B3)
+                    : const Color(0xFFD8C8F5),
+                fontSize: 12.5,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF9D4EDD).withValues(alpha: 0.24),
+        ),
       ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: <Widget>[
+          tabButton(_MangalChartAnchor.lagna),
+          tabButton(_MangalChartAnchor.moon),
+          tabButton(_MangalChartAnchor.venus),
+        ],
+      ),
+    );
+  }
+
+  Widget _mangalAnchorChart({
+    required BuildContext context,
+    required List<_MangalChartRow> rows,
+    required _MangalChartAnchor selectedAnchor,
+  }) {
+    if (rows.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.22),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFF9D4EDD).withValues(alpha: 0.30),
+          ),
+        ),
+        child: const Text(
+          'Chart data unavailable for this anchor.',
+          style: TextStyle(
+            color: Color(0xFFD8C8F5),
+            fontSize: 12,
+          ),
+        ),
+      );
+    }
+
+    final borderColor = Theme.of(
+      context,
+    ).colorScheme.outlineVariant.withValues(alpha: 0.42);
+    final dividerColor = const Color(0xFF9D4EDD).withValues(alpha: 0.28);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          '${_mangalAnchorLabel(selectedAnchor)} Chart - D1',
+          style: const TextStyle(
+            color: Color(0xFFFFE7B3),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border.all(color: borderColor),
+              borderRadius: BorderRadius.circular(18),
+              color: Colors.black.withValues(alpha: 0.22),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Table(
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                columnWidths: const <int, TableColumnWidth>{
+                  0: FlexColumnWidth(1.2),
+                  1: FlexColumnWidth(1.6),
+                  2: FlexColumnWidth(0.9),
+                },
+                children: <TableRow>[
+                  TableRow(
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: dividerColor)),
+                    ),
+                    children: const <Widget>[
+                      _MangalTableCell(
+                        text: 'Sign',
+                        isHeader: true,
+                      ),
+                      _MangalTableCell(
+                        text: 'Planet',
+                        isHeader: true,
+                      ),
+                      _MangalTableCell(
+                        text: 'House',
+                        isHeader: true,
+                        textAlign: TextAlign.center,
+                        horizontalPadding: 6,
+                      ),
+                    ],
+                  ),
+                  ...List<TableRow>.generate(rows.length, (int index) {
+                    final row = rows[index];
+                    return TableRow(
+                      decoration: index == rows.length - 1
+                          ? null
+                          : BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: dividerColor),
+                              ),
+                            ),
+                      children: <Widget>[
+                        _MangalTableCell(text: row.rashiLabel),
+                        _MangalTableCell(
+                          text:
+                              '${_mangalChartGrahaGlyph[row.grahaKey] ?? '•'} ${_mangalChartGrahaLabel[row.grahaKey] ?? row.grahaKey}',
+                        ),
+                        _MangalTableCell(
+                          text: row.house.toString(),
+                          textAlign: TextAlign.center,
+                          horizontalPadding: 6,
+                        ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<_MangalChartRow> _buildMangalChartRows({
+    required Map<String, dynamic> snapshot,
+    required _MangalChartAnchor anchor,
+  }) {
+    final varga = _asMap(snapshot['varga']);
+    final d1 = _asMap(varga['d1']);
+    final housesRaw = _asMap(d1['houses']);
+    final positionsRaw = _asMap(d1['graha_positions']);
+    if (housesRaw.isEmpty || positionsRaw.isEmpty) {
+      return const <_MangalChartRow>[];
+    }
+
+    final anchorGrahaKey = switch (anchor) {
+      _MangalChartAnchor.lagna => 'lagna',
+      _MangalChartAnchor.moon => 'moon',
+      _MangalChartAnchor.venus => 'shukra',
+    };
+    final anchorPosition = _asMap(positionsRaw[anchorGrahaKey]);
+    final anchorHouse = _asInt(anchorPosition['house']) ?? 1;
+
+    final rows = <_MangalChartRow>[];
+    for (final grahaKey in _mangalChartGrahaOrder) {
+      final position = _asMap(positionsRaw[grahaKey]);
+      final baseHouse = _asInt(position['house']);
+      if (baseHouse == null) {
+        continue;
+      }
+      final relativeHouse = ((baseHouse - anchorHouse + 12) % 12) + 1;
+      final housePayload = _asMap(housesRaw[baseHouse.toString()]);
+      final rashiCode = housePayload['rashi']?.toString() ?? '';
+      final rashiLabel = _mangalChartRashiNames[rashiCode] ?? rashiCode;
+      rows.add(
+        _MangalChartRow(
+          rashiLabel: rashiLabel,
+          grahaKey: grahaKey,
+          house: relativeHouse,
+        ),
+      );
+    }
+
+    rows.sort((a, b) {
+      final byHouse = a.house.compareTo(b.house);
+      if (byHouse != 0) {
+        return byHouse;
+      }
+      final aOrder = _mangalChartGrahaOrder.indexOf(a.grahaKey);
+      final bOrder = _mangalChartGrahaOrder.indexOf(b.grahaKey);
+      return aOrder.compareTo(bOrder);
+    });
+    return rows;
+  }
+
+  String _mangalAnchorLabel(_MangalChartAnchor anchor) {
+    return switch (anchor) {
+      _MangalChartAnchor.lagna => 'Ascendant',
+      _MangalChartAnchor.moon => 'Moon',
+      _MangalChartAnchor.venus => 'Venus',
+    };
+  }
+
+  String _referenceKeyForAnchor(_MangalChartAnchor anchor) {
+    return switch (anchor) {
+      _MangalChartAnchor.lagna => 'lagna',
+      _MangalChartAnchor.moon => 'moon',
+      _MangalChartAnchor.venus => 'venus',
+    };
+  }
+
+  Widget _mangalReasonList({
+    required String title,
+    required List<String> reasons,
+    required Color titleColor,
+    required Color textColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          title,
+          style: TextStyle(
+            color: titleColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        ...reasons.map(
+          (String reason) => Padding(
+            padding: const EdgeInsets.only(bottom: 3),
+            child: Text(
+              '• $reason',
+              style: TextStyle(
+                color: textColor,
+                fontSize: 12,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -324,6 +814,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
     final percent = summary.gunaScoreMax <= 0
         ? 0
         : (summary.gunaScore / summary.gunaScoreMax * 100);
+    final visual = _bandVisual(summary.overallBand);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -354,116 +845,49 @@ class _SoulmatePageState extends State<SoulmatePage> {
             '${percent.toStringAsFixed(1)}% • ${summary.overallBand}',
             style: const TextStyle(color: Color(0xFFD8C8F5)),
           ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF3C096C),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFF9D4EDD).withValues(alpha: 0.42),
+              ),
+            ),
+            child: Row(
+              children: <Widget>[
+                Text(
+                  visual.$1,
+                  style: const TextStyle(fontSize: 23),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    visual.$2,
+                    style: const TextStyle(
+                      color: Color(0xFFFFE7B3),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const Text(
+                  '🕊️',
+                  style: TextStyle(fontSize: 22),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: <Widget>[
-              _pill(summary.manglikAlignment),
+              _pill(summary.overallBand),
               _pill(summary.nadiMatch ? 'Nadi Match' : 'Nadi Dosha'),
               _pill(summary.bhakootMatch ? 'Bhakoot Match' : 'Bhakoot Dosha'),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _manglikCard(BuildContext context, CompatibilityManglik manglik) {
-    final partnerRole =
-        _primaryRole == _PrimaryRole.boy ? 'Partner (Girl)' : 'Partner (Boy)';
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF240046).withValues(alpha: 0.84),
-        borderRadius: BorderRadius.circular(16),
-        border:
-            Border.all(color: const Color(0xFF9D4EDD).withValues(alpha: 0.36)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'Manglik Check',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFFFFE7B3),
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${manglik.score.toStringAsFixed(1)} / ${manglik.maxScore.toStringAsFixed(0)}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            manglik.verdict,
-            style: const TextStyle(color: Color(0xFFD8C8F5)),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: _manglikMiniTile(
-                  label: _primaryRole == _PrimaryRole.boy
-                      ? 'You (Boy)'
-                      : 'You (Girl)',
-                  person: _primaryRole == _PrimaryRole.boy
-                      ? manglik.boy
-                      : manglik.girl,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _manglikMiniTile(
-                  label: partnerRole,
-                  person: _primaryRole == _PrimaryRole.boy
-                      ? manglik.girl
-                      : manglik.boy,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _manglikMiniTile({
-    required String label,
-    required CompatibilityManglikPerson person,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: const Color(0xFF3C096C),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFFD8C8F5),
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            person.isManglik ? 'Manglik' : 'Non-Manglik',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '${person.triggerCount} trigger(s)',
-            style: const TextStyle(color: Color(0xFFC77DFF), fontSize: 12),
           ),
         ],
       ),
@@ -492,45 +916,281 @@ class _SoulmatePageState extends State<SoulmatePage> {
                 ),
           ),
           const SizedBox(height: 10),
-          ...ashtaKuta.components.map((component) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 740),
+              child: Table(
+                border: TableBorder.all(
+                  color: const Color(0xFF9D4EDD).withValues(alpha: 0.26),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                columnWidths: const <int, TableColumnWidth>{
+                  0: FlexColumnWidth(1.4),
+                  1: FlexColumnWidth(0.65),
+                  2: FlexColumnWidth(0.7),
+                  3: FlexColumnWidth(1.1),
+                  4: FlexColumnWidth(1.1),
+                  5: FlexColumnWidth(1.25),
+                },
+                children: <TableRow>[
+                  TableRow(
+                    decoration: const BoxDecoration(color: Color(0xFF5A189A)),
                     children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          component.label,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        '${component.score.toStringAsFixed(1)} / ${component.maxScore.toStringAsFixed(0)}',
-                        style: const TextStyle(color: Color(0xFFFFE7B3)),
-                      ),
+                      _tableHeaderCell('Guna'),
+                      _tableHeaderCell('Max'),
+                      _tableHeaderCell('Obt'),
+                      _tableHeaderCell('Boy'),
+                      _tableHeaderCell('Girl'),
+                      _tableHeaderCell('Area of Life'),
                     ],
                   ),
-                  const SizedBox(height: 6),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(999),
-                    child: LinearProgressIndicator(
-                      value: (component.percent / 100).clamp(0, 1),
-                      minHeight: 6,
-                      backgroundColor: const Color(0xFF3C096C),
-                    ),
-                  ),
+                  ...ashtaKuta.components.map((component) {
+                    return TableRow(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF240046).withValues(alpha: 0.9),
+                      ),
+                      children: <Widget>[
+                        _tableCell(component.label, isBold: true),
+                        _tableCell(component.maxScore.toStringAsFixed(0),
+                            centered: true),
+                        _tableCell(component.score.toStringAsFixed(1),
+                            centered: true),
+                        _tableCell(
+                          component.boyValue.isEmpty ? '-' : component.boyValue,
+                        ),
+                        _tableCell(
+                          component.girlValue.isEmpty
+                              ? '-'
+                              : component.girlValue,
+                        ),
+                        _tableCell(
+                          component.areaOfLife.isEmpty
+                              ? '-'
+                              : component.areaOfLife,
+                        ),
+                      ],
+                    );
+                  }),
                 ],
               ),
-            );
-          }),
+            ),
+          ),
+          const SizedBox(height: 14),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: ashtaKuta.components.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 1.22,
+            ),
+            itemBuilder: (BuildContext context, int index) {
+              final component = ashtaKuta.components[index];
+              return Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3C096C),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF9D4EDD).withValues(alpha: 0.32),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            '${component.label} Details',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFFFFE7B3),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                        InkWell(
+                          borderRadius: BorderRadius.circular(999),
+                          onTap: () =>
+                              _showKutaExplanationSheet(context, component),
+                          child: const Padding(
+                            padding: EdgeInsets.all(3),
+                            child: Icon(
+                              Icons.info_outline_rounded,
+                              color: Color(0xFFFFE7B3),
+                              size: 17,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '${component.score.toStringAsFixed(1)} / ${component.maxScore.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 17,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Boy: ${component.boyValue.isEmpty ? '-' : component.boyValue}',
+                      style: const TextStyle(
+                        color: Color(0xFFD8C8F5),
+                        fontSize: 12,
+                      ),
+                    ),
+                    Text(
+                      'Girl: ${component.girlValue.isEmpty ? '-' : component.girlValue}',
+                      style: const TextStyle(
+                        color: Color(0xFFD8C8F5),
+                        fontSize: 12,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      component.areaOfLife.isEmpty
+                          ? 'Area: -'
+                          : 'Area: ${component.areaOfLife}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFFC77DFF),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
+  }
+
+  Widget _tableHeaderCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+
+  Widget _tableCell(
+    String text, {
+    bool isBold = false,
+    bool centered = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 9),
+      child: Text(
+        text,
+        textAlign: centered ? TextAlign.center : TextAlign.left,
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showKutaExplanationSheet(
+    BuildContext context,
+    CompatibilityKutaComponent component,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFF240046),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        '${component.label} Kuta',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: const Color(0xFFFFE7B3),
+                            ),
+                      ),
+                    ),
+                    Text(
+                      '${component.score.toStringAsFixed(1)}/${component.maxScore.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  component.description.isEmpty
+                      ? 'This kuta score contributes to overall Ashta-Kuta matching quality.'
+                      : component.description,
+                  style: const TextStyle(
+                    color: Color(0xFFD8C8F5),
+                    height: 1.35,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Boy: ${component.boyValue.isEmpty ? '-' : component.boyValue}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+                Text(
+                  'Girl: ${component.girlValue.isEmpty ? '-' : component.girlValue}',
+                  style: const TextStyle(color: Colors.white),
+                ),
+                Text(
+                  'Area of Life: ${component.areaOfLife.isEmpty ? '-' : component.areaOfLife}',
+                  style: const TextStyle(color: Color(0xFFC77DFF)),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  (String, String) _bandVisual(String band) {
+    final value = band.trim().toLowerCase();
+    if (value == 'excellent') {
+      return ('🕊️💞🕊️', 'Harmony is exceptionally strong for this match.');
+    }
+    if (value == 'very good') {
+      return ('💖🕊️', 'Strong compatibility with good long-term potential.');
+    }
+    if (value == 'middling') {
+      return ('🤍🕊️', 'Moderate compatibility that needs conscious effort.');
+    }
+    return ('🕊️', 'Sensitive match. Alignment work is important.');
   }
 
   Widget _pill(String text) {
@@ -549,6 +1209,95 @@ class _SoulmatePageState extends State<SoulmatePage> {
         ),
       ),
     );
+  }
+
+  String _computeActionLabel() {
+    if (widget.entryPoint == SoulmateEntryPoint.mangalDosh) {
+      return 'Check Mangal Dosh';
+    }
+    return 'Find Compatibility';
+  }
+
+  (CompatibilityManglikPerson, CompatibilityManglikPerson)
+      _manglikPeopleForResponse(ComputeCompatibilityResponse response) {
+    final isPrimaryBoy = response.roles.primary.trim().toLowerCase() == 'boy';
+    if (isPrimaryBoy) {
+      return (
+        response.compatibility.manglik.boy,
+        response.compatibility.manglik.girl
+      );
+    }
+    return (
+      response.compatibility.manglik.girl,
+      response.compatibility.manglik.boy
+    );
+  }
+
+  CompatibilityManglikReferenceEvidence _resolveReferenceEvidence(
+    CompatibilityManglikPerson person,
+    String referenceKey,
+  ) {
+    final existing = person.referenceEvidence[referenceKey];
+    if (existing != null) {
+      return existing;
+    }
+    final marsHouse = switch (referenceKey) {
+      'lagna' => person.marsHouseFromLagna,
+      'moon' => person.marsHouseFromMoon,
+      'venus' => person.marsHouseFromVenus,
+      _ => 0,
+    };
+    final triggerHouses = person.triggerHouses.isEmpty
+        ? _defaultManglikTriggerHouses
+        : person.triggerHouses;
+    final label = switch (referenceKey) {
+      'lagna' => 'Lagna',
+      'moon' => 'Moon',
+      'venus' => 'Venus',
+      _ => referenceKey,
+    };
+    final triggered = triggerHouses.contains(marsHouse);
+    return CompatibilityManglikReferenceEvidence(
+      referenceKey: referenceKey,
+      referenceLabel: label,
+      marsHouse: marsHouse,
+      triggered: triggered,
+      effectiveTriggered: triggered,
+      cancelled: false,
+      ruleHouses: triggerHouses,
+      reason: triggered
+          ? 'Mars in house $marsHouse from $label triggers the rule.'
+          : 'Mars in house $marsHouse from $label does not trigger the rule.',
+    );
+  }
+
+  String _humanizeManglikMethod(String method) {
+    if (method == 'mars_in_1_2_4_7_8_12_from_lagna_moon_venus') {
+      return 'Mars in houses 1, 2, 4, 7, 8, 12 from Lagna, Moon, and Venus.';
+    }
+    return method.replaceAll('_', ' ');
+  }
+
+  Map<String, dynamic> _asMap(Object? raw) {
+    if (raw is Map<String, dynamic>) {
+      return raw;
+    }
+    if (raw is Map) {
+      return raw.map(
+        (Object? key, Object? value) => MapEntry(key.toString(), value),
+      );
+    }
+    return <String, dynamic>{};
+  }
+
+  int? _asInt(Object? raw) {
+    if (raw == null) {
+      return null;
+    }
+    if (raw is num) {
+      return raw.toInt();
+    }
+    return int.tryParse(raw.toString());
   }
 
   bool _isPrimaryReady() {
@@ -570,9 +1319,35 @@ class _SoulmatePageState extends State<SoulmatePage> {
     return value;
   }
 
+  String _formatGenderLabel(PersonGender gender) {
+    return switch (gender) {
+      PersonGender.male => 'Male',
+      PersonGender.female => 'Female',
+      PersonGender.unspecified => 'Not set',
+    };
+  }
+
+  String _derivePrimaryRole({
+    required PersonGender primaryGender,
+    required PersonGender partnerGender,
+  }) {
+    if (primaryGender == PersonGender.male &&
+        partnerGender == PersonGender.female) {
+      return 'boy';
+    }
+    if (primaryGender == PersonGender.female &&
+        partnerGender == PersonGender.male) {
+      return 'girl';
+    }
+    if (primaryGender == PersonGender.female) {
+      return 'girl';
+    }
+    return 'boy';
+  }
+
   Future<void> _openPartnerForm() async {
-    final draft = await Navigator.of(context).push<_PartnerProfileDraft>(
-      MaterialPageRoute<_PartnerProfileDraft>(
+    final draft = await Navigator.of(context).push<CompatibilityPartnerProfile>(
+      MaterialPageRoute<CompatibilityPartnerProfile>(
         builder: (BuildContext context) {
           return _PartnerFormPage(
             initialDraft: _partner,
@@ -587,6 +1362,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
     setState(() {
       _partner = draft;
     });
+    widget.birthInputState.setCompatibilityPartnerProfile(draft);
     _controller.clearComputedResult();
   }
 
@@ -608,7 +1384,10 @@ class _SoulmatePageState extends State<SoulmatePage> {
         placeOfBirth: partner.placeOfBirth,
         customPlace: partner.customPlace,
       ),
-      primaryRole: _primaryRole == _PrimaryRole.boy ? 'boy' : 'girl',
+      primaryRole: _derivePrimaryRole(
+        primaryGender: widget.birthInputState.gender,
+        partnerGender: partner.gender,
+      ),
     );
   }
 
@@ -628,13 +1407,59 @@ class _SoulmatePageState extends State<SoulmatePage> {
   }
 }
 
+class _MangalChartRow {
+  const _MangalChartRow({
+    required this.rashiLabel,
+    required this.grahaKey,
+    required this.house,
+  });
+
+  final String rashiLabel;
+  final String grahaKey;
+  final int house;
+}
+
+class _MangalTableCell extends StatelessWidget {
+  const _MangalTableCell({
+    required this.text,
+    this.isHeader = false,
+    this.textAlign = TextAlign.left,
+    this.horizontalPadding = 10,
+  });
+
+  final String text;
+  final bool isHeader;
+  final TextAlign textAlign;
+  final double horizontalPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding:
+          EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 12),
+      child: Text(
+        text,
+        textAlign: textAlign,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.clip,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: isHeader ? 12.8 : 12.4,
+          fontWeight: isHeader ? FontWeight.w700 : FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
 class _PartnerFormPage extends StatefulWidget {
   const _PartnerFormPage({
     required this.initialDraft,
     required this.controller,
   });
 
-  final _PartnerProfileDraft? initialDraft;
+  final CompatibilityPartnerProfile? initialDraft;
   final SoulmateController controller;
 
   @override
@@ -647,6 +1472,7 @@ class _PartnerFormPageState extends State<_PartnerFormPage> {
   late final TextEditingController _dateController;
   late final TextEditingController _timeController;
   late final TextEditingController _placeController;
+  PersonGender _gender = PersonGender.unspecified;
   CustomPlacePayload? _customPlace;
 
   @override
@@ -660,6 +1486,7 @@ class _PartnerFormPageState extends State<_PartnerFormPage> {
         TextEditingController(text: widget.initialDraft?.timeOfBirth ?? '');
     _placeController =
         TextEditingController(text: widget.initialDraft?.placeOfBirth ?? '');
+    _gender = widget.initialDraft?.gender ?? PersonGender.unspecified;
     _customPlace = widget.initialDraft?.customPlace;
   }
 
@@ -710,6 +1537,41 @@ class _PartnerFormPageState extends State<_PartnerFormPage> {
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Partner name is required';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      DropdownButtonFormField<PersonGender>(
+                        initialValue: _gender == PersonGender.unspecified
+                            ? null
+                            : _gender,
+                        decoration: const InputDecoration(
+                          labelText: 'Partner Gender',
+                          hintText: 'Select gender',
+                          prefixIcon: Icon(Icons.wc_rounded),
+                        ),
+                        items: const <DropdownMenuItem<PersonGender>>[
+                          DropdownMenuItem<PersonGender>(
+                            value: PersonGender.male,
+                            child: Text('Male'),
+                          ),
+                          DropdownMenuItem<PersonGender>(
+                            value: PersonGender.female,
+                            child: Text('Female'),
+                          ),
+                        ],
+                        onChanged: (PersonGender? value) {
+                          if (value == null) {
+                            return;
+                          }
+                          _gender = value;
+                          setState(() {});
+                        },
+                        validator: (PersonGender? value) {
+                          if (value == null ||
+                              value == PersonGender.unspecified) {
+                            return 'Partner gender is required';
                           }
                           return null;
                         },
@@ -853,36 +1715,14 @@ class _PartnerFormPageState extends State<_PartnerFormPage> {
     if (state == null || !state.validate()) {
       return;
     }
-    final draft = _PartnerProfileDraft(
+    final draft = CompatibilityPartnerProfile(
       name: _nameController.text.trim(),
+      gender: _gender,
       dateOfBirth: _dateController.text.trim(),
       timeOfBirth: _timeController.text.trim(),
       placeOfBirth: _placeController.text.trim(),
       customPlace: _customPlace,
     );
     Navigator.of(context).pop(draft);
-  }
-}
-
-class _PartnerProfileDraft {
-  const _PartnerProfileDraft({
-    required this.name,
-    required this.dateOfBirth,
-    required this.timeOfBirth,
-    required this.placeOfBirth,
-    required this.customPlace,
-  });
-
-  final String name;
-  final String dateOfBirth;
-  final String timeOfBirth;
-  final String placeOfBirth;
-  final CustomPlacePayload? customPlace;
-
-  bool get isComplete {
-    return name.trim().isNotEmpty &&
-        dateOfBirth.trim().isNotEmpty &&
-        timeOfBirth.trim().isNotEmpty &&
-        placeOfBirth.trim().isNotEmpty;
   }
 }

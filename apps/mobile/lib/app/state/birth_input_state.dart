@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 
 import '../data/saved_profiles_repository.dart';
+import '../models/compatibility_partner_profile.dart';
 import '../models/custom_place_payload.dart';
+import '../models/person_gender.dart';
 import '../models/saved_birth_profile.dart';
 import '../../features/charts/data/models/compute_report_models.dart';
 import '../../features/dasha/data/models/dasha_models.dart';
@@ -9,11 +11,13 @@ import '../../features/dasha/data/models/dasha_models.dart';
 class BirthInputState extends ChangeNotifier {
   BirthInputState({
     String firstName = '',
+    PersonGender gender = PersonGender.unspecified,
     String dateOfBirth = '',
     String timeOfBirth = '',
     String placeOfBirth = '',
     SavedProfilesRepository? profilesRepository,
   })  : _firstName = firstName,
+        _gender = gender,
         _dateOfBirth = dateOfBirth,
         _timeOfBirth = timeOfBirth,
         _placeOfBirth = placeOfBirth,
@@ -21,6 +25,7 @@ class BirthInputState extends ChangeNotifier {
             profilesRepository ?? SharedPreferencesSavedProfilesRepository();
 
   String _firstName;
+  PersonGender _gender;
   String _dateOfBirth;
   String _timeOfBirth;
   String _placeOfBirth;
@@ -35,8 +40,10 @@ class BirthInputState extends ChangeNotifier {
   bool _profilesLoaded = false;
   bool _profilesLoading = false;
   String? _profilesError;
+  CompatibilityPartnerProfile? _compatibilityPartnerProfile;
 
   String get firstName => _firstName;
+  PersonGender get gender => _gender;
   String get dateOfBirth => _dateOfBirth;
   String get timeOfBirth => _timeOfBirth;
   String get placeOfBirth => _placeOfBirth;
@@ -51,6 +58,8 @@ class BirthInputState extends ChangeNotifier {
   bool get profilesLoaded => _profilesLoaded;
   bool get profilesLoading => _profilesLoading;
   String? get profilesError => _profilesError;
+  CompatibilityPartnerProfile? get compatibilityPartnerProfile =>
+      _compatibilityPartnerProfile;
   bool get canSaveCurrentAsProfile =>
       _dateOfBirth.trim().isNotEmpty &&
       _timeOfBirth.trim().isNotEmpty &&
@@ -61,6 +70,18 @@ class BirthInputState extends ChangeNotifier {
       return;
     }
     _firstName = value;
+    if (clearComputed) {
+      _clearComputedState();
+      _onboardingCompleted = false;
+    }
+    notifyListeners();
+  }
+
+  void updateGender(PersonGender value, {bool clearComputed = false}) {
+    if (_gender == value) {
+      return;
+    }
+    _gender = value;
     if (clearComputed) {
       _clearComputedState();
       _onboardingCompleted = false;
@@ -173,6 +194,19 @@ class BirthInputState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setCompatibilityPartnerProfile(CompatibilityPartnerProfile profile) {
+    _compatibilityPartnerProfile = profile;
+    notifyListeners();
+  }
+
+  void clearCompatibilityPartnerProfile() {
+    if (_compatibilityPartnerProfile == null) {
+      return;
+    }
+    _compatibilityPartnerProfile = null;
+    notifyListeners();
+  }
+
   Future<void> loadSavedProfiles() async {
     if (_profilesLoaded || _profilesLoading) {
       return;
@@ -238,6 +272,7 @@ class BirthInputState extends ChangeNotifier {
       timeOfBirth: _timeOfBirth.trim(),
       placeOfBirth: _placeOfBirth.trim(),
       customPlace: _customPlace,
+      gender: _gender,
       isDefault: setAsDefault || _savedProfiles.isEmpty,
       createdAtUtcIso: nowIso,
       updatedAtUtcIso: nowIso,
@@ -299,6 +334,7 @@ class BirthInputState extends ChangeNotifier {
       placeOfBirth: _placeOfBirth.trim(),
       customPlace: _customPlace,
       clearCustomPlace: _customPlace == null,
+      gender: _gender,
       updatedAtUtcIso: DateTime.now().toUtc().toIso8601String(),
     );
     _savedProfiles = _sortProfiles(_savedProfiles);
@@ -354,6 +390,7 @@ class BirthInputState extends ChangeNotifier {
 
   void _applyProfile(SavedBirthProfile profile, {bool notify = true}) {
     _firstName = profile.name;
+    _gender = profile.gender;
     _dateOfBirth = profile.dateOfBirth;
     _timeOfBirth = profile.timeOfBirth;
     _placeOfBirth = profile.placeOfBirth;
@@ -449,6 +486,7 @@ class BirthInputState extends ChangeNotifier {
 
   void _clearCurrentInput() {
     _firstName = '';
+    _gender = PersonGender.unspecified;
     _dateOfBirth = '';
     _timeOfBirth = '';
     _placeOfBirth = '';
