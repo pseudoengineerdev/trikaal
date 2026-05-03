@@ -20,6 +20,62 @@ enum SoulmateEntryPoint {
 }
 
 const List<int> _defaultManglikTriggerHouses = <int>[1, 2, 4, 7, 8, 12];
+const List<String> _mangalChartGrahaOrder = <String>[
+  'lagna',
+  'sun',
+  'moon',
+  'mangal',
+  'budha',
+  'guru',
+  'shukra',
+  'shani',
+  'rahu',
+  'ketu',
+];
+const Map<String, String> _mangalChartGrahaLabel = <String, String>{
+  'lagna': 'Ascendant',
+  'sun': 'Sun',
+  'moon': 'Moon',
+  'mangal': 'Mars',
+  'budha': 'Mercury',
+  'guru': 'Jupiter',
+  'shukra': 'Venus',
+  'shani': 'Saturn',
+  'rahu': 'Rahu',
+  'ketu': 'Ketu',
+};
+const Map<String, String> _mangalChartGrahaGlyph = <String, String>{
+  'lagna': '↑',
+  'sun': '☉',
+  'moon': '☽',
+  'mangal': '♂',
+  'budha': '☿',
+  'guru': '♃',
+  'shukra': '♀',
+  'shani': '♄',
+  'rahu': '☊',
+  'ketu': '☋',
+};
+const Map<String, String> _mangalChartRashiNames = <String, String>{
+  'Mesh': 'Aries',
+  'Vrish': 'Taurus',
+  'Mith': 'Gemini',
+  'Kark': 'Cancer',
+  'Simh': 'Leo',
+  'Kany': 'Virgo',
+  'Tula': 'Libra',
+  'Vrsc': 'Scorpio',
+  'Dhanu': 'Sagittarius',
+  'Makar': 'Capricorn',
+  'Kumb': 'Aquarius',
+  'Meen': 'Pisces',
+};
+
+enum _MangalChartAnchor {
+  lagna,
+  moon,
+  venus,
+}
 
 class SoulmatePage extends StatefulWidget {
   const SoulmatePage({
@@ -40,6 +96,8 @@ class SoulmatePage extends StatefulWidget {
 class _SoulmatePageState extends State<SoulmatePage> {
   late final SoulmateController _controller;
   CompatibilityPartnerProfile? _partner;
+  _MangalChartAnchor _primaryChartAnchor = _MangalChartAnchor.lagna;
+  _MangalChartAnchor _partnerChartAnchor = _MangalChartAnchor.lagna;
   bool _autoComputeAttempted = false;
   bool _autoPartnerFormAttempted = false;
 
@@ -166,8 +224,6 @@ class _SoulmatePageState extends State<SoulmatePage> {
                     const SizedBox(height: 16),
                     if (widget.entryPoint ==
                         SoulmateEntryPoint.mangalDosh) ...<Widget>[
-                      _mangalDoshSummaryCard(context, _controller.result!),
-                      const SizedBox(height: 12),
                       _mangalDoshLogicCard(context, _controller.result!),
                     ] else ...<Widget>[
                       _compatibilitySummaryCard(
@@ -295,209 +351,425 @@ class _SoulmatePageState extends State<SoulmatePage> {
     );
   }
 
-  Widget _mangalDoshSummaryCard(
-    BuildContext context,
-    ComputeCompatibilityResponse response,
-  ) {
-    final manglik = response.compatibility.manglik;
-    final (primary, partner) = _manglikPeopleForResponse(response);
-    final isBalanced = manglik.pairAlignment.trim().toLowerCase() == 'balanced';
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF240046).withValues(alpha: 0.88),
-        borderRadius: BorderRadius.circular(16),
-        border:
-            Border.all(color: const Color(0xFF9D4EDD).withValues(alpha: 0.42)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'Mangal Dosh Result',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFFFFE7B3),
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${manglik.score.toStringAsFixed(1)} / ${manglik.maxScore.toStringAsFixed(0)}',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            manglik.verdict,
-            style: const TextStyle(
-              color: Color(0xFFD8C8F5),
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: <Widget>[
-              _pill(isBalanced ? 'Balanced' : 'Unbalanced'),
-              _pill(
-                'You: ${primary.isManglik ? 'Manglik' : 'Non-Manglik'}',
-              ),
-              _pill(
-                'Partner: ${partner.isManglik ? 'Manglik' : 'Non-Manglik'}',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _mangalDoshLogicCard(
     BuildContext context,
     ComputeCompatibilityResponse response,
   ) {
     final manglik = response.compatibility.manglik;
     final (primary, partner) = _manglikPeopleForResponse(response);
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF240046).withValues(alpha: 0.84),
-        borderRadius: BorderRadius.circular(16),
-        border:
-            Border.all(color: const Color(0xFF9D4EDD).withValues(alpha: 0.36)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'Mangal Dosh Logic',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xFFFFE7B3),
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            manglik.method.isEmpty
-                ? 'Rule: Mars in houses 1, 2, 4, 7, 8, 12 from Lagna, Moon, and Venus.'
-                : 'Rule: ${_humanizeManglikMethod(manglik.method)}',
-            style: const TextStyle(
-              color: Color(0xFFD8C8F5),
-              height: 1.3,
-            ),
-          ),
-          if (manglik.ruleProfileId.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 6),
-            Text(
-              'Rule profile: ${manglik.ruleProfileId}',
-              style: const TextStyle(
-                color: Color(0xFFC77DFF),
-                fontWeight: FontWeight.w600,
+    final primarySnapshot = response.primary.snapshot;
+    final partnerSnapshot = response.partner.snapshot;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        _mangalReferenceBlock(
+          title: 'Your Profile',
+          person: primary,
+          snapshot: primarySnapshot,
+          selectedAnchor: _primaryChartAnchor,
+          onAnchorChanged: (_MangalChartAnchor value) {
+            if (_primaryChartAnchor == value) {
+              return;
+            }
+            setState(() {
+              _primaryChartAnchor = value;
+            });
+          },
+        ),
+        const SizedBox(height: 12),
+        Divider(
+          color: const Color(0xFF9D4EDD).withValues(alpha: 0.30),
+          thickness: 0.8,
+          height: 1,
+        ),
+        const SizedBox(height: 12),
+        _mangalReferenceBlock(
+          title: 'Partner Profile',
+          person: partner,
+          snapshot: partnerSnapshot,
+          selectedAnchor: _partnerChartAnchor,
+          onAnchorChanged: (_MangalChartAnchor value) {
+            if (_partnerChartAnchor == value) {
+              return;
+            }
+            setState(() {
+              _partnerChartAnchor = value;
+            });
+          },
+        ),
+        const SizedBox(height: 14),
+        Divider(
+          color: const Color(0xFF9D4EDD).withValues(alpha: 0.30),
+          thickness: 0.8,
+          height: 1,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Mangal Dosh Logic',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: const Color(0xFFFFE7B3),
+                fontWeight: FontWeight.w700,
               ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          _mangalReferenceBlock(
-            title: 'Your Profile',
-            person: primary,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          manglik.method.isEmpty
+              ? 'Rule: Mars in houses 1, 2, 4, 7, 8, 12 from Lagna, Moon, and Venus.'
+              : 'Rule: ${_humanizeManglikMethod(manglik.method)}',
+          style: const TextStyle(
+            color: Color(0xFFD8C8F5),
+            height: 1.3,
           ),
-          const SizedBox(height: 10),
-          _mangalReferenceBlock(
-            title: 'Partner Profile',
-            person: partner,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _mangalReferenceBlock({
     required String title,
     required CompatibilityManglikPerson person,
+    required Map<String, dynamic> snapshot,
+    required _MangalChartAnchor selectedAnchor,
+    required ValueChanged<_MangalChartAnchor> onAnchorChanged,
   }) {
-    final List<String> doshaReasons = person.doshaReasons;
-    final List<String> nullificationReasons = person.nullificationReasons;
+    final selectedReferenceKey = _referenceKeyForAnchor(selectedAnchor);
+    final selectedReference =
+        _resolveReferenceEvidence(person, selectedReferenceKey);
+    final List<String> doshaReasons = selectedReference.doshaReasons;
+    final List<String> nullificationReasons =
+        selectedReference.nullificationReasons;
+    final chartRows = _buildMangalChartRows(
+      snapshot: snapshot,
+      anchor: selectedAnchor,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          title,
+          style: const TextStyle(
+            color: Color(0xFFFFE7B3),
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          person.isManglik
+              ? 'Manglik'
+              : (person.cancelledReferences.isNotEmpty
+                  ? 'Non-Manglik (Nullified)'
+                  : 'Non-Manglik'),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 6),
+        ...<String>['lagna', 'moon', 'venus'].map((String referenceKey) {
+          final reference = _resolveReferenceEvidence(person, referenceKey);
+          final isActiveTrigger = reference.effectiveTriggered;
+          final isNullified = reference.cancelled;
+          final stateLabel = isActiveTrigger
+              ? '✓ trigger'
+              : (isNullified ? '~ nullified' : '✗ no trigger');
+          final stateColor = isActiveTrigger
+              ? const Color(0xFF6DFFB3)
+              : (isNullified
+                  ? const Color(0xFFFFD27D)
+                  : const Color(0xFFD8C8F5));
+          final stateWeight = isActiveTrigger || isNullified
+              ? FontWeight.w700
+              : FontWeight.w500;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Text(
+              '${reference.referenceLabel}: H${reference.marsHouse} $stateLabel',
+              style: TextStyle(
+                color: stateColor,
+                fontSize: 12,
+                fontWeight: stateWeight,
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 8),
+        _mangalAnchorTabs(
+          selectedAnchor: selectedAnchor,
+          onChanged: onAnchorChanged,
+        ),
+        const SizedBox(height: 8),
+        _mangalAnchorChart(
+          context: context,
+          rows: chartRows,
+          selectedAnchor: selectedAnchor,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '${selectedReference.referenceLabel} status: ${selectedReference.reason}',
+          style: const TextStyle(
+            color: Color(0xFFD8C8F5),
+            fontSize: 11.8,
+            height: 1.2,
+          ),
+        ),
+        if (doshaReasons.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 8),
+          _mangalReasonList(
+            title: '${selectedReference.referenceLabel} Dosha Reason',
+            reasons: doshaReasons,
+            titleColor: const Color(0xFFFFE7B3),
+            textColor: const Color(0xFFD8C8F5),
+          ),
+        ],
+        if (nullificationReasons.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 8),
+          _mangalReasonList(
+            title: '${selectedReference.referenceLabel} Dosha Nullified',
+            reasons: nullificationReasons,
+            titleColor: const Color(0xFFFFD27D),
+            textColor: const Color(0xFFFFEBC1),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _mangalAnchorTabs({
+    required _MangalChartAnchor selectedAnchor,
+    required ValueChanged<_MangalChartAnchor> onChanged,
+  }) {
+    Widget tabButton(_MangalChartAnchor anchor) {
+      final selected = selectedAnchor == anchor;
+      return Expanded(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () => onChanged(anchor),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 170),
+            padding: const EdgeInsets.symmetric(vertical: 7),
+            decoration: BoxDecoration(
+              color: selected
+                  ? const Color(0xFF5A189A).withValues(alpha: 0.95)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              _mangalAnchorLabel(anchor),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: selected
+                    ? const Color(0xFFFFE7B3)
+                    : const Color(0xFFD8C8F5),
+                fontSize: 12.5,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Container(
-      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFF3C096C),
+        color: Colors.black.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF9D4EDD).withValues(alpha: 0.32),
+          color: const Color(0xFF9D4EDD).withValues(alpha: 0.24),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(4),
+      child: Row(
         children: <Widget>[
-          Text(
-            title,
-            style: const TextStyle(
-              color: Color(0xFFFFE7B3),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            person.isManglik
-                ? 'Manglik'
-                : (person.cancelledReferences.isNotEmpty
-                    ? 'Non-Manglik (Nullified)'
-                    : 'Non-Manglik'),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 6),
-          ...<String>['lagna', 'moon', 'venus'].map((String referenceKey) {
-            final reference = _resolveReferenceEvidence(person, referenceKey);
-            final isActiveTrigger = reference.effectiveTriggered;
-            final isNullified = reference.cancelled;
-            final stateLabel = isActiveTrigger
-                ? '✓ trigger'
-                : (isNullified ? '~ nullified' : '✗ no trigger');
-            final stateColor = isActiveTrigger
-                ? const Color(0xFF6DFFB3)
-                : (isNullified
-                    ? const Color(0xFFFFD27D)
-                    : const Color(0xFFD8C8F5));
-            final stateWeight = isActiveTrigger || isNullified
-                ? FontWeight.w700
-                : FontWeight.w500;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Text(
-                '${reference.referenceLabel}: H${reference.marsHouse} $stateLabel',
-                style: TextStyle(
-                  color: stateColor,
-                  fontSize: 12,
-                  fontWeight: stateWeight,
-                ),
-              ),
-            );
-          }),
-          if (doshaReasons.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 8),
-            _mangalReasonList(
-              title: 'Dosha Reason',
-              reasons: doshaReasons,
-              titleColor: const Color(0xFFFFE7B3),
-              textColor: const Color(0xFFD8C8F5),
-            ),
-          ],
-          if (nullificationReasons.isNotEmpty) ...<Widget>[
-            const SizedBox(height: 8),
-            _mangalReasonList(
-              title: 'Dosha Nullified',
-              reasons: nullificationReasons,
-              titleColor: const Color(0xFFFFD27D),
-              textColor: const Color(0xFFFFEBC1),
-            ),
-          ],
+          tabButton(_MangalChartAnchor.lagna),
+          tabButton(_MangalChartAnchor.moon),
+          tabButton(_MangalChartAnchor.venus),
         ],
       ),
     );
+  }
+
+  Widget _mangalAnchorChart({
+    required BuildContext context,
+    required List<_MangalChartRow> rows,
+    required _MangalChartAnchor selectedAnchor,
+  }) {
+    if (rows.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.22),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFF9D4EDD).withValues(alpha: 0.30),
+          ),
+        ),
+        child: const Text(
+          'Chart data unavailable for this anchor.',
+          style: TextStyle(
+            color: Color(0xFFD8C8F5),
+            fontSize: 12,
+          ),
+        ),
+      );
+    }
+
+    final borderColor = Theme.of(
+      context,
+    ).colorScheme.outlineVariant.withValues(alpha: 0.42);
+    final dividerColor = const Color(0xFF9D4EDD).withValues(alpha: 0.28);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          '${_mangalAnchorLabel(selectedAnchor)} Chart - D1',
+          style: const TextStyle(
+            color: Color(0xFFFFE7B3),
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border.all(color: borderColor),
+              borderRadius: BorderRadius.circular(18),
+              color: Colors.black.withValues(alpha: 0.22),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Table(
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                columnWidths: const <int, TableColumnWidth>{
+                  0: FlexColumnWidth(1.2),
+                  1: FlexColumnWidth(1.6),
+                  2: FlexColumnWidth(0.9),
+                },
+                children: <TableRow>[
+                  TableRow(
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: dividerColor)),
+                    ),
+                    children: const <Widget>[
+                      _MangalTableCell(
+                        text: 'Sign',
+                        isHeader: true,
+                      ),
+                      _MangalTableCell(
+                        text: 'Planet',
+                        isHeader: true,
+                      ),
+                      _MangalTableCell(
+                        text: 'House',
+                        isHeader: true,
+                        textAlign: TextAlign.center,
+                        horizontalPadding: 6,
+                      ),
+                    ],
+                  ),
+                  ...List<TableRow>.generate(rows.length, (int index) {
+                    final row = rows[index];
+                    return TableRow(
+                      decoration: index == rows.length - 1
+                          ? null
+                          : BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: dividerColor),
+                              ),
+                            ),
+                      children: <Widget>[
+                        _MangalTableCell(text: row.rashiLabel),
+                        _MangalTableCell(
+                          text:
+                              '${_mangalChartGrahaGlyph[row.grahaKey] ?? '•'} ${_mangalChartGrahaLabel[row.grahaKey] ?? row.grahaKey}',
+                        ),
+                        _MangalTableCell(
+                          text: row.house.toString(),
+                          textAlign: TextAlign.center,
+                          horizontalPadding: 6,
+                        ),
+                      ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<_MangalChartRow> _buildMangalChartRows({
+    required Map<String, dynamic> snapshot,
+    required _MangalChartAnchor anchor,
+  }) {
+    final varga = _asMap(snapshot['varga']);
+    final d1 = _asMap(varga['d1']);
+    final housesRaw = _asMap(d1['houses']);
+    final positionsRaw = _asMap(d1['graha_positions']);
+    if (housesRaw.isEmpty || positionsRaw.isEmpty) {
+      return const <_MangalChartRow>[];
+    }
+
+    final anchorGrahaKey = switch (anchor) {
+      _MangalChartAnchor.lagna => 'lagna',
+      _MangalChartAnchor.moon => 'moon',
+      _MangalChartAnchor.venus => 'shukra',
+    };
+    final anchorPosition = _asMap(positionsRaw[anchorGrahaKey]);
+    final anchorHouse = _asInt(anchorPosition['house']) ?? 1;
+
+    final rows = <_MangalChartRow>[];
+    for (final grahaKey in _mangalChartGrahaOrder) {
+      final position = _asMap(positionsRaw[grahaKey]);
+      final baseHouse = _asInt(position['house']);
+      if (baseHouse == null) {
+        continue;
+      }
+      final relativeHouse = ((baseHouse - anchorHouse + 12) % 12) + 1;
+      final housePayload = _asMap(housesRaw[baseHouse.toString()]);
+      final rashiCode = housePayload['rashi']?.toString() ?? '';
+      final rashiLabel = _mangalChartRashiNames[rashiCode] ?? rashiCode;
+      rows.add(
+        _MangalChartRow(
+          rashiLabel: rashiLabel,
+          grahaKey: grahaKey,
+          house: relativeHouse,
+        ),
+      );
+    }
+
+    rows.sort((a, b) {
+      final byHouse = a.house.compareTo(b.house);
+      if (byHouse != 0) {
+        return byHouse;
+      }
+      final aOrder = _mangalChartGrahaOrder.indexOf(a.grahaKey);
+      final bOrder = _mangalChartGrahaOrder.indexOf(b.grahaKey);
+      return aOrder.compareTo(bOrder);
+    });
+    return rows;
+  }
+
+  String _mangalAnchorLabel(_MangalChartAnchor anchor) {
+    return switch (anchor) {
+      _MangalChartAnchor.lagna => 'Ascendant',
+      _MangalChartAnchor.moon => 'Moon',
+      _MangalChartAnchor.venus => 'Venus',
+    };
+  }
+
+  String _referenceKeyForAnchor(_MangalChartAnchor anchor) {
+    return switch (anchor) {
+      _MangalChartAnchor.lagna => 'lagna',
+      _MangalChartAnchor.moon => 'moon',
+      _MangalChartAnchor.venus => 'venus',
+    };
   }
 
   Widget _mangalReasonList({
@@ -1006,6 +1278,28 @@ class _SoulmatePageState extends State<SoulmatePage> {
     return method.replaceAll('_', ' ');
   }
 
+  Map<String, dynamic> _asMap(Object? raw) {
+    if (raw is Map<String, dynamic>) {
+      return raw;
+    }
+    if (raw is Map) {
+      return raw.map(
+        (Object? key, Object? value) => MapEntry(key.toString(), value),
+      );
+    }
+    return <String, dynamic>{};
+  }
+
+  int? _asInt(Object? raw) {
+    if (raw == null) {
+      return null;
+    }
+    if (raw is num) {
+      return raw.toInt();
+    }
+    return int.tryParse(raw.toString());
+  }
+
   bool _isPrimaryReady() {
     return widget.birthInputState.dateOfBirth.trim().isNotEmpty &&
         widget.birthInputState.timeOfBirth.trim().isNotEmpty &&
@@ -1109,6 +1403,52 @@ class _SoulmatePageState extends State<SoulmatePage> {
       birthInputState: widget.birthInputState,
       homeBehavior: DockHomeBehavior.popToRoot,
       chartsBehavior: DockChartsBehavior.popOne,
+    );
+  }
+}
+
+class _MangalChartRow {
+  const _MangalChartRow({
+    required this.rashiLabel,
+    required this.grahaKey,
+    required this.house,
+  });
+
+  final String rashiLabel;
+  final String grahaKey;
+  final int house;
+}
+
+class _MangalTableCell extends StatelessWidget {
+  const _MangalTableCell({
+    required this.text,
+    this.isHeader = false,
+    this.textAlign = TextAlign.left,
+    this.horizontalPadding = 10,
+  });
+
+  final String text;
+  final bool isHeader;
+  final TextAlign textAlign;
+  final double horizontalPadding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding:
+          EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 12),
+      child: Text(
+        text,
+        textAlign: textAlign,
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.clip,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: isHeader ? 12.8 : 12.4,
+          fontWeight: isHeader ? FontWeight.w700 : FontWeight.w500,
+        ),
+      ),
     );
   }
 }
