@@ -63,7 +63,10 @@ class ProfilePage extends StatelessWidget {
       return UniversalDockScaffold(
         activeItem: AppDockItem.profile,
         onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
-        appBar: buildTrikaalAppBar(context),
+        appBar: buildTrikaalAppBar(
+          context,
+          onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+        ),
         body: const AstroPageBackground(
           child: Center(
             child: Text('Profile is available after chart computation.'),
@@ -90,7 +93,10 @@ class ProfilePage extends StatelessWidget {
     return UniversalDockScaffold(
       activeItem: AppDockItem.profile,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+      ),
       body: AstroPageBackground(
         child: SafeArea(
           child: Column(

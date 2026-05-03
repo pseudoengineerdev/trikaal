@@ -133,21 +133,7 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
     return UniversalDockScaffold(
       appBar: buildTrikaalAppBar(
         context,
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Additional birth-chart actions are coming next.'),
-                  ),
-                );
-            },
-            icon: const Icon(Icons.add_rounded),
-          ),
-        ],
+        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
