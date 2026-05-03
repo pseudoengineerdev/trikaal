@@ -17,6 +17,7 @@ import '../domain/report_refresh_policy.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
 import '../../shared/astrology/term_localizer.dart';
 import '../../shared/widgets/terminology_toggle.dart';
+import '../../subscription/presentation/subscription_page.dart';
 
 enum _BirthChartMainTab {
   chart(label: 'Chart'),
@@ -142,9 +143,14 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
       appBar: buildTrikaalAppBar(
         context,
         onPremiumTap: () {
-          openSubscriptionPage(
-            context: context,
-            birthInputState: widget.birthInputState,
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return SubscriptionPage(
+                  birthInputState: widget.birthInputState,
+                );
+              },
+            ),
           );
         },
         actions: <Widget>[
