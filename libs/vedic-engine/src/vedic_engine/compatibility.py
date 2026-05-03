@@ -340,6 +340,111 @@ _ELEMENT_BY_RASHI_INDEX = {
 }
 
 _MANGAL_DOSHA_HOUSES = {1, 2, 4, 7, 8, 12}
+_MANGAL_DOSHA_HOUSES_SORTED = tuple(sorted(_MANGAL_DOSHA_HOUSES))
+_MANGAL_DOSHA_RULE_PROFILE_ID = "mangal_dosha_v2"
+_MANGAL_DOSHA_METHOD = (
+    "mars_in_1_2_4_7_8_12_from_lagna_moon_venus_with_house_sign_exceptions"
+)
+_MANGAL_DOSHA_REFERENCE_LABELS = {
+    "lagna": "Lagna",
+    "moon": "Moon",
+    "venus": "Venus",
+}
+_MANGAL_DOSHA_HOUSE_SIGN_EXCEPTION_RULES: dict[tuple[int, int], tuple[str, str]] = {
+    (1, 1): ("house_1_mesha_exception", "Mangal in Mesha coinciding First House"),
+    (2, 3): (
+        "house_2_mercury_sign_exception",
+        "Mangal in Mithuna coinciding Second House",
+    ),
+    (2, 6): (
+        "house_2_mercury_sign_exception",
+        "Mangal in Kanya coinciding Second House",
+    ),
+    (4, 1): ("house_4_mars_sign_exception", "Mangal in Mesha coinciding Fourth House"),
+    (4, 8): (
+        "house_4_mars_sign_exception",
+        "Mangal in Vrishchika coinciding Fourth House",
+    ),
+    (7, 4): (
+        "house_7_cancer_capricorn_exception",
+        "Mangal in Karka coinciding Seventh House",
+    ),
+    (7, 10): (
+        "house_7_cancer_capricorn_exception",
+        "Mangal in Makara coinciding Seventh House",
+    ),
+    (8, 9): (
+        "house_8_jupiter_sign_exception",
+        "Mangal in Dhanu coinciding Eighth House",
+    ),
+    (8, 12): (
+        "house_8_jupiter_sign_exception",
+        "Mangal in Meena coinciding Eighth House",
+    ),
+    (12, 2): (
+        "house_12_venus_sign_exception",
+        "Mangal in Vrishabha coinciding Twelfth House",
+    ),
+    (12, 7): ("house_12_venus_sign_exception", "Mangal in Tula coinciding Twelfth House"),
+    (12, 9): (
+        "house_12_dhanu_muhurta_exception",
+        "Mangal in Dhanu coinciding Twelfth House *as per Muhurta Deepak",
+    ),
+}
+_MANGAL_DOSHA_BASE_PERCENT_BY_HOUSE = {
+    12: 50,
+    1: 60,
+    2: 80,
+    4: 80,
+    7: 100,
+    8: 100,
+}
+_MANGAL_DOSHA_HELPER_PLANETS = ("shani", "sun", "rahu", "ketu")
+_MANGAL_DOSHA_HELPER_PLANET_RASHI_FIELDS = {
+    "sun": "sun_rashi",
+    "shani": "shani_rashi",
+    "rahu": "rahu_rashi",
+    "ketu": "ketu_rashi",
+}
+_MANGAL_DOSHA_HELPER_PLANET_LABELS = {
+    "sun": "Surya",
+    "shani": "Shani",
+    "rahu": "Rahu",
+    "ketu": "Ketu",
+}
+_MANGAL_DOSHA_JUPITER_CANCELLATION_ASPECTS = (5, 7, 9)
+_MANGAL_DOSHA_ANY_HOUSE_EXCEPTION_BY_RASHI = {
+    5: (
+        "simha_any_house_exception",
+        "Mangal in Simha coinciding any House creating Dosha",
+    ),
+    11: (
+        "kumbha_any_house_exception",
+        "Mangal in Kumbha coinciding any House creating Dosha",
+    ),
+}
+_MANGAL_DOSHA_CONJUNCTION_PLANETS = {
+    "guru_rashi": (
+        "jupiter_conjunction_cancellation",
+        "Brihaspati conjoins Mangal",
+    ),
+    "moon_rashi": ("moon_conjunction_cancellation", "Chandra conjoins Mangal"),
+    "rahu_rashi": ("rahu_conjunction_cancellation", "Rahu conjoins Mangal"),
+}
+_HOUSE_ORDINAL_LABELS = {
+    1: "First",
+    2: "Second",
+    3: "Third",
+    4: "Fourth",
+    5: "Fifth",
+    6: "Sixth",
+    7: "Seventh",
+    8: "Eighth",
+    9: "Ninth",
+    10: "Tenth",
+    11: "Eleventh",
+    12: "Twelfth",
+}
 
 
 @dataclass(frozen=True)
@@ -623,17 +728,32 @@ def _compute_manglik_pair(
         score = 8.0
         alignment = "Balanced"
         verdict = "Manglik profile aligned between both charts."
+        pair_rule = "same_manglik_status"
     else:
         intensity_gap = abs(boy["trigger_count"] - girl["trigger_count"])
         score = 4.0 if intensity_gap <= 1 else 2.0
         alignment = "Unbalanced"
         verdict = "One chart has stronger Manglik triggers than the other."
+        pair_rule = "mismatched_manglik_status"
 
     return {
+        "rule_profile_id": _MANGAL_DOSHA_RULE_PROFILE_ID,
+        "method": _MANGAL_DOSHA_METHOD,
         "max_score": 8.0,
         "score": score,
         "pair_alignment": alignment,
         "verdict": verdict,
+        "evidence": {
+            "pair_rule": pair_rule,
+            "boy_trigger_count": int(boy["trigger_count"]),
+            "girl_trigger_count": int(girl["trigger_count"]),
+            "trigger_count_gap": abs(int(boy["trigger_count"]) - int(girl["trigger_count"])),
+            "boy_raw_trigger_count": int(boy["raw_trigger_count"]),
+            "girl_raw_trigger_count": int(girl["raw_trigger_count"]),
+            "same_manglik_status": same_status,
+            "boy_cancellation_applied": bool(boy["cancellation_applied"]),
+            "girl_cancellation_applied": bool(girl["cancellation_applied"]),
+        },
         "boy": boy,
         "girl": girl,
     }
@@ -645,28 +765,406 @@ def _compute_manglik_for_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
     bhava = snapshot["bhava"]
 
     mars_house_lagna = int(bhava["mangal_house"])
+    lagna_rashi_code = str(
+        vedic.get("lagna_rashi") or vedic.get("moon_rashi") or vedic["mangal_rashi"]
+    )
+    lagna_rashi = _rashi_index(lagna_rashi_code)
     mars_rashi = _rashi_index(vedic["mangal_rashi"])
     moon_rashi = _rashi_index(vedic["moon_rashi"])
     venus_rashi = _rashi_index(vedic["shukra_rashi"])
     house_from_moon = _count_cycle(start=moon_rashi, end=mars_rashi, size=12)
     house_from_venus = _count_cycle(start=venus_rashi, end=mars_rashi, size=12)
 
-    triggers = {
-        "from_lagna": mars_house_lagna in _MANGAL_DOSHA_HOUSES,
-        "from_moon": house_from_moon in _MANGAL_DOSHA_HOUSES,
-        "from_venus": house_from_venus in _MANGAL_DOSHA_HOUSES,
+    reference_evidence = {
+        "lagna": _build_manglik_reference_evidence(
+            reference_key="lagna",
+            mars_house=mars_house_lagna,
+            mars_rashi_index=mars_rashi,
+            reference_rashi_index=lagna_rashi,
+            vedic=vedic,
+            bhava=bhava,
+        ),
+        "moon": _build_manglik_reference_evidence(
+            reference_key="moon",
+            mars_house=house_from_moon,
+            mars_rashi_index=mars_rashi,
+            reference_rashi_index=moon_rashi,
+            vedic=vedic,
+            bhava=bhava,
+        ),
+        "venus": _build_manglik_reference_evidence(
+            reference_key="venus",
+            mars_house=house_from_venus,
+            mars_rashi_index=mars_rashi,
+            reference_rashi_index=venus_rashi,
+            vedic=vedic,
+            bhava=bhava,
+        ),
     }
-    trigger_count = sum(1 for value in triggers.values() if value)
+    raw_triggers = {
+        "from_lagna": bool(reference_evidence["lagna"]["triggered"]),
+        "from_moon": bool(reference_evidence["moon"]["triggered"]),
+        "from_venus": bool(reference_evidence["venus"]["triggered"]),
+    }
+    effective_triggers = {
+        "from_lagna": bool(reference_evidence["lagna"]["effective_triggered"]),
+        "from_moon": bool(reference_evidence["moon"]["effective_triggered"]),
+        "from_venus": bool(reference_evidence["venus"]["effective_triggered"]),
+    }
+    raw_trigger_count = sum(1 for value in raw_triggers.values() if value)
+    trigger_count = sum(1 for value in effective_triggers.values() if value)
     is_manglik = trigger_count > 0
+    active_references = [
+        reference_key
+        for reference_key, reference in reference_evidence.items()
+        if bool(reference["effective_triggered"])
+    ]
+    inactive_references = [
+        reference_key
+        for reference_key, reference in reference_evidence.items()
+        if not bool(reference["effective_triggered"])
+    ]
+    cancelled_references = [
+        reference_key
+        for reference_key, reference in reference_evidence.items()
+        if bool(reference["triggered"]) and bool(reference["cancelled"])
+    ]
+    cancellation_reasons = [
+        str(reason)
+        for reference in reference_evidence.values()
+        for reason in reference["cancellation_reasons"]
+    ]
+    dosha_reasons = _dedupe_reasons(
+        [
+            str(reason)
+            for reference in reference_evidence.values()
+            for reason in reference["dosha_reasons"]
+        ]
+    )
+    nullification_reasons = _dedupe_reasons(
+        [
+            str(reason)
+            for reference in reference_evidence.values()
+            for reason in reference["nullification_reasons"]
+        ]
+    )
+    dosha_percent = max(
+        (
+            int(reference["dosha_percent"])
+            for reference in reference_evidence.values()
+            if int(reference["dosha_percent"]) > 0
+        ),
+        default=0,
+    )
+    raw_dosha_percent = max(
+        (
+            int(reference["raw_dosha_percent"])
+            for reference in reference_evidence.values()
+            if int(reference["raw_dosha_percent"]) > 0
+        ),
+        default=0,
+    )
     return {
+        "rule_profile_id": _MANGAL_DOSHA_RULE_PROFILE_ID,
+        "method": _MANGAL_DOSHA_METHOD,
         "is_manglik": is_manglik,
         "trigger_count": trigger_count,
+        "raw_trigger_count": raw_trigger_count,
+        "dosha_percent": dosha_percent,
+        "raw_dosha_percent": raw_dosha_percent,
+        "trigger_houses": list(_MANGAL_DOSHA_HOUSES_SORTED),
+        "active_references": active_references,
+        "inactive_references": inactive_references,
+        "cancelled_references": cancelled_references,
+        "cancellation_applied": len(cancelled_references) > 0,
+        "cancellation_reasons": cancellation_reasons,
+        "dosha_reasons": dosha_reasons,
+        "nullification_reasons": nullification_reasons,
+        "reference_evidence": reference_evidence,
         "mars_house_from_lagna": mars_house_lagna,
         "mars_house_from_moon": house_from_moon,
         "mars_house_from_venus": house_from_venus,
+        "mars_rashi": str(vedic["mangal_rashi"]),
+        "mars_rashi_index": mars_rashi,
         "d9_mars_house": int(graha_table["mangal"]["d9_house"]),
-        "triggers": triggers,
+        "triggers": effective_triggers,
+        "raw_triggers": raw_triggers,
     }
+
+
+def _build_manglik_reference_evidence(
+    *,
+    reference_key: str,
+    mars_house: int,
+    mars_rashi_index: int,
+    reference_rashi_index: int,
+    vedic: dict[str, Any],
+    bhava: dict[str, Any],
+) -> dict[str, Any]:
+    triggered = mars_house in _MANGAL_DOSHA_HOUSES
+    exception = _manglik_house_sign_exception(
+        mars_house=mars_house,
+        mars_rashi_index=mars_rashi_index,
+    )
+    jupiter_house: int | None = None
+    jupiter_aspects_mars = False
+    jupiter_aspect_house: int | None = None
+    guru_rashi = vedic.get("guru_rashi")
+    if guru_rashi is not None:
+        jupiter_house = _house_from_reference(
+            reference_rashi_index=reference_rashi_index,
+            target_rashi_index=_rashi_index(str(guru_rashi)),
+        )
+        jupiter_aspects_mars, jupiter_aspect_house = _does_planet_aspect_house(
+            source_house=jupiter_house,
+            target_house=mars_house,
+            aspect_houses=_MANGAL_DOSHA_JUPITER_CANCELLATION_ASPECTS,
+        )
+    helper_planet_houses = _helper_planet_houses_from_reference(
+        reference_rashi_index=reference_rashi_index,
+        vedic=vedic,
+    )
+    helper_hits = [
+        planet_key
+        for planet_key, house in helper_planet_houses.items()
+        if house in _MANGAL_DOSHA_HOUSES
+    ]
+    raw_dosha_percent = _manglik_raw_percent(
+        mars_house=mars_house,
+        helper_count=len(helper_hits),
+        triggered=triggered,
+    )
+    reference_label = _MANGAL_DOSHA_REFERENCE_LABELS[reference_key]
+    cancellation_rule_ids: list[str] = []
+    cancellation_reasons: list[str] = []
+    if triggered:
+        if exception is not None:
+            cancellation_rule_ids.append(str(exception["rule_id"]))
+            cancellation_reasons.append(str(exception["reason"]))
+        extra_cancellations = _manglik_additional_cancellations(
+            mars_rashi_index=mars_rashi_index,
+            bhava=bhava,
+            vedic=vedic,
+        )
+        for rule_id, reason in extra_cancellations:
+            cancellation_rule_ids.append(rule_id)
+            cancellation_reasons.append(reason)
+        if jupiter_aspects_mars and jupiter_aspect_house is not None:
+            cancellation_rule_ids.append("jupiter_aspect_cancellation")
+            cancellation_reasons.append(
+                f"Brihaspati {jupiter_aspect_house}th sight aspects Mangal"
+            )
+    cancelled = triggered and len(cancellation_rule_ids) > 0
+    effective_triggered = triggered and not cancelled
+    dosha_percent = 0 if cancelled else raw_dosha_percent
+    mars_rashi_code = _RASHI_SEQUENCE[mars_rashi_index - 1]
+    mars_rashi_name = _RASHI_DISPLAY_NAMES[mars_rashi_index - 1]
+    helper_labels = [_MANGAL_DOSHA_HELPER_PLANET_LABELS[key] for key in helper_hits]
+    helping_reason = _manglik_helper_reason(helper_labels)
+    dosha_reasons: list[str] = []
+    nullification_reasons = _dedupe_reasons(cancellation_reasons)
+    if triggered:
+        dosha_reasons.append(_manglik_dosha_house_reason(mars_house))
+        if helping_reason is not None:
+            dosha_reasons.append(helping_reason)
+    if not triggered:
+        reason = (
+            f"Mars is in house {mars_house} from {reference_label}, outside trigger houses."
+        )
+    elif cancelled:
+        reason = (
+            f"Mars is in house {mars_house} from {reference_label}, but dosha is nullified by"
+            f" cancellation rules."
+        )
+    else:
+        reason = f"Mars is in house {mars_house} from {reference_label}."
+    return {
+        "reference_key": reference_key,
+        "reference_label": reference_label,
+        "mars_house": mars_house,
+        "mars_rashi": mars_rashi_code,
+        "mars_rashi_english": mars_rashi_name,
+        "triggered": triggered,
+        "effective_triggered": effective_triggered,
+        "cancelled": cancelled,
+        "raw_dosha_percent": raw_dosha_percent,
+        "dosha_percent": dosha_percent,
+        "helper_planet_count": len(helper_hits),
+        "helper_planets": helper_hits,
+        "helper_planet_labels": helper_labels,
+        "helper_planet_houses": helper_planet_houses,
+        "helping_reason": helping_reason,
+        "jupiter_house_from_reference": jupiter_house,
+        "jupiter_aspects_mars": jupiter_aspects_mars,
+        "jupiter_aspect_house": jupiter_aspect_house,
+        "exception_rule_id": None if exception is None else str(exception["rule_id"]),
+        "exception_reason": None if exception is None else str(exception["reason"]),
+        "cancellation_rule_ids": _dedupe_reasons(cancellation_rule_ids),
+        "cancellation_reasons": _dedupe_reasons(cancellation_reasons),
+        "dosha_reasons": dosha_reasons,
+        "nullification_reasons": nullification_reasons,
+        "rule_houses": list(_MANGAL_DOSHA_HOUSES_SORTED),
+        "reason": reason,
+    }
+
+
+def _manglik_additional_cancellations(
+    *,
+    mars_rashi_index: int,
+    bhava: dict[str, Any],
+    vedic: dict[str, Any],
+) -> list[tuple[str, str]]:
+    cancellations: list[tuple[str, str]] = []
+    any_house_rule = _MANGAL_DOSHA_ANY_HOUSE_EXCEPTION_BY_RASHI.get(mars_rashi_index)
+    if any_house_rule is not None:
+        cancellations.append(any_house_rule)
+
+    for planet_rashi_field, rule in _MANGAL_DOSHA_CONJUNCTION_PLANETS.items():
+        planet_rashi = vedic.get(planet_rashi_field)
+        if planet_rashi is None:
+            continue
+        if _rashi_index(str(planet_rashi)) == mars_rashi_index:
+            cancellations.append(rule)
+
+    guru_house = _safe_house_index(bhava.get("guru_house"))
+    shukra_house = _safe_house_index(bhava.get("shukra_house"))
+    if guru_house == 1:
+        cancellations.append(
+            ("jupiter_in_lagna_house_cancellation", "Brihaspati in Lagna house in the chart")
+        )
+    if shukra_house == 1:
+        cancellations.append(
+            ("venus_in_lagna_house_cancellation", "Shukra in Lagna house in the chart")
+        )
+    if shukra_house == 7:
+        cancellations.append(("venus_in_seventh_house_cancellation", "Shukra in Seventh house"))
+    return cancellations
+
+
+def _manglik_dosha_house_reason(mars_house: int) -> str:
+    if mars_house == 1:
+        return "Mars in First House *considered by North astrologers"
+    if mars_house == 2:
+        return "Mars in Second House *considered by South astrologers"
+    return f"Mars in {_house_ordinal_label(mars_house)} House"
+
+
+def _manglik_helper_reason(helper_labels: list[str]) -> str | None:
+    if not helper_labels:
+        return None
+    if len(helper_labels) == 1:
+        return f"{helper_labels[0]} is helping Mangal"
+    if len(helper_labels) == 2:
+        return f"{helper_labels[0]} and {helper_labels[1]} are helping Mangal"
+    return f"{', '.join(helper_labels[:-1])} and {helper_labels[-1]} are helping Mangal"
+
+
+def reference_label_for(reference_key: str) -> str:
+    return _MANGAL_DOSHA_REFERENCE_LABELS.get(reference_key, reference_key)
+
+
+def _house_ordinal_label(house: int) -> str:
+    return _HOUSE_ORDINAL_LABELS.get(house, str(house))
+
+
+def _dedupe_reasons(reasons: list[str]) -> list[str]:
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for reason in reasons:
+        normalized = reason.strip()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        deduped.append(normalized)
+    return deduped
+
+
+def _safe_house_index(value: Any) -> int | None:
+    if value is None:
+        return None
+    try:
+        house = int(value)
+    except (TypeError, ValueError):
+        return None
+    if 1 <= house <= 12:
+        return house
+    return None
+
+
+def _house_from_reference(
+    *,
+    reference_rashi_index: int,
+    target_rashi_index: int,
+) -> int:
+    return _count_cycle(start=reference_rashi_index, end=target_rashi_index, size=12)
+
+
+def _helper_planet_houses_from_reference(
+    *,
+    reference_rashi_index: int,
+    vedic: dict[str, Any],
+) -> dict[str, int]:
+    houses: dict[str, int] = {}
+    for planet_key in _MANGAL_DOSHA_HELPER_PLANETS:
+        rashi_field = _MANGAL_DOSHA_HELPER_PLANET_RASHI_FIELDS[planet_key]
+        rashi_code = vedic.get(rashi_field)
+        if rashi_code is None:
+            continue
+        target_rashi_index = _rashi_index(str(rashi_code))
+        houses[planet_key] = _house_from_reference(
+            reference_rashi_index=reference_rashi_index,
+            target_rashi_index=target_rashi_index,
+        )
+    return houses
+
+
+def _does_planet_aspect_house(
+    *,
+    source_house: int,
+    target_house: int,
+    aspect_houses: tuple[int, ...],
+) -> tuple[bool, int | None]:
+    for aspect_house in aspect_houses:
+        aspected_house = ((source_house + aspect_house - 2) % 12) + 1
+        if aspected_house == target_house:
+            return True, aspect_house
+    return False, None
+
+
+def _manglik_raw_percent(
+    *,
+    mars_house: int,
+    helper_count: int,
+    triggered: bool,
+) -> int:
+    if not triggered:
+        return 0
+    base_percent = int(_MANGAL_DOSHA_BASE_PERCENT_BY_HOUSE.get(mars_house, 0))
+    if mars_house in {12, 1, 2, 4}:
+        if helper_count >= 2:
+            return 200
+        if helper_count >= 1:
+            return 150
+        return base_percent
+    if mars_house in {7, 8}:
+        if helper_count >= 2:
+            return 250
+        if helper_count >= 1:
+            return 200
+        return base_percent
+    return base_percent
+
+
+def _manglik_house_sign_exception(
+    *,
+    mars_house: int,
+    mars_rashi_index: int,
+) -> dict[str, str] | None:
+    rule = _MANGAL_DOSHA_HOUSE_SIGN_EXCEPTION_RULES.get((mars_house, mars_rashi_index))
+    if rule is None:
+        return None
+    rule_id, reason = rule
+    return {"rule_id": rule_id, "reason": reason}
 
 
 def _compute_d1_d9_checks(

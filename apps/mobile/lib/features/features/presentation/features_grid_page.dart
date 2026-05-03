@@ -51,6 +51,11 @@ class FeaturesGridPage extends StatelessWidget {
       icon: Icons.volunteer_activism_rounded,
     ),
     _FeatureTileData(
+      code: 'mangal_dosh',
+      title: 'Mangal Dosh',
+      icon: Icons.local_fire_department_rounded,
+    ),
+    _FeatureTileData(
       code: 'rising_sign',
       title: 'Rising Sign',
       icon: Icons.wb_twilight_rounded,
@@ -233,7 +238,48 @@ class FeaturesGridPage extends StatelessWidget {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
-            return SoulmatePage(birthInputState: birthInputState);
+            return SoulmatePage(
+              birthInputState: birthInputState,
+              entryPoint: SoulmateEntryPoint.soulmate,
+            );
+          },
+        ),
+      );
+      return;
+    }
+    if (tile.code == 'mangal_dosh') {
+      final partner = birthInputState.compatibilityPartnerProfile;
+      final partnerReady = partner != null && partner.isComplete;
+      if (!partnerReady) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Add partner details in Your Soulmate first. We will reuse them for Mangal Dosh.',
+              ),
+            ),
+          );
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (BuildContext context) {
+              return SoulmatePage(
+                birthInputState: birthInputState,
+                entryPoint: SoulmateEntryPoint.soulmate,
+                startWithPartnerForm: true,
+              );
+            },
+          ),
+        );
+        return;
+      }
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return SoulmatePage(
+              birthInputState: birthInputState,
+              entryPoint: SoulmateEntryPoint.mangalDosh,
+            );
           },
         ),
       );
