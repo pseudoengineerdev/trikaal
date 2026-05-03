@@ -17,6 +17,7 @@ import '../domain/report_refresh_policy.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
 import '../../shared/astrology/term_localizer.dart';
 import '../../shared/widgets/terminology_toggle.dart';
+import '../../subscription/presentation/subscription_page.dart';
 
 enum _BirthChartMainTab {
   chart(label: 'Chart'),
@@ -36,6 +37,7 @@ enum _ChartSubTab {
 }
 
 const List<String> _planetOrder = <String>[
+  'lagna',
   'sun',
   'moon',
   'mangal',
@@ -45,7 +47,6 @@ const List<String> _planetOrder = <String>[
   'shani',
   'rahu',
   'ketu',
-  'lagna',
 ];
 
 const List<String> _wheelPlanetOrder = <String>[
@@ -59,6 +60,13 @@ const List<String> _wheelPlanetOrder = <String>[
   'rahu',
   'ketu',
 ];
+
+final List<String> _tableChartCodes = List<String>.unmodifiable(
+  <String>[
+    'BC',
+    ...List<String>.generate(60, (int index) => 'D${index + 1}'),
+  ],
+);
 
 const Map<String, String> _grahaGlyph = <String, String>{
   'sun': '☉',
@@ -103,6 +111,7 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
   late final ChartApiClient _chartApiClient;
   _BirthChartMainTab _mainTab = _BirthChartMainTab.chart;
   _ChartSubTab _chartSubTab = _ChartSubTab.planets;
+  String _selectedTableChartCode = 'D1';
   bool _autoRefreshingReport = false;
   bool _autoRefreshAttempted = false;
 
@@ -133,7 +142,32 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
     return UniversalDockScaffold(
       appBar: buildTrikaalAppBar(
         context,
-        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+        onPremiumTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return SubscriptionPage(
+                  birthInputState: widget.birthInputState,
+                );
+              },
+            ),
+          );
+        },
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  const SnackBar(
+                    content:
+                        Text('Additional birth-chart actions are coming next.'),
+                  ),
+                );
+            },
+            icon: const Icon(Icons.add_rounded),
+          ),
+        ],
       ),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
@@ -415,60 +449,183 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
   }
 
   Widget _buildTablesTab(ComputeReportResponse report) {
-    final snapshot = report.snapshot;
-    final planetEntries = _planetEntries(snapshot.grahaTable);
+    final chartCode = _selectedTableChartCode;
+    final divisionCode = _divisionCodeForTableChart(chartCode);
+    final selectedDivision = report.snapshot.varga.divisionByCode(divisionCode);
+    final isSupported = selectedDivision != null;
+    final tableRows = _tableRowsForChart(
+      table: report.snapshot.grahaTable,
+      chartCode: chartCode,
+      division: selectedDivision,
+    );
     final mode = _terminologyModeState.mode;
 
     return ListView(
       key: const ValueKey<String>('tables_tab'),
       padding: const EdgeInsets.fromLTRB(16, 2, 16, 120),
       children: <Widget>[
-        Text(
-          'Planets',
-          style: Theme.of(context).textTheme.titleLarge,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                'Graha Table',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Container(
+              key: const ValueKey<String>('table-chart-selector'),
+              padding: const EdgeInsets.symmetric(horizontal: 7),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface
+                    .withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: chartCode,
+                  isDense: true,
+                  borderRadius: BorderRadius.circular(12),
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded),
+                  items: _tableChartCodes
+                      .map(
+                        (String code) => DropdownMenuItem<String>(
+                          value: code,
+                          key: ValueKey<String>('table-chart-option-$code'),
+                          child: Text(_tableChartLabel(code)),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: (String? value) {
+                    if (value == null || value == chartCode) {
+                      return;
+                    }
+                    setState(() {
+                      _selectedTableChartCode = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                headingTextStyle: Theme.of(context).textTheme.titleSmall,
-                dataTextStyle: Theme.of(context).textTheme.bodyMedium,
-                columns: const <DataColumn>[
-                  DataColumn(label: Text('Planet')),
-                  DataColumn(label: Text('Sign')),
-                  DataColumn(label: Text('Degree')),
-                  DataColumn(label: Text('House')),
-                  DataColumn(label: Text('Motion')),
-                ],
-                rows: planetEntries.map((entry) {
-                  final graha = localizeGraha(
-                    entry.key,
-                    mode,
-                    termsState: _astrologyTermsState,
-                  );
-                  final rashi = localizeRashi(
-                    entry.rashi,
-                    mode,
-                    termsState: _astrologyTermsState,
-                  );
-                  return DataRow(
-                    cells: <DataCell>[
-                      DataCell(Text('${_grahaGlyph[entry.key] ?? ''} $graha')),
-                      DataCell(Text('$rashi ${_rashiSymbol(entry.rashi)}')),
-                      DataCell(Text(_formatDegree(entry.siderealDeg))),
-                      DataCell(Text(entry.house.toString())),
-                      DataCell(
-                          Text(entry.retrograde ? 'Retrograde' : 'Direct')),
-                    ],
-                  );
-                }).toList(growable: false),
+        const SizedBox(height: 6),
+        if (!isSupported)
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                'Chart $chartCode is intentionally locked until Reference parity fixtures are captured and verified for this division. '
+                'This usually means the requested division is missing from the engine payload.',
+                key: const ValueKey<String>('table-chart-locked-message'),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),
-        ),
+        if (isSupported)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outlineVariant.withValues(alpha: 0.42),
+                ),
+                borderRadius: BorderRadius.circular(18),
+                color: Colors.black.withValues(alpha: 0.22),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columnSpacing: 24,
+                    horizontalMargin: 14,
+                    headingRowHeight: 42,
+                    dataRowMinHeight: 40,
+                    dataRowMaxHeight: 42,
+                    dividerThickness: 0.7,
+                    headingTextStyle: Theme.of(context).textTheme.titleSmall,
+                    dataTextStyle: Theme.of(context).textTheme.bodyMedium,
+                    columns: const <DataColumn>[
+                      DataColumn(label: Text('Planet')),
+                      DataColumn(label: Text('Sign')),
+                      DataColumn(label: Text('Degree')),
+                      DataColumn(label: Text('House')),
+                      DataColumn(label: Text('Motion')),
+                    ],
+                    rows: tableRows.map((entry) {
+                      final graha = localizeGraha(
+                        entry.key,
+                        mode,
+                        termsState: _astrologyTermsState,
+                      );
+                      final rashi = localizeRashi(
+                        entry.rashi,
+                        mode,
+                        termsState: _astrologyTermsState,
+                      );
+                      return DataRow(
+                        cells: <DataCell>[
+                          DataCell(
+                            Text(
+                              '${_grahaGlyph[entry.key] ?? ''} $graha',
+                              key: ValueKey<String>(
+                                'table-$chartCode-graha-${entry.key}',
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              '$rashi ${_rashiSymbol(entry.rashi)}',
+                              key: ValueKey<String>(
+                                'table-$chartCode-rashi-${entry.key}',
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              entry.degreeInDivisionDeg == null
+                                  ? '—'
+                                  : _formatDegree(entry.degreeInDivisionDeg!),
+                              key: ValueKey<String>(
+                                'table-$chartCode-degree-${entry.key}',
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              entry.house.toString(),
+                              key: ValueKey<String>(
+                                'table-$chartCode-house-${entry.key}',
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              entry.retrograde ? 'Retrograde' : 'Direct',
+                              key: ValueKey<String>(
+                                'table-$chartCode-motion-${entry.key}',
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(growable: false),
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -687,6 +844,56 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
 
   List<ReportGrahaEntry> _planetEntries(ReportGrahaTable table) {
     return _planetOrder.map(table.entryByKey).toList(growable: false);
+  }
+
+  String _divisionCodeForTableChart(String chartCode) {
+    if (chartCode == 'BC') {
+      return 'd1';
+    }
+    return chartCode.toLowerCase();
+  }
+
+  String _tableChartLabel(String chartCode) {
+    return chartCode == 'BC' ? 'BC' : chartCode;
+  }
+
+  List<_TableGrahaRow> _tableRowsForChart({
+    required ReportGrahaTable table,
+    required String chartCode,
+    required ReportDivision? division,
+  }) {
+    final entries = _planetEntries(table);
+    switch (chartCode) {
+      case 'BC':
+        return entries
+            .map(
+              (entry) => _TableGrahaRow(
+                key: entry.key,
+                rashi: entry.rashi,
+                house: entry.house,
+                degreeInDivisionDeg: entry.siderealDeg,
+                retrograde: entry.retrograde,
+              ),
+            )
+            .toList(growable: false);
+      case 'D1':
+      default:
+        if (division == null) {
+          return const <_TableGrahaRow>[];
+        }
+        return entries.map(
+          (entry) {
+            final placement = division.grahaPositions[entry.key];
+            return _TableGrahaRow(
+              key: entry.key,
+              rashi: placement?.rashi ?? entry.rashi,
+              house: placement?.house ?? entry.house,
+              degreeInDivisionDeg: placement?.degreeInSignDeg,
+              retrograde: entry.retrograde,
+            );
+          },
+        ).toList(growable: false);
+    }
   }
 
   String _rashiSymbol(String rashiCode) {
@@ -1221,6 +1428,22 @@ class _ElementMeterRow extends StatelessWidget {
       ],
     );
   }
+}
+
+class _TableGrahaRow {
+  const _TableGrahaRow({
+    required this.key,
+    required this.rashi,
+    required this.house,
+    required this.degreeInDivisionDeg,
+    required this.retrograde,
+  });
+
+  final String key;
+  final String rashi;
+  final int house;
+  final double? degreeInDivisionDeg;
+  final bool retrograde;
 }
 
 class _VedicWheelPainter extends CustomPainter {

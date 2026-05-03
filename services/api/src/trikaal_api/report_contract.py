@@ -191,24 +191,97 @@ class HouseContract(StrictModel):
     occupants: list[str]
 
 
+_DIVISION_GRAHA_KEYS = (
+    "sun",
+    "moon",
+    "mangal",
+    "budha",
+    "guru",
+    "shukra",
+    "shani",
+    "rahu",
+    "ketu",
+    "spashth_rahu",
+    "spashth_ketu",
+    "lagna",
+)
+
+
+class DivisionGrahaPositionContract(StrictModel):
+    rashi: str
+    house: int
+    degree_in_sign: float
+
+
 class DivisionContract(StrictModel):
     lagna_rashi: str
     houses: dict[str, HouseContract]
+    graha_positions: dict[str, DivisionGrahaPositionContract]
 
     @model_validator(mode="after")
-    def validate_house_keys(self) -> Self:
+    def validate_division_consistency(self) -> Self:
         expected = {str(index) for index in range(1, 13)}
         actual = set(self.houses.keys())
         if actual != expected:
             missing = sorted(expected - actual)
             extra = sorted(actual - expected)
             raise ValueError(f"houses must contain keys 1..12 (missing={missing}, extra={extra})")
+
+        graha_expected = set(_DIVISION_GRAHA_KEYS)
+        graha_actual = set(self.graha_positions.keys())
+        if graha_actual != graha_expected:
+            missing = sorted(graha_expected - graha_actual)
+            extra = sorted(graha_actual - graha_expected)
+            raise ValueError(
+                "graha_positions must contain canonical graha keys "
+                f"(missing={missing}, extra={extra})"
+            )
+
+        for graha_key, placement in self.graha_positions.items():
+            if placement.house < 1 or placement.house > 12:
+                raise ValueError(f"graha_positions.{graha_key}.house must be in range 1..12")
+            house_key = str(placement.house)
+            house_entry = self.houses[house_key]
+            if house_entry.rashi != placement.rashi:
+                raise ValueError(
+                    f"graha_positions.{graha_key}.rashi must match houses.{house_key}.rashi"
+                )
+            if graha_key not in house_entry.occupants:
+                raise ValueError(
+                    f"graha_positions.{graha_key} missing from houses.{house_key}.occupants"
+                )
+
+        lagna_position = self.graha_positions["lagna"]
+        if lagna_position.rashi != self.lagna_rashi:
+            raise ValueError("graha_positions.lagna.rashi must match lagna_rashi")
+
         return self
 
 
 class VargaContract(StrictModel):
+    model_config = ConfigDict(extra="allow")
+
     d1: DivisionContract
     d9: DivisionContract
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_supported_divisions(cls, raw: object) -> object:
+        if not isinstance(raw, dict):
+            raise ValueError("varga must be an object")
+        if "d1" not in raw or "d9" not in raw:
+            raise ValueError("varga must contain at least d1 and d9 divisions")
+        for key, value in raw.items():
+            if not isinstance(key, str) or not key.startswith("d"):
+                raise ValueError(f"Unsupported varga key: {key}")
+            factor_str = key[1:]
+            if not factor_str.isdigit():
+                raise ValueError(f"Unsupported varga key: {key}")
+            factor = int(factor_str)
+            if factor < 1 or factor > 60:
+                raise ValueError(f"Unsupported varga factor in key: {key}")
+            DivisionContract.model_validate(value)
+        return raw
 
 
 class GrahaEntryContract(StrictModel):

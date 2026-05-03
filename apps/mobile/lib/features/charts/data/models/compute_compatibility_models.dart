@@ -197,6 +197,10 @@ class CompatibilityKutaComponent {
     required this.score,
     required this.maxScore,
     required this.percent,
+    required this.boyValue,
+    required this.girlValue,
+    required this.areaOfLife,
+    required this.description,
   });
 
   final String key;
@@ -204,6 +208,10 @@ class CompatibilityKutaComponent {
   final double score;
   final double maxScore;
   final double percent;
+  final String boyValue;
+  final String girlValue;
+  final String areaOfLife;
+  final String description;
 
   factory CompatibilityKutaComponent.fromJson(Map<String, dynamic> json) {
     return CompatibilityKutaComponent(
@@ -212,35 +220,74 @@ class CompatibilityKutaComponent {
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
       maxScore: (json['max_score'] as num?)?.toDouble() ?? 0.0,
       percent: (json['percent'] as num?)?.toDouble() ?? 0.0,
+      boyValue: (json['boy_value'] as String?) ?? '',
+      girlValue: (json['girl_value'] as String?) ?? '',
+      areaOfLife: (json['area_of_life'] as String?) ?? '',
+      description: (json['description'] as String?) ?? '',
     );
   }
 }
 
 class CompatibilityManglik {
   const CompatibilityManglik({
+    this.ruleProfileId = '',
+    this.method = '',
     required this.maxScore,
     required this.score,
     required this.pairAlignment,
     required this.verdict,
+    this.evidence = const CompatibilityManglikEvidence(),
     required this.boy,
     required this.girl,
   });
 
+  final String ruleProfileId;
+  final String method;
   final double maxScore;
   final double score;
   final String pairAlignment;
   final String verdict;
+  final CompatibilityManglikEvidence evidence;
   final CompatibilityManglikPerson boy;
   final CompatibilityManglikPerson girl;
 
   factory CompatibilityManglik.fromJson(Map<String, dynamic> json) {
     return CompatibilityManglik(
+      ruleProfileId: (json['rule_profile_id'] as String?) ?? '',
+      method: (json['method'] as String?) ?? '',
       maxScore: (json['max_score'] as num?)?.toDouble() ?? 0.0,
       score: (json['score'] as num?)?.toDouble() ?? 0.0,
       pairAlignment: (json['pair_alignment'] as String?) ?? '',
       verdict: (json['verdict'] as String?) ?? '',
+      evidence: CompatibilityManglikEvidence.fromJson(_asMap(json['evidence'])),
       boy: CompatibilityManglikPerson.fromJson(_asMap(json['boy'])),
       girl: CompatibilityManglikPerson.fromJson(_asMap(json['girl'])),
+    );
+  }
+}
+
+class CompatibilityManglikEvidence {
+  const CompatibilityManglikEvidence({
+    this.pairRule = '',
+    this.boyTriggerCount = 0,
+    this.girlTriggerCount = 0,
+    this.triggerCountGap = 0,
+    this.sameManglikStatus = false,
+  });
+
+  final String pairRule;
+  final int boyTriggerCount;
+  final int girlTriggerCount;
+  final int triggerCountGap;
+  final bool sameManglikStatus;
+
+  factory CompatibilityManglikEvidence.fromJson(Map<String, dynamic> json) {
+    return CompatibilityManglikEvidence(
+      pairRule: (json['pair_rule'] as String?) ?? '',
+      boyTriggerCount: (json['boy_trigger_count'] as num?)?.toInt() ?? 0,
+      girlTriggerCount: (json['girl_trigger_count'] as num?)?.toInt() ?? 0,
+      triggerCountGap: (json['trigger_count_gap'] as num?)?.toInt() ?? 0,
+      sameManglikStatus: (json['same_manglik_status'] as bool?) ?? false,
     );
   }
 }
@@ -249,15 +296,161 @@ class CompatibilityManglikPerson {
   const CompatibilityManglikPerson({
     required this.isManglik,
     required this.triggerCount,
+    this.rawTriggerCount = 0,
+    this.doshaPercent = 0,
+    this.rawDoshaPercent = 0,
+    this.triggerHouses = const <int>[],
+    this.activeReferences = const <String>[],
+    this.inactiveReferences = const <String>[],
+    this.cancelledReferences = const <String>[],
+    this.cancellationApplied = false,
+    this.cancellationReasons = const <String>[],
+    this.doshaReasons = const <String>[],
+    this.nullificationReasons = const <String>[],
+    this.referenceEvidence =
+        const <String, CompatibilityManglikReferenceEvidence>{},
+    this.marsHouseFromLagna = 0,
+    this.marsHouseFromMoon = 0,
+    this.marsHouseFromVenus = 0,
   });
 
   final bool isManglik;
   final int triggerCount;
+  final int rawTriggerCount;
+  final int doshaPercent;
+  final int rawDoshaPercent;
+  final List<int> triggerHouses;
+  final List<String> activeReferences;
+  final List<String> inactiveReferences;
+  final List<String> cancelledReferences;
+  final bool cancellationApplied;
+  final List<String> cancellationReasons;
+  final List<String> doshaReasons;
+  final List<String> nullificationReasons;
+  final Map<String, CompatibilityManglikReferenceEvidence> referenceEvidence;
+  final int marsHouseFromLagna;
+  final int marsHouseFromMoon;
+  final int marsHouseFromVenus;
 
   factory CompatibilityManglikPerson.fromJson(Map<String, dynamic> json) {
+    final rawReferenceEvidence = _asMap(json['reference_evidence']);
+    final referenceEvidence = rawReferenceEvidence.map(
+      (String key, dynamic value) => MapEntry(
+        key,
+        CompatibilityManglikReferenceEvidence.fromJson(_asMap(value)),
+      ),
+    );
     return CompatibilityManglikPerson(
       isManglik: (json['is_manglik'] as bool?) ?? false,
       triggerCount: (json['trigger_count'] as num?)?.toInt() ?? 0,
+      rawTriggerCount: (json['raw_trigger_count'] as num?)?.toInt() ?? 0,
+      doshaPercent: (json['dosha_percent'] as num?)?.toInt() ?? 0,
+      rawDoshaPercent: (json['raw_dosha_percent'] as num?)?.toInt() ?? 0,
+      triggerHouses: _readIntList(json['trigger_houses']),
+      activeReferences: _readStringList(json['active_references']),
+      inactiveReferences: _readStringList(json['inactive_references']),
+      cancelledReferences: _readStringList(json['cancelled_references']),
+      cancellationApplied: (json['cancellation_applied'] as bool?) ?? false,
+      cancellationReasons: _readStringList(json['cancellation_reasons']),
+      doshaReasons: _readStringList(json['dosha_reasons']),
+      nullificationReasons: _readStringList(json['nullification_reasons']),
+      referenceEvidence: referenceEvidence,
+      marsHouseFromLagna: (json['mars_house_from_lagna'] as num?)?.toInt() ?? 0,
+      marsHouseFromMoon: (json['mars_house_from_moon'] as num?)?.toInt() ?? 0,
+      marsHouseFromVenus: (json['mars_house_from_venus'] as num?)?.toInt() ?? 0,
+    );
+  }
+}
+
+class CompatibilityManglikReferenceEvidence {
+  const CompatibilityManglikReferenceEvidence({
+    this.referenceKey = '',
+    this.referenceLabel = '',
+    this.marsHouse = 0,
+    this.triggered = false,
+    this.effectiveTriggered = false,
+    this.cancelled = false,
+    this.rawDoshaPercent = 0,
+    this.doshaPercent = 0,
+    this.helperPlanetCount = 0,
+    this.helperPlanets = const <String>[],
+    this.helperPlanetLabels = const <String>[],
+    this.helperPlanetHouses = const <String, int>{},
+    this.helpingReason = '',
+    this.jupiterHouseFromReference = 0,
+    this.jupiterAspectsMars = false,
+    this.jupiterAspectHouse = 0,
+    this.exceptionRuleId = '',
+    this.exceptionReason = '',
+    this.cancellationRuleIds = const <String>[],
+    this.cancellationReasons = const <String>[],
+    this.doshaReasons = const <String>[],
+    this.nullificationReasons = const <String>[],
+    this.ruleHouses = const <int>[],
+    this.reason = '',
+  });
+
+  final String referenceKey;
+  final String referenceLabel;
+  final int marsHouse;
+  final bool triggered;
+  final bool effectiveTriggered;
+  final bool cancelled;
+  final int rawDoshaPercent;
+  final int doshaPercent;
+  final int helperPlanetCount;
+  final List<String> helperPlanets;
+  final List<String> helperPlanetLabels;
+  final Map<String, int> helperPlanetHouses;
+  final String helpingReason;
+  final int jupiterHouseFromReference;
+  final bool jupiterAspectsMars;
+  final int jupiterAspectHouse;
+  final String exceptionRuleId;
+  final String exceptionReason;
+  final List<String> cancellationRuleIds;
+  final List<String> cancellationReasons;
+  final List<String> doshaReasons;
+  final List<String> nullificationReasons;
+  final List<int> ruleHouses;
+  final String reason;
+
+  factory CompatibilityManglikReferenceEvidence.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    final rawHelperHouses = _asMap(json['helper_planet_houses']);
+    final helperPlanetHouses = rawHelperHouses.map(
+      (String key, dynamic value) => MapEntry(
+        key,
+        (value as num?)?.toInt() ?? 0,
+      ),
+    );
+    return CompatibilityManglikReferenceEvidence(
+      referenceKey: (json['reference_key'] as String?) ?? '',
+      referenceLabel: (json['reference_label'] as String?) ?? '',
+      marsHouse: (json['mars_house'] as num?)?.toInt() ?? 0,
+      triggered: (json['triggered'] as bool?) ?? false,
+      effectiveTriggered: (json['effective_triggered'] as bool?) ?? false,
+      cancelled: (json['cancelled'] as bool?) ?? false,
+      rawDoshaPercent: (json['raw_dosha_percent'] as num?)?.toInt() ?? 0,
+      doshaPercent: (json['dosha_percent'] as num?)?.toInt() ?? 0,
+      helperPlanetCount: (json['helper_planet_count'] as num?)?.toInt() ?? 0,
+      helperPlanets: _readStringList(json['helper_planets']),
+      helperPlanetLabels: _readStringList(json['helper_planet_labels']),
+      helperPlanetHouses: helperPlanetHouses,
+      helpingReason: (json['helping_reason'] as String?) ?? '',
+      jupiterHouseFromReference:
+          (json['jupiter_house_from_reference'] as num?)?.toInt() ?? 0,
+      jupiterAspectsMars: (json['jupiter_aspects_mars'] as bool?) ?? false,
+      jupiterAspectHouse: (json['jupiter_aspect_house'] as num?)?.toInt() ?? 0,
+      exceptionRuleId: (json['exception_rule_id'] as String?) ?? '',
+      exceptionReason: (json['exception_reason'] as String?) ?? '',
+      cancellationRuleIds: _readStringList(json['cancellation_rule_ids']),
+      cancellationReasons: _readStringList(json['cancellation_reasons']),
+      doshaReasons: _readStringList(json['dosha_reasons']),
+      nullificationReasons: _readStringList(json['nullification_reasons']),
+      ruleHouses: _readIntList(json['rule_houses']),
+      reason: (json['reason'] as String?) ?? '',
     );
   }
 }
@@ -299,4 +492,20 @@ Map<String, dynamic> _asMap(Object? raw) {
     return raw.map((key, value) => MapEntry(key.toString(), value));
   }
   return <String, dynamic>{};
+}
+
+List<int> _readIntList(Object? raw) {
+  final list = raw as List<dynamic>?;
+  if (list == null) {
+    return const <int>[];
+  }
+  return list.map((dynamic value) => (value as num).toInt()).toList();
+}
+
+List<String> _readStringList(Object? raw) {
+  final list = raw as List<dynamic>?;
+  if (list == null) {
+    return const <String>[];
+  }
+  return list.map((dynamic value) => value.toString()).toList();
 }

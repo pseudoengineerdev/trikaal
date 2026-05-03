@@ -1,4 +1,5 @@
 import 'custom_place_payload.dart';
+import 'person_gender.dart';
 
 class SavedBirthProfile {
   const SavedBirthProfile({
@@ -10,6 +11,7 @@ class SavedBirthProfile {
     required this.createdAtUtcIso,
     required this.updatedAtUtcIso,
     this.customPlace,
+    this.gender = PersonGender.unspecified,
     this.isDefault = false,
   });
 
@@ -19,6 +21,7 @@ class SavedBirthProfile {
   final String timeOfBirth;
   final String placeOfBirth;
   final CustomPlacePayload? customPlace;
+  final PersonGender gender;
   final bool isDefault;
   final String createdAtUtcIso;
   final String updatedAtUtcIso;
@@ -31,6 +34,7 @@ class SavedBirthProfile {
     String? placeOfBirth,
     CustomPlacePayload? customPlace,
     bool clearCustomPlace = false,
+    PersonGender? gender,
     bool? isDefault,
     String? createdAtUtcIso,
     String? updatedAtUtcIso,
@@ -42,6 +46,7 @@ class SavedBirthProfile {
       timeOfBirth: timeOfBirth ?? this.timeOfBirth,
       placeOfBirth: placeOfBirth ?? this.placeOfBirth,
       customPlace: clearCustomPlace ? null : (customPlace ?? this.customPlace),
+      gender: gender ?? this.gender,
       isDefault: isDefault ?? this.isDefault,
       createdAtUtcIso: createdAtUtcIso ?? this.createdAtUtcIso,
       updatedAtUtcIso: updatedAtUtcIso ?? this.updatedAtUtcIso,
@@ -57,6 +62,7 @@ class SavedBirthProfile {
       'time_of_birth': timeOfBirth.trim(),
       'place_of_birth': placeOfBirth.trim(),
       'custom_place': safeCustomPlace?.toJson(),
+      'gender': gender.storageValue,
       'is_default': isDefault,
       'created_at_utc_iso': createdAtUtcIso,
       'updated_at_utc_iso': updatedAtUtcIso,
@@ -80,6 +86,7 @@ class SavedBirthProfile {
       customPlace: customPlaceMap == null
           ? null
           : CustomPlacePayload.fromJson(customPlaceMap),
+      gender: PersonGender.fromStorageValue(json['gender'] as String?),
       isDefault: (json['is_default'] as bool?) ?? false,
       createdAtUtcIso: (json['created_at_utc_iso'] as String?) ?? '',
       updatedAtUtcIso: (json['updated_at_utc_iso'] as String?) ?? '',
