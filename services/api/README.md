@@ -39,6 +39,7 @@ uvicorn trikaal_api.main:app --reload \
 - `POST /v1/reports/compute` (recommended one-call endpoint for app clients)
 - `POST /v1/charts/compute` (legacy-compatible chart-only endpoint)
 - `POST /v1/dasha/compute` (legacy-compatible dasha-only endpoint)
+- `POST /v1/kaal-sarpa/compute` (Kaal Sarpa Dosha contract from D1 enclosure logic)
 - `POST /v1/pancha-pakshi/compute` (realtime Pancha Pakshi timeline + active window)
 - `POST /v1/engine/chart` (advanced/direct coordinates)
 - `POST /v1/engine/chart-from-place` (legacy-compatible place flow)

@@ -415,8 +415,8 @@ def test_kaal_sarpa_full_detection_and_type_mapping() -> None:
 
     assert result["rule_profile_id"] == "kaal_sarpa_dosha_v1"
     assert result["is_kaal_sarpa"] is True
-    assert result["is_partial_candidate"] is False
-    assert result["reference_partial_included"] is False
+    assert "is_partial_candidate" not in result
+    assert "reference_partial_included" not in result
     assert result["kaal_sarpa_type"] == "Ananta"
     assert result["rahu_house"] == 1
     assert result["ketu_house"] == 7
@@ -449,11 +449,13 @@ def test_kaal_sarpa_absent_when_planets_are_not_enclosed() -> None:
     result = compatibility_module.compute_kaal_sarpa_for_snapshot(snapshot)
 
     assert result["is_kaal_sarpa"] is False
-    assert result["is_partial_candidate"] is True
+    assert "is_partial_candidate" not in result
+    assert "reference_partial_included" not in result
+    assert result["enclosed_side"] == "none"
     assert result["outside_planets"] == ["shani"]
     assert result["outside_planet_count"] == 1
     assert result["kaal_sarpa_type"] == ""
-    assert "Partial Kaal Sarpa candidate detected" in result["verdict"]
+    assert "No Kaal Sarpa Dosha" in result["verdict"]
 
 
 def test_kaal_sarpa_detects_ketu_to_rahu_enclosure_side() -> None:

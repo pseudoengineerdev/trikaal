@@ -7,6 +7,7 @@ import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../compatibility/presentation/soulmate_page.dart';
+import '../../kaal_sarpa/presentation/kaal_sarpa_page.dart';
 import '../../pancha_pakshi/presentation/pancha_pakshi_page.dart';
 import 'birth_chart_detail_page.dart';
 
@@ -58,7 +59,6 @@ class FeaturesGridPage extends StatelessWidget {
       description: 'Kaal Sarpa Dosh module',
       actionLabel: 'Open',
       icon: Icons.brightness_3_rounded,
-      badge: 'Soon',
       visualStyle: _FeatureVisualStyle.caution,
     ),
   ];
@@ -189,15 +189,13 @@ class FeaturesGridPage extends StatelessWidget {
     }
 
     if (tile.code == 'kaal_sarpa_dosh') {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Kaal Sarpa Dosh module is coming soon.',
-            ),
-          ),
-        );
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return KaalSarpaPage(birthInputState: birthInputState);
+          },
+        ),
+      );
     }
   }
 }

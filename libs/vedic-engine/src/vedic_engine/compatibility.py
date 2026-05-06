@@ -535,8 +535,6 @@ def _compute_kaal_sarpa_pair(
             "same_kaal_sarpa_status": same_status,
             "boy_outside_planet_count": int(boy["outside_planet_count"]),
             "girl_outside_planet_count": int(girl["outside_planet_count"]),
-            "boy_partial_candidate": bool(boy["is_partial_candidate"]),
-            "girl_partial_candidate": bool(girl["is_partial_candidate"]),
         },
         "boy": boy,
         "girl": girl,
@@ -590,15 +588,10 @@ def compute_kaal_sarpa_for_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
         enclosed_side = "ketu_to_rahu"
         outside_planets = outside_from_ketu_to_rahu
     else:
-        if len(outside_from_rahu_to_ketu) <= len(outside_from_ketu_to_rahu):
-            enclosed_side = "rahu_to_ketu_candidate"
-            outside_planets = outside_from_rahu_to_ketu
-        else:
-            enclosed_side = "ketu_to_rahu_candidate"
-            outside_planets = outside_from_ketu_to_rahu
+        enclosed_side = "none"
+        outside_planets = outside_from_rahu_to_ketu
 
     outside_planet_count = len(outside_planets)
-    partial_candidate = (not is_kaal_sarpa) and outside_planet_count == 1
 
     rahu_house = _extract_house_from_snapshot(snapshot=snapshot, planet_key="rahu")
     ketu_house = _extract_house_from_snapshot(snapshot=snapshot, planet_key="ketu")
@@ -606,11 +599,6 @@ def compute_kaal_sarpa_for_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
 
     if is_kaal_sarpa:
         verdict = f"Kaal Sarpa Dosha present ({type_name}) with planets enclosed on one side."
-    elif partial_candidate:
-        verdict = (
-            "Partial Kaal Sarpa candidate detected (one planet outside axis), "
-            "but not classified as full dosha."
-        )
     else:
         verdict = "No Kaal Sarpa Dosha: one or more planets are outside the Rahu-Ketu enclosure."
 
@@ -618,8 +606,6 @@ def compute_kaal_sarpa_for_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
         "rule_profile_id": _KAAL_SARPA_RULE_PROFILE_ID,
         "method": _KAAL_SARPA_METHOD,
         "is_kaal_sarpa": is_kaal_sarpa,
-        "is_partial_candidate": partial_candidate,
-        "reference_partial_included": False,
         "kaal_sarpa_type": type_name if is_kaal_sarpa else "",
         "rahu_house": rahu_house,
         "ketu_house": ketu_house,

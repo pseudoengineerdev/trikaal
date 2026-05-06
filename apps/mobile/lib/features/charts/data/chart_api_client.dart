@@ -4,6 +4,7 @@ import '../../../config/app_config.dart';
 import '../../shared/network/json_api_helpers.dart';
 import 'models/compute_chart_models.dart';
 import 'models/compute_compatibility_models.dart';
+import 'models/compute_kaal_sarpa_models.dart';
 import 'models/compute_report_models.dart';
 import 'models/place_search_models.dart';
 import '../../pancha_pakshi/data/models/pancha_pakshi_models.dart';
@@ -117,6 +118,22 @@ class ChartApiClient {
       ),
     );
     return ComputeCompatibilityResponse.fromJson(body);
+  }
+
+  Future<ComputeKaalSarpaResponse> computeKaalSarpa(
+    ComputeKaalSarpaRequest request,
+  ) async {
+    final uri = Uri.parse('$_baseUrl/v1/kaal-sarpa/compute');
+    final body = await postJson(
+      client: _httpClient,
+      uri: uri,
+      payload: request.toJson(),
+      exceptionBuilder: (message, statusCode) => ChartApiException(
+        message,
+        statusCode: statusCode,
+      ),
+    );
+    return ComputeKaalSarpaResponse.fromJson(body);
   }
 
   void dispose() {

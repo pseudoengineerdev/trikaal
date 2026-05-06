@@ -22,6 +22,11 @@ from trikaal_api.compatibility import (
 )
 from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
 from trikaal_api.metadata import AstrologyTermsResponse, load_astrology_terms
+from trikaal_api.kaal_sarpa import (
+    KaalSarpaComputeRequest,
+    KaalSarpaComputeResponse,
+    compute_kaal_sarpa,
+)
 from trikaal_api.pancha_pakshi import (
     PanchaPakshiComputeRequest,
     PanchaPakshiComputeResponse,
@@ -135,6 +140,16 @@ def pancha_pakshi_compute(request: PanchaPakshiComputeRequest) -> PanchaPakshiCo
 def compatibility_compute(request: CompatibilityComputeRequest) -> CompatibilityComputeResponse:
     try:
         return compute_compatibility(request)
+    except PlaceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+
+
+@app.post("/v1/kaal-sarpa/compute", response_model=KaalSarpaComputeResponse)
+def kaal_sarpa_compute(request: KaalSarpaComputeRequest) -> KaalSarpaComputeResponse:
+    try:
+        return compute_kaal_sarpa(request)
     except PlaceNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ZoneInfoNotFoundError as exc:
