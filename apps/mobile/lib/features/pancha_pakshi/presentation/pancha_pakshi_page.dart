@@ -237,6 +237,8 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 130),
                   children: <Widget>[
+                    _BirthPakshiCard(payload: payload),
+                    const SizedBox(height: 12),
                     _RealtimeLocationCard(
                       usingCurrentLocation: usingCurrentReference,
                       placeController: _runtimePlaceController,
@@ -248,8 +250,6 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
                       onPlaceSelected: _onRuntimePlaceSelected,
                       onUseBirthLocation: _useBirthLocationRuntime,
                     ),
-                    const SizedBox(height: 12),
-                    _BirthPakshiCard(payload: payload),
                     const SizedBox(height: 12),
                     _ActiveWindowCard(
                       payload: payload,
@@ -458,32 +458,27 @@ class _BirthPakshiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'Pancha Pakshi',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Birth Pakshi: ${_withBirdEmoji(payload.birth.pakshi)}',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Nakshatra: ${payload.birth.nakshatraName} '
-              '(#${payload.birth.nakshatraNumber}) · ${payload.birth.paksha} Paksha',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+    final bannerAsset = _pakshiBannerAsset(payload.birth.pakshi);
+    if (bannerAsset == null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+        child: Text(
+          'Birth Pakshi: ${_withBirdEmoji(payload.birth.pakshi)}',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
               ),
-            ),
-          ],
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: AspectRatio(
+        aspectRatio: 2.35,
+        child: Image.asset(
+          bannerAsset,
+          fit: BoxFit.cover,
+          alignment: Alignment.center,
         ),
       ),
     );
@@ -912,6 +907,24 @@ String _withBirdEmoji(String bird) {
     return bird;
   }
   return '$emoji $bird';
+}
+
+String? _pakshiBannerAsset(String bird) {
+  switch (bird.trim().toLowerCase()) {
+    case 'vulture':
+      return 'assets/feature_cards/pakshi_vulture_banner.png';
+    case 'peacock':
+      return 'assets/feature_cards/pakshi_peacock_banner.png';
+    case 'crow':
+      return 'assets/feature_cards/pakshi_crow_banner.png';
+    case 'owl':
+      return 'assets/feature_cards/pakshi_owl_banner.png';
+    case 'cock':
+    case 'rooster':
+      return 'assets/feature_cards/pakshi_cock_banner.png';
+    default:
+      return null;
+  }
 }
 
 String _withActivityEmoji(String activity) {

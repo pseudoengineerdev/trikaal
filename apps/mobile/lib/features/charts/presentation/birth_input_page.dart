@@ -11,7 +11,6 @@ import '../../dasha/data/models/dasha_models.dart';
 import '../data/models/compute_report_models.dart';
 import '../data/models/place_search_models.dart';
 import '../../shared/birth_input/birth_input_formatters.dart';
-import '../../shared/widgets/terminology_toggle.dart';
 import 'state/birth_chart_controller.dart';
 import 'widgets/chart_result_card.dart';
 import 'widgets/chart_state_widgets.dart';
@@ -120,7 +119,14 @@ class _BirthInputPageState extends State<BirthInputPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        terminologyModeListenable: widget.terminologyModeState,
+        terminologyMode: widget.terminologyModeState.mode,
+        onTerminologyChanged: widget.terminologyModeState.setMode,
+        leftCtaLabel: 'Charts',
+        rightCtaLabel: 'Dasha',
+      ),
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           _controller,
@@ -136,17 +142,7 @@ class _BirthInputPageState extends State<BirthInputPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        const Expanded(child: _AstroIntroCard()),
-                        const SizedBox(width: 10),
-                        TerminologyToggle(
-                          mode: widget.terminologyModeState.mode,
-                          onChanged: widget.terminologyModeState.setMode,
-                        ),
-                      ],
-                    ),
+                    const _AstroIntroCard(),
                     const SizedBox(height: 12),
                     _SavedProfilesCard(
                       profilesLoaded: widget.birthInputState.profilesLoaded,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'trikaal_surface.dart';
+
 abstract final class TrikaalTheme {
   static const Color _darkAmethyst = Color(0xFF10002B);
   static const Color _deepAmethyst = Color(0xFF240046);
@@ -95,13 +97,12 @@ abstract final class TrikaalTheme {
         scrolledUnderElevation: 0,
       ),
       cardTheme: CardThemeData(
-        elevation: 1,
-        color: Color(0xCC210E3D),
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        color: TrikaalSurface.fill(),
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: colorScheme.outlineVariant),
-        ),
+        shape: TrikaalSurface.shape(colorScheme: colorScheme),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -130,24 +131,130 @@ abstract final class TrikaalTheme {
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size.fromHeight(52),
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          textStyle: textTheme.titleMedium?.copyWith(
-            fontSize: 19,
+        style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll(Size.fromHeight(52)),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return TrikaalSurface.fill(
+                  alpha: TrikaalSurface.disabledFillAlpha);
+            }
+            return TrikaalSurface.fill();
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
+            }
+            return colorScheme.onSurface;
+          }),
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return colorScheme.primary.withValues(alpha: 0.16);
+            }
+            if (states.contains(WidgetState.hovered) ||
+                states.contains(WidgetState.focused)) {
+              return colorScheme.primary.withValues(alpha: 0.10);
+            }
+            return Colors.transparent;
+          }),
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return TrikaalSurface.border(
+                colorScheme,
+                alpha: TrikaalSurface.disabledBorderAlpha,
+              );
+            }
+            return TrikaalSurface.border(colorScheme);
+          }),
+          elevation: const WidgetStatePropertyAll(0),
+          shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+          textStyle: WidgetStatePropertyAll(
+            textTheme.titleMedium?.copyWith(fontSize: 19),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: colorScheme.secondaryContainer,
-          foregroundColor: colorScheme.onSecondaryContainer,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll(Size.fromHeight(48)),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return TrikaalSurface.fill(
+                  alpha: TrikaalSurface.disabledFillAlpha);
+            }
+            return TrikaalSurface.fill();
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
+            }
+            return colorScheme.onSurface;
+          }),
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return colorScheme.primary.withValues(alpha: 0.14);
+            }
+            if (states.contains(WidgetState.hovered) ||
+                states.contains(WidgetState.focused)) {
+              return colorScheme.primary.withValues(alpha: 0.08);
+            }
+            return Colors.transparent;
+          }),
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return TrikaalSurface.border(
+                colorScheme,
+                alpha: TrikaalSurface.disabledBorderAlpha,
+              );
+            }
+            return TrikaalSurface.border(colorScheme);
+          }),
+          elevation: const WidgetStatePropertyAll(0),
+          shadowColor: const WidgetStatePropertyAll(Colors.transparent),
+          textStyle: WidgetStatePropertyAll(textTheme.titleMedium),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: ButtonStyle(
+          minimumSize: const WidgetStatePropertyAll(Size.fromHeight(48)),
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return TrikaalSurface.fill(
+                  alpha: TrikaalSurface.disabledFillAlpha);
+            }
+            return TrikaalSurface.fill();
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return colorScheme.onSurfaceVariant.withValues(alpha: 0.55);
+            }
+            return colorScheme.onSurface;
+          }),
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return colorScheme.primary.withValues(alpha: 0.12);
+            }
+            if (states.contains(WidgetState.hovered) ||
+                states.contains(WidgetState.focused)) {
+              return colorScheme.primary.withValues(alpha: 0.08);
+            }
+            return Colors.transparent;
+          }),
+          side: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) {
+              return TrikaalSurface.border(
+                colorScheme,
+                alpha: TrikaalSurface.disabledBorderAlpha,
+              );
+            }
+            return TrikaalSurface.border(colorScheme);
+          }),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
         ),
       ),

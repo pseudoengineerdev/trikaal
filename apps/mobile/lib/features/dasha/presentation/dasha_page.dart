@@ -5,7 +5,6 @@ import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
-import '../../shared/widgets/terminology_toggle.dart';
 import 'widgets/dasha_state_widgets.dart';
 
 class DashaPage extends StatelessWidget {
@@ -23,7 +22,14 @@ class DashaPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        terminologyModeListenable: terminologyModeState,
+        terminologyMode: terminologyModeState.mode,
+        onTerminologyChanged: terminologyModeState.setMode,
+        leftCtaLabel: 'Today',
+        rightCtaLabel: 'Insights',
+      ),
       body: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[
           birthInputState,
@@ -36,25 +42,14 @@ class DashaPage extends StatelessWidget {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Text(
-                              'Vimshottari Timeline & Active Periods',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ),
-                        ),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Text(
+                        'Vimshottari Timeline & Active Periods',
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
-                      const SizedBox(width: 10),
-                      TerminologyToggle(
-                        mode: terminologyModeState.mode,
-                        onChanged: terminologyModeState.setMode,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 Expanded(

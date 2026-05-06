@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/theme/trikaal_surface.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
-import '../../charts/data/models/compute_report_models.dart';
 import '../../compatibility/presentation/soulmate_page.dart';
 import '../../pancha_pakshi/presentation/pancha_pakshi_page.dart';
-import '../../shared/astrology/sign_trio_insights.dart';
 import 'birth_chart_detail_page.dart';
 
 class FeaturesGridPage extends StatelessWidget {
@@ -19,83 +18,82 @@ class FeaturesGridPage extends StatelessWidget {
 
   final BirthInputState birthInputState;
 
-  static const List<_FeatureTileData> _featureTiles = <_FeatureTileData>[
+  static const List<_FeatureTileData> _tiles = <_FeatureTileData>[
     _FeatureTileData(
-      code: 'tarot',
-      title: 'Tarot Readings',
-      icon: Icons.style_rounded,
+      code: 'birth_chart',
+      title: 'Birth Chart',
+      description: 'Birth chart module',
+      actionLabel: 'Open',
+      icon: Icons.donut_large_rounded,
+      visualStyle: _FeatureVisualStyle.primary,
     ),
     _FeatureTileData(
       code: 'soulmate',
       title: 'Your Soulmate',
+      description: 'Soulmate module',
+      actionLabel: 'Open',
       icon: Icons.favorite_outline_rounded,
-    ),
-    _FeatureTileData(
-      code: 'meditation',
-      title: 'Meditation',
-      icon: Icons.self_improvement_rounded,
-    ),
-    _FeatureTileData(
-      code: 'birth_chart',
-      title: 'Birth Chart',
-      icon: Icons.donut_large_rounded,
+      visualStyle: _FeatureVisualStyle.supportive,
     ),
     _FeatureTileData(
       code: 'pancha_pakshi',
       title: 'Pancha Pakshi',
+      description: 'Pancha Pakshi module',
+      actionLabel: 'Open',
       icon: Icons.schedule_rounded,
-    ),
-    _FeatureTileData(
-      code: 'compatibility',
-      title: 'Compatibility',
-      icon: Icons.volunteer_activism_rounded,
+      visualStyle: _FeatureVisualStyle.supportive,
     ),
     _FeatureTileData(
       code: 'mangal_dosh',
       title: 'Mangal Dosh',
+      description: 'Mangal Dosh module',
+      actionLabel: 'Open',
       icon: Icons.local_fire_department_rounded,
+      badge: 'Partner',
+      visualStyle: _FeatureVisualStyle.caution,
     ),
     _FeatureTileData(
-      code: 'rising_sign',
-      title: 'Rising Sign',
-      icon: Icons.wb_twilight_rounded,
+      code: 'kaal_sarpa_dosh',
+      title: 'Kaal Sarpa Dosh',
+      description: 'Kaal Sarpa Dosh module',
+      actionLabel: 'Open',
+      icon: Icons.brightness_3_rounded,
+      badge: 'Soon',
+      visualStyle: _FeatureVisualStyle.caution,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final report = birthInputState.computedReport;
-
     return UniversalDockScaffold(
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+      ),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(
         child: SafeArea(
-          child: LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              const spacing = 12.0;
-              final tileWidth = ((constraints.maxWidth - 16 - 16 - spacing) / 2)
-                  .floorToDouble();
-              const smallCardHeight = 112.0;
-              const bigCardHeight = (smallCardHeight * 2) + spacing;
-              return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 140),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    ..._buildMosaicSections(
-                      context: context,
-                      report: report,
-                      tileWidth: tileWidth,
-                      smallCardHeight: smallCardHeight,
-                      bigCardHeight: bigCardHeight,
-                      spacing: spacing,
-                    ),
-                  ],
-                ),
-              );
-            },
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 140),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _tiles.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 1.15,
+              ),
+              itemBuilder: (BuildContext context, int index) {
+                final tile = _tiles[index];
+                return _FeatureCard(
+                  tile: tile,
+                  onTap: () => _handleFeatureTap(context, tile),
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -113,106 +111,6 @@ class FeaturesGridPage extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildMosaicSections({
-    required BuildContext context,
-    required ComputeReportResponse? report,
-    required double tileWidth,
-    required double smallCardHeight,
-    required double bigCardHeight,
-    required double spacing,
-  }) {
-    final sections = <Widget>[];
-    for (var start = 0; start < _featureTiles.length; start += 3) {
-      final chunk = _featureTiles.skip(start).take(3).toList(growable: false);
-      if (chunk.length < 3) {
-        sections.add(
-          Wrap(
-            spacing: spacing,
-            runSpacing: spacing,
-            children: chunk.map((tile) {
-              return SizedBox(
-                width: tileWidth,
-                child: _FeatureGridCard(
-                  data: tile,
-                  height: smallCardHeight,
-                  chartPreviewLines: _birthChartPreviewForTile(tile, report),
-                  onTap: () => _handleFeatureTap(context, tile),
-                ),
-              );
-            }).toList(growable: false),
-          ),
-        );
-        continue;
-      }
-
-      final bigOnLeft = (start ~/ 3).isEven;
-      final bigTile = chunk[0];
-      final topSmallTile = chunk[1];
-      final bottomSmallTile = chunk[2];
-
-      final bigCard = SizedBox(
-        width: tileWidth,
-        child: _FeatureGridCard(
-          data: bigTile,
-          height: bigCardHeight,
-          chartPreviewLines: _birthChartPreviewForTile(bigTile, report),
-          onTap: () => _handleFeatureTap(context, bigTile),
-        ),
-      );
-      final stackedSmallCards = SizedBox(
-        width: tileWidth,
-        height: bigCardHeight,
-        child: Column(
-          children: <Widget>[
-            _FeatureGridCard(
-              data: topSmallTile,
-              height: smallCardHeight,
-              chartPreviewLines:
-                  _birthChartPreviewForTile(topSmallTile, report),
-              onTap: () => _handleFeatureTap(context, topSmallTile),
-            ),
-            SizedBox(height: spacing),
-            _FeatureGridCard(
-              data: bottomSmallTile,
-              height: smallCardHeight,
-              chartPreviewLines:
-                  _birthChartPreviewForTile(bottomSmallTile, report),
-              onTap: () => _handleFeatureTap(context, bottomSmallTile),
-            ),
-          ],
-        ),
-      );
-
-      sections.add(
-        SizedBox(
-          height: bigCardHeight,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (bigOnLeft) bigCard else stackedSmallCards,
-              SizedBox(width: spacing),
-              if (bigOnLeft) stackedSmallCards else bigCard,
-            ],
-          ),
-        ),
-      );
-      if (start + 3 < _featureTiles.length) {
-        sections.add(SizedBox(height: spacing));
-      }
-    }
-    return sections;
-  }
-
-  void _showFeatureToast(BuildContext context, String title) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('$title will be added in the next feature phase.'),
-        ),
-      );
-  }
-
   void _handleFeatureTap(BuildContext context, _FeatureTileData tile) {
     if (tile.code == 'birth_chart') {
       Navigator.of(context).push(
@@ -224,6 +122,7 @@ class FeaturesGridPage extends StatelessWidget {
       );
       return;
     }
+
     if (tile.code == 'pancha_pakshi') {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -234,7 +133,8 @@ class FeaturesGridPage extends StatelessWidget {
       );
       return;
     }
-    if (tile.code == 'soulmate' || tile.code == 'compatibility') {
+
+    if (tile.code == 'soulmate') {
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
@@ -247,6 +147,7 @@ class FeaturesGridPage extends StatelessWidget {
       );
       return;
     }
+
     if (tile.code == 'mangal_dosh') {
       final partner = birthInputState.compatibilityPartnerProfile;
       final partnerReady = partner != null && partner.isComplete;
@@ -273,6 +174,7 @@ class FeaturesGridPage extends StatelessWidget {
         );
         return;
       }
+
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
@@ -285,121 +187,148 @@ class FeaturesGridPage extends StatelessWidget {
       );
       return;
     }
-    _showFeatureToast(context, tile.title);
-  }
 
-  List<String>? _birthChartPreviewForTile(
-    _FeatureTileData tile,
-    ComputeReportResponse? report,
-  ) {
-    if (tile.code != 'birth_chart' || report == null) {
-      return null;
+    if (tile.code == 'kaal_sarpa_dosh') {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Kaal Sarpa Dosh module is coming soon.',
+            ),
+          ),
+        );
     }
-    final trio = SignTrioInsights.fromReport(report);
-    return <String>[
-      '☉ ${trio.sun.name}',
-      '☽ ${trio.moon.name}',
-      '↑ ${trio.rising.name}',
-    ];
   }
 }
 
-class _FeatureGridCard extends StatelessWidget {
-  const _FeatureGridCard({
-    required this.data,
-    required this.height,
-    required this.chartPreviewLines,
+class _FeatureCard extends StatelessWidget {
+  const _FeatureCard({
+    required this.tile,
     required this.onTap,
   });
 
-  final _FeatureTileData data;
-  final double height;
-  final List<String>? chartPreviewLines;
+  final _FeatureTileData tile;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isTall = height > 180;
     final colorScheme = Theme.of(context).colorScheme;
-    final isBirthChartCard = chartPreviewLines != null;
-    final titleFontSize = isTall ? 17.0 : 15.0;
-    final titleLineHeight = isTall ? 1.08 : 1.12;
-    final titleMaxLines = isBirthChartCard ? 2 : (isTall ? 3 : 2);
-    final iconSize = isTall ? 28.0 : 22.0;
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onTap,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.55),
-          ),
-          color: const Color(0xFF3C096C),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.18),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Icon(
-              data.icon,
-              size: iconSize,
-              color: const Color(0xFFFFE7B3),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              data.title,
-              maxLines: titleMaxLines,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: titleFontSize,
-                height: titleLineHeight,
-                color: const Color(0xFFFFE7B3),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (isBirthChartCard) ...<Widget>[
-              const SizedBox(height: 8),
-              ...(chartPreviewLines ?? const <String>[]).map(
-                (line) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    line,
-                    style: const TextStyle(
-                      color: Color(0xFFFFE7B3),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
+    final backgroundAsset = _backgroundAssetForCode(tile.code);
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: DecoratedBox(
+            decoration: TrikaalSurface.decoration(
+              colorScheme: colorScheme,
+              radius: 18,
+              fillAlpha: 1,
+              image: backgroundAsset == null
+                  ? null
+                  : DecorationImage(
+                      image: AssetImage(backgroundAsset),
+                      fit: BoxFit.cover,
+                      alignment: Alignment.center,
+                      opacity: 0.56,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withValues(alpha: 0.10),
+                        BlendMode.darken,
+                      ),
                     ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  if (backgroundAsset == null) ...<Widget>[
+                    Text(
+                      _emojiForCode(tile.code),
+                      style: const TextStyle(fontSize: 30),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  Text(
+                    tile.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
-                ),
+                ],
               ),
-              const Spacer(),
-            ] else ...<Widget>[
-              const Spacer(),
-            ],
-          ],
+            ),
+          ),
         ),
       ),
     );
   }
+
+  String _emojiForCode(String code) {
+    switch (code) {
+      case 'birth_chart':
+        return '🪐';
+      case 'soulmate':
+        return '💞';
+      case 'pancha_pakshi':
+        return '🕊️';
+      case 'mangal_dosh':
+        return '🔥';
+      case 'kaal_sarpa_dosh':
+        return '🐍';
+      default:
+        return '✨';
+    }
+  }
+
+  String? _backgroundAssetForCode(String code) {
+    switch (code) {
+      case 'birth_chart':
+        return 'assets/feature_cards/birth_chart_bg.png';
+      case 'mangal_dosh':
+        return 'assets/feature_cards/mangal_dosh_bg.png';
+      case 'kaal_sarpa_dosh':
+        return 'assets/feature_cards/kaal_sarpa_dosh_bg.png';
+      case 'pancha_pakshi':
+        return 'assets/feature_cards/pancha_pakshi_bg.png';
+      case 'soulmate':
+        return 'assets/feature_cards/soulmate_bg.png';
+      default:
+        return null;
+    }
+  }
+}
+
+enum _FeatureVisualStyle {
+  primary,
+  supportive,
+  caution,
 }
 
 class _FeatureTileData {
   const _FeatureTileData({
     required this.code,
     required this.title,
-    required this.icon,
+    this.description = '',
+    this.actionLabel = '',
+    this.icon = Icons.auto_awesome_rounded,
+    this.badge,
+    this.visualStyle = _FeatureVisualStyle.supportive,
   });
 
   final String code;
   final String title;
+  final String description;
+  final String actionLabel;
   final IconData icon;
+  final String? badge;
+  final _FeatureVisualStyle visualStyle;
 }

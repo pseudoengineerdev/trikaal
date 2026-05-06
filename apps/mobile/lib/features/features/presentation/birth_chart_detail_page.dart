@@ -6,6 +6,7 @@ import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
+import '../../../app/theme/trikaal_surface.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
@@ -16,7 +17,6 @@ import '../domain/vedic_dominants.dart';
 import '../domain/report_refresh_policy.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
 import '../../shared/astrology/term_localizer.dart';
-import '../../shared/widgets/terminology_toggle.dart';
 import '../../subscription/presentation/subscription_page.dart';
 
 enum _BirthChartMainTab {
@@ -153,21 +153,11 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
             ),
           );
         },
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  const SnackBar(
-                    content:
-                        Text('Additional birth-chart actions are coming next.'),
-                  ),
-                );
-            },
-            icon: const Icon(Icons.add_rounded),
-          ),
-        ],
+        terminologyModeListenable: _terminologyModeState,
+        terminologyMode: _terminologyModeState.mode,
+        onTerminologyChanged: _terminologyModeState.setMode,
+        leftCtaLabel: 'Chart',
+        rightCtaLabel: 'Guide',
       ),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
@@ -193,14 +183,6 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
                           onSelected: (_BirthChartMainTab value) {
                             setState(() => _mainTab = value);
                           },
-                        ),
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TerminologyToggle(
-                            mode: _terminologyModeState.mode,
-                            onChanged: _terminologyModeState.setMode,
-                          ),
                         ),
                       ],
                     ),
@@ -534,14 +516,9 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
           ClipRRect(
             borderRadius: BorderRadius.circular(18),
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.outlineVariant.withValues(alpha: 0.42),
-                ),
-                borderRadius: BorderRadius.circular(18),
-                color: Colors.black.withValues(alpha: 0.22),
+              decoration: TrikaalSurface.decoration(
+                colorScheme: Theme.of(context).colorScheme,
+                radius: 18,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8),
@@ -1231,11 +1208,9 @@ class _DominantGrahaRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final hasDashaBadge = mahaActive || antarActive;
     return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: 0.32),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-            color: colorScheme.outlineVariant.withValues(alpha: 0.85)),
+      decoration: TrikaalSurface.decoration(
+        colorScheme: colorScheme,
+        radius: 14,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Column(
@@ -1708,12 +1683,6 @@ class _VedicWheelPainter extends CustomPainter {
       degree: (lagnaSiderealDeg + 90) % 360,
       label: 'Ic',
       fontSize: maxRadius * 0.04,
-    );
-
-    canvas.drawCircle(
-      center,
-      maxRadius * 0.01,
-      Paint()..color = Colors.white.withValues(alpha: 0.8),
     );
   }
 

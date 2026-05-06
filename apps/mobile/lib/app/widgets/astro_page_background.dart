@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+const String _cosmicOverlayAsset =
+    'assets/backgrounds/cosmic_overlay_gold_transparent.png';
+
 class AstroPageBackground extends StatelessWidget {
   const AstroPageBackground({
     required this.child,
@@ -45,6 +48,19 @@ class AstroPageBackground extends StatelessWidget {
             child: _Orb(
               diameter: 150,
               color: const Color(0x30E0AAFF),
+            ),
+          ),
+          Positioned.fill(
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.34,
+                child: Image.asset(
+                  _cosmicOverlayAsset,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  filterQuality: FilterQuality.high,
+                ),
+              ),
             ),
           ),
           Positioned.fill(child: child),

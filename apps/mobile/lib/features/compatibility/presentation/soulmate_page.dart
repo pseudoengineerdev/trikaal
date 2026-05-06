@@ -5,6 +5,7 @@ import '../../../app/models/custom_place_payload.dart';
 import '../../../app/models/person_gender.dart';
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/theme/trikaal_surface.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
@@ -134,7 +135,10 @@ class _SoulmatePageState extends State<SoulmatePage> {
   @override
   Widget build(BuildContext context) {
     return UniversalDockScaffold(
-      appBar: buildTrikaalAppBar(context),
+      appBar: buildTrikaalAppBar(
+        context,
+        onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
+      ),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       body: AstroPageBackground(
@@ -572,12 +576,11 @@ class _SoulmatePageState extends State<SoulmatePage> {
     }
 
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF9D4EDD).withValues(alpha: 0.24),
-        ),
+      decoration: TrikaalSurface.decoration(
+        colorScheme: Theme.of(context).colorScheme,
+        radius: 12,
+        fillAlpha: TrikaalSurface.disabledFillAlpha,
+        borderAlpha: TrikaalSurface.disabledBorderAlpha,
       ),
       padding: const EdgeInsets.all(4),
       child: Row(
@@ -599,12 +602,10 @@ class _SoulmatePageState extends State<SoulmatePage> {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.22),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: const Color(0xFF9D4EDD).withValues(alpha: 0.30),
-          ),
+        decoration: TrikaalSurface.decoration(
+          colorScheme: Theme.of(context).colorScheme,
+          radius: 12,
+          borderAlpha: 0.30,
         ),
         child: const Text(
           'Chart data unavailable for this anchor.',
@@ -616,9 +617,6 @@ class _SoulmatePageState extends State<SoulmatePage> {
       );
     }
 
-    final borderColor = Theme.of(
-      context,
-    ).colorScheme.outlineVariant.withValues(alpha: 0.42);
     final dividerColor = const Color(0xFF9D4EDD).withValues(alpha: 0.28);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -635,10 +633,9 @@ class _SoulmatePageState extends State<SoulmatePage> {
         ClipRRect(
           borderRadius: BorderRadius.circular(18),
           child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border.all(color: borderColor),
-              borderRadius: BorderRadius.circular(18),
-              color: Colors.black.withValues(alpha: 0.22),
+            decoration: TrikaalSurface.decoration(
+              colorScheme: Theme.of(context).colorScheme,
+              radius: 18,
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

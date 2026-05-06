@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/theme/trikaal_surface.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
@@ -86,9 +87,8 @@ class ProfilePage extends StatelessWidget {
     final rising = trio.rising;
     final chartRows = _buildChartRows(report.snapshot.grahaTable);
 
-    final tableBorderColor = Theme.of(
-      context,
-    ).colorScheme.outlineVariant.withValues(alpha: 0.42);
+    final tableBorderColor =
+        TrikaalSurface.border(Theme.of(context).colorScheme).color;
 
     return UniversalDockScaffold(
       activeItem: AppDockItem.profile,
@@ -169,10 +169,9 @@ class ProfilePage extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(18),
                         child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: tableBorderColor),
-                            borderRadius: BorderRadius.circular(18),
-                            color: Colors.black.withValues(alpha: 0.22),
+                          decoration: TrikaalSurface.decoration(
+                            colorScheme: Theme.of(context).colorScheme,
+                            radius: 18,
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
