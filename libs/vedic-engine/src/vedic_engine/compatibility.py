@@ -445,6 +445,31 @@ _HOUSE_ORDINAL_LABELS = {
     11: "Eleventh",
     12: "Twelfth",
 }
+_KAAL_SARPA_RULE_PROFILE_ID = "kaal_sarpa_dosha_v1"
+_KAAL_SARPA_METHOD = "all_seven_classical_planets_within_rahu_ketu_axis_no_partial"
+_KAAL_SARPA_CLASSICAL_PLANETS = (
+    "sun",
+    "moon",
+    "mangal",
+    "budha",
+    "guru",
+    "shukra",
+    "shani",
+)
+_KAAL_SARPA_TYPE_BY_RAHU_HOUSE = {
+    1: "Ananta",
+    2: "Kulika",
+    3: "Vasuki",
+    4: "Sankhapala",
+    5: "Padma",
+    6: "Maha Padma",
+    7: "Takshaka",
+    8: "Karkotaka",
+    9: "Shankhachura",
+    10: "Ghataka",
+    11: "Vishadhara",
+    12: "Sheshanaga",
+}
 
 
 @dataclass(frozen=True)
@@ -465,12 +490,17 @@ def compute_kundali_compatibility(
     girl = _moon_profile_from_snapshot(girl_snapshot)
     ashta = _compute_ashta_kuta(boy=boy, girl=girl)
     manglik = _compute_manglik_pair(boy_snapshot=boy_snapshot, girl_snapshot=girl_snapshot)
+    kaal_sarpa = _compute_kaal_sarpa_pair(
+        boy_snapshot=boy_snapshot,
+        girl_snapshot=girl_snapshot,
+    )
     d1_d9 = _compute_d1_d9_checks(boy_snapshot=boy_snapshot, girl_snapshot=girl_snapshot)
 
     return {
         "version": "v1",
         "ashta_kuta": ashta,
         "manglik": manglik,
+        "kaal_sarpa": kaal_sarpa,
         "d1_d9": d1_d9,
         "summary": {
             "overall_band": _overall_band(ashta["total_score"]),
@@ -480,6 +510,131 @@ def compute_kundali_compatibility(
             "nadi_match": ashta["nadi_match"],
             "bhakoot_match": ashta["bhakoot_match"],
         },
+    }
+
+
+def _compute_kaal_sarpa_pair(
+    *,
+    boy_snapshot: dict[str, Any],
+    girl_snapshot: dict[str, Any],
+) -> dict[str, Any]:
+    boy = compute_kaal_sarpa_for_snapshot(boy_snapshot)
+    girl = compute_kaal_sarpa_for_snapshot(girl_snapshot)
+    same_status = bool(boy["is_kaal_sarpa"]) == bool(girl["is_kaal_sarpa"])
+    pair_alignment = "Balanced" if same_status else "Unbalanced"
+    if same_status:
+        verdict = "Kaal Sarpa status is aligned between both charts."
+    else:
+        verdict = "Kaal Sarpa status differs between the two charts."
+    return {
+        "rule_profile_id": _KAAL_SARPA_RULE_PROFILE_ID,
+        "method": _KAAL_SARPA_METHOD,
+        "pair_alignment": pair_alignment,
+        "verdict": verdict,
+        "evidence": {
+            "same_kaal_sarpa_status": same_status,
+            "boy_outside_planet_count": int(boy["outside_planet_count"]),
+            "girl_outside_planet_count": int(girl["outside_planet_count"]),
+            "boy_partial_candidate": bool(boy["is_partial_candidate"]),
+            "girl_partial_candidate": bool(girl["is_partial_candidate"]),
+        },
+        "boy": boy,
+        "girl": girl,
+    }
+
+
+def compute_kaal_sarpa_for_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
+    rahu_degree = _planet_sidereal_degree(snapshot=snapshot, planet_key="rahu")
+    ketu_degree = _planet_sidereal_degree(snapshot=snapshot, planet_key="ketu")
+
+    per_planet: dict[str, dict[str, Any]] = {}
+    for planet_key in _KAAL_SARPA_CLASSICAL_PLANETS:
+        degree = _planet_sidereal_degree(snapshot=snapshot, planet_key=planet_key)
+        in_rahu_to_ketu = _degree_on_axis_arc(
+            start_degree=rahu_degree,
+            end_degree=ketu_degree,
+            target_degree=degree,
+        )
+        in_ketu_to_rahu = _degree_on_axis_arc(
+            start_degree=ketu_degree,
+            end_degree=rahu_degree,
+            target_degree=degree,
+        )
+        per_planet[planet_key] = {
+            "sidereal_degree": _round_2(degree),
+            "within_rahu_to_ketu_arc": in_rahu_to_ketu,
+            "within_ketu_to_rahu_arc": in_ketu_to_rahu,
+        }
+
+    outside_from_rahu_to_ketu = [
+        planet_key
+        for planet_key in _KAAL_SARPA_CLASSICAL_PLANETS
+        if not bool(per_planet[planet_key]["within_rahu_to_ketu_arc"])
+    ]
+    outside_from_ketu_to_rahu = [
+        planet_key
+        for planet_key in _KAAL_SARPA_CLASSICAL_PLANETS
+        if not bool(per_planet[planet_key]["within_ketu_to_rahu_arc"])
+    ]
+    enclosed_rahu_to_ketu = len(outside_from_rahu_to_ketu) == 0
+    enclosed_ketu_to_rahu = len(outside_from_ketu_to_rahu) == 0
+    is_kaal_sarpa = enclosed_rahu_to_ketu or enclosed_ketu_to_rahu
+
+    if enclosed_rahu_to_ketu and enclosed_ketu_to_rahu:
+        enclosed_side = "both_sides"
+        outside_planets: list[str] = []
+    elif enclosed_rahu_to_ketu:
+        enclosed_side = "rahu_to_ketu"
+        outside_planets = outside_from_rahu_to_ketu
+    elif enclosed_ketu_to_rahu:
+        enclosed_side = "ketu_to_rahu"
+        outside_planets = outside_from_ketu_to_rahu
+    else:
+        if len(outside_from_rahu_to_ketu) <= len(outside_from_ketu_to_rahu):
+            enclosed_side = "rahu_to_ketu_candidate"
+            outside_planets = outside_from_rahu_to_ketu
+        else:
+            enclosed_side = "ketu_to_rahu_candidate"
+            outside_planets = outside_from_ketu_to_rahu
+
+    outside_planet_count = len(outside_planets)
+    partial_candidate = (not is_kaal_sarpa) and outside_planet_count == 1
+
+    rahu_house = _extract_house_from_snapshot(snapshot=snapshot, planet_key="rahu")
+    ketu_house = _extract_house_from_snapshot(snapshot=snapshot, planet_key="ketu")
+    type_name = _kaal_sarpa_type_name(rahu_house=rahu_house)
+
+    if is_kaal_sarpa:
+        verdict = f"Kaal Sarpa Dosha present ({type_name}) with planets enclosed on one side."
+    elif partial_candidate:
+        verdict = (
+            "Partial Kaal Sarpa candidate detected (one planet outside axis), "
+            "but not classified as full dosha."
+        )
+    else:
+        verdict = "No Kaal Sarpa Dosha: one or more planets are outside the Rahu-Ketu enclosure."
+
+    return {
+        "rule_profile_id": _KAAL_SARPA_RULE_PROFILE_ID,
+        "method": _KAAL_SARPA_METHOD,
+        "is_kaal_sarpa": is_kaal_sarpa,
+        "is_partial_candidate": partial_candidate,
+        "reference_partial_included": False,
+        "kaal_sarpa_type": type_name if is_kaal_sarpa else "",
+        "rahu_house": rahu_house,
+        "ketu_house": ketu_house,
+        "enclosed_side": enclosed_side,
+        "outside_planets": outside_planets,
+        "outside_planet_count": outside_planet_count,
+        "axis": {
+            "rahu_degree": _round_2(rahu_degree),
+            "ketu_degree": _round_2(ketu_degree),
+            "rahu_to_ketu_enclosure": enclosed_rahu_to_ketu,
+            "ketu_to_rahu_enclosure": enclosed_ketu_to_rahu,
+        },
+        "classical_planets": list(_KAAL_SARPA_CLASSICAL_PLANETS),
+        "planet_evidence": per_planet,
+        "verdict": verdict,
     }
 
 
@@ -1089,6 +1244,58 @@ def _safe_house_index(value: Any) -> int | None:
     if 1 <= house <= 12:
         return house
     return None
+
+
+def _extract_house_from_snapshot(
+    *,
+    snapshot: dict[str, Any],
+    planet_key: str,
+) -> int:
+    bhava = snapshot.get("bhava", {})
+    house = _safe_house_index(bhava.get(f"{planet_key}_house"))
+    if house is not None:
+        return house
+    graha_table = snapshot.get("graha_table", {})
+    graha_entry = graha_table.get(planet_key, {}) if isinstance(graha_table, dict) else {}
+    table_house = _safe_house_index(graha_entry.get("house"))
+    if table_house is not None:
+        return table_house
+    raise ValueError(f"Missing house for planet '{planet_key}' in snapshot.")
+
+
+def _planet_sidereal_degree(
+    *,
+    snapshot: dict[str, Any],
+    planet_key: str,
+) -> float:
+    graha_table = snapshot.get("graha_table", {})
+    if isinstance(graha_table, dict):
+        graha_entry = graha_table.get(planet_key, {})
+        if isinstance(graha_entry, dict) and "sidereal_deg" in graha_entry:
+            return float(graha_entry["sidereal_deg"]) % 360.0
+    astronomy = snapshot.get("astronomy", {})
+    astronomy_key = f"{planet_key}_sidereal_deg"
+    if isinstance(astronomy, dict) and astronomy_key in astronomy:
+        return float(astronomy[astronomy_key]) % 360.0
+    raise ValueError(f"Missing sidereal degree for planet '{planet_key}' in snapshot.")
+
+
+def _degree_on_axis_arc(
+    *,
+    start_degree: float,
+    end_degree: float,
+    target_degree: float,
+) -> bool:
+    start = float(start_degree) % 360.0
+    end = float(end_degree) % 360.0
+    target = float(target_degree) % 360.0
+    if start <= end:
+        return start <= target <= end
+    return target >= start or target <= end
+
+
+def _kaal_sarpa_type_name(*, rahu_house: int) -> str:
+    return _KAAL_SARPA_TYPE_BY_RAHU_HOUSE.get(rahu_house, "Unknown")
 
 
 def _house_from_reference(

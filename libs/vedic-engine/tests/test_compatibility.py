@@ -85,6 +85,9 @@ def test_compatibility_returns_ashta_kuta_manglik_and_d1_d9_sections() -> None:
     assert "description" in first_component
     assert result["manglik"]["pair_alignment"] == "Balanced"
     assert result["manglik"]["score"] == 8.0
+    assert result["kaal_sarpa"]["rule_profile_id"] == "kaal_sarpa_dosha_v1"
+    assert "boy" in result["kaal_sarpa"]
+    assert "girl" in result["kaal_sarpa"]
     assert result["d1_d9"]["d1"]["lagna_distance"] == 4
     assert result["d1_d9"]["d9"]["mars_house_gap"] == 5
     assert result["summary"]["overall_band"] == "Very Good"
@@ -387,6 +390,98 @@ def test_manglik_payload_includes_rule_profile_and_reference_evidence() -> None:
     assert boy["reference_evidence"]["lagna"]["reference_label"] == "Lagna"
     assert boy["reference_evidence"]["moon"]["reference_key"] == "moon"
     assert girl["reference_evidence"]["venus"]["reference_key"] == "venus"
+
+
+def test_kaal_sarpa_full_detection_and_type_mapping() -> None:
+    snapshot = {
+        "graha_table": {
+            "rahu": {"sidereal_deg": 30.0, "house": 1},
+            "ketu": {"sidereal_deg": 210.0, "house": 7},
+            "sun": {"sidereal_deg": 35.0},
+            "moon": {"sidereal_deg": 60.0},
+            "mangal": {"sidereal_deg": 90.0},
+            "budha": {"sidereal_deg": 120.0},
+            "guru": {"sidereal_deg": 150.0},
+            "shukra": {"sidereal_deg": 180.0},
+            "shani": {"sidereal_deg": 205.0},
+        },
+        "bhava": {
+            "rahu_house": 1,
+            "ketu_house": 7,
+        },
+    }
+
+    result = compatibility_module.compute_kaal_sarpa_for_snapshot(snapshot)
+
+    assert result["rule_profile_id"] == "kaal_sarpa_dosha_v1"
+    assert result["is_kaal_sarpa"] is True
+    assert result["is_partial_candidate"] is False
+    assert result["reference_partial_included"] is False
+    assert result["kaal_sarpa_type"] == "Ananta"
+    assert result["rahu_house"] == 1
+    assert result["ketu_house"] == 7
+    assert result["enclosed_side"] == "rahu_to_ketu"
+    assert result["outside_planets"] == []
+    assert result["outside_planet_count"] == 0
+    for key in ("sun", "moon", "mangal", "budha", "guru", "shukra", "shani"):
+        assert result["planet_evidence"][key]["within_rahu_to_ketu_arc"] is True
+
+
+def test_kaal_sarpa_absent_when_planets_are_not_enclosed() -> None:
+    snapshot = {
+        "graha_table": {
+            "rahu": {"sidereal_deg": 30.0, "house": 1},
+            "ketu": {"sidereal_deg": 210.0, "house": 7},
+            "sun": {"sidereal_deg": 35.0},
+            "moon": {"sidereal_deg": 60.0},
+            "mangal": {"sidereal_deg": 90.0},
+            "budha": {"sidereal_deg": 120.0},
+            "guru": {"sidereal_deg": 150.0},
+            "shukra": {"sidereal_deg": 180.0},
+            "shani": {"sidereal_deg": 280.0},
+        },
+        "bhava": {
+            "rahu_house": 1,
+            "ketu_house": 7,
+        },
+    }
+
+    result = compatibility_module.compute_kaal_sarpa_for_snapshot(snapshot)
+
+    assert result["is_kaal_sarpa"] is False
+    assert result["is_partial_candidate"] is True
+    assert result["outside_planets"] == ["shani"]
+    assert result["outside_planet_count"] == 1
+    assert result["kaal_sarpa_type"] == ""
+    assert "Partial Kaal Sarpa candidate detected" in result["verdict"]
+
+
+def test_kaal_sarpa_detects_ketu_to_rahu_enclosure_side() -> None:
+    snapshot = {
+        "graha_table": {
+            "rahu": {"sidereal_deg": 20.0, "house": 9},
+            "ketu": {"sidereal_deg": 200.0, "house": 3},
+            "sun": {"sidereal_deg": 205.0},
+            "moon": {"sidereal_deg": 230.0},
+            "mangal": {"sidereal_deg": 260.0},
+            "budha": {"sidereal_deg": 300.0},
+            "guru": {"sidereal_deg": 330.0},
+            "shukra": {"sidereal_deg": 350.0},
+            "shani": {"sidereal_deg": 10.0},
+        },
+        "bhava": {
+            "rahu_house": 9,
+            "ketu_house": 3,
+        },
+    }
+
+    result = compatibility_module.compute_kaal_sarpa_for_snapshot(snapshot)
+
+    assert result["is_kaal_sarpa"] is True
+    assert result["kaal_sarpa_type"] == "Shankhachura"
+    assert result["enclosed_side"] == "ketu_to_rahu"
+    assert result["axis"]["rahu_to_ketu_enclosure"] is False
+    assert result["axis"]["ketu_to_rahu_enclosure"] is True
 
 
 def test_manglik_pair_unbalanced_case_reports_evidence_trace() -> None:

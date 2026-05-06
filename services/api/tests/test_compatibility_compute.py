@@ -42,6 +42,10 @@ def test_compatibility_compute_returns_kuta_manglik_and_summary() -> None:
     )
     assert compatibility["manglik"]["boy"]["trigger_houses"] == [1, 2, 4, 7, 8, 12]
     assert "reference_evidence" in compatibility["manglik"]["boy"]
+    assert compatibility["kaal_sarpa"]["rule_profile_id"] == "kaal_sarpa_dosha_v1"
+    assert compatibility["kaal_sarpa"]["method"] == "all_seven_classical_planets_within_rahu_ketu_axis_no_partial"
+    assert "boy" in compatibility["kaal_sarpa"]
+    assert "girl" in compatibility["kaal_sarpa"]
     assert compatibility["summary"]["guna_score_max"] == 36.0
 
 
@@ -94,6 +98,7 @@ def test_compatibility_compute_sahil_candace_pdf_case_matches_36_with_custom_pla
         "nadi": 8.0,
     }
     assert compatibility["manglik"]["rule_profile_id"] == "mangal_dosha_v2"
+    assert compatibility["kaal_sarpa"]["rule_profile_id"] == "kaal_sarpa_dosha_v1"
     assert compatibility["manglik"]["pair_alignment"] == "Unbalanced"
     assert compatibility["manglik"]["boy"]["active_references"] == []
     assert compatibility["manglik"]["girl"]["active_references"] == ["venus"]
