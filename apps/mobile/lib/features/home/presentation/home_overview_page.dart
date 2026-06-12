@@ -9,8 +9,8 @@ import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../feed/presentation/feed_page.dart';
 import '../../feed/presentation/state/feed_controller.dart';
-import '../../shared/astrology/sign_trio_insights.dart';
 import 'widgets/home_header_tabs.dart';
+import 'widgets/today_view.dart';
 
 class HomeOverviewPage extends StatefulWidget {
   const HomeOverviewPage({
@@ -149,107 +149,6 @@ class _TodayTab extends StatelessWidget {
       );
     }
 
-    final trio = SignTrioInsights.fromReport(report);
-    final sun = trio.sun;
-    final moon = trio.moon;
-    final rising = trio.rising;
-    final displayName = birthInputState.firstName.trim().isEmpty
-        ? 'Your Profile'
-        : birthInputState.firstName.trim();
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 160),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'Welcome, $displayName',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 18),
-          _HomeCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Text(
-                  'Your Sign Trio',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: <Widget>[
-                    _SignPill(label: '☉ ${sun.name} ${sun.symbol}'),
-                    _SignPill(label: '☽ ${moon.name} ${moon.symbol}'),
-                    _SignPill(label: '↑ ${rising.name} ${rising.symbol}'),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tap the center profile button for your full "About You" section.',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 12),
-        ],
-      ),
-    );
-  }
-}
-
-class _HomeCard extends StatelessWidget {
-  const _HomeCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.78),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: child,
-      ),
-    );
-  }
-}
-
-class _SignPill extends StatelessWidget {
-  const _SignPill({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer.withValues(
-              alpha: 0.32,
-            ),
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
-      ),
-    );
+    return TodayView(birthInputState: birthInputState);
   }
 }
