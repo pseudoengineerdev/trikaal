@@ -30,6 +30,8 @@ class BirthInputState extends ChangeNotifier {
   String _timeOfBirth;
   String _placeOfBirth;
   CustomPlacePayload? _customPlace;
+  String? _currentObservationPlaceLabel;
+  CustomPlacePayload? _currentObservationCustomPlace;
   bool _hasComputedChart = false;
   DashaSummary? _computedDasha;
   ComputeReportResponse? _computedReport;
@@ -48,6 +50,19 @@ class BirthInputState extends ChangeNotifier {
   String get timeOfBirth => _timeOfBirth;
   String get placeOfBirth => _placeOfBirth;
   CustomPlacePayload? get customPlace => _customPlace;
+  String? get currentObservationPlaceLabel => _currentObservationPlaceLabel;
+  CustomPlacePayload? get currentObservationCustomPlace =>
+      _currentObservationCustomPlace;
+  bool get hasCurrentObservationLocation =>
+      _currentObservationPlaceLabel != null &&
+      _currentObservationPlaceLabel!.trim().isNotEmpty;
+  String get placeForCurrentObservations => hasCurrentObservationLocation
+      ? _currentObservationPlaceLabel!.trim()
+      : _placeOfBirth.trim();
+  CustomPlacePayload? get customPlaceForCurrentObservations =>
+      hasCurrentObservationLocation
+          ? _currentObservationCustomPlace
+          : _customPlace;
   bool get hasComputedChart => _hasComputedChart;
   DashaSummary? get computedDasha => _computedDasha;
   ComputeReportResponse? get computedReport => _computedReport;
@@ -126,6 +141,41 @@ class BirthInputState extends ChangeNotifier {
       _clearComputedState();
       _onboardingCompleted = false;
     }
+    notifyListeners();
+  }
+
+  void setCurrentObservationLocation({
+    required String placeLabel,
+    CustomPlacePayload? customPlace,
+  }) {
+    final trimmedLabel = placeLabel.trim();
+    if (!hasCurrentObservationLocation ||
+        _currentObservationPlaceLabel != trimmedLabel ||
+        _currentObservationCustomPlace?.placeLabel != customPlace?.placeLabel ||
+        _currentObservationCustomPlace?.latitude !=
+            (customPlace?.latitude ??
+                _currentObservationCustomPlace?.latitude) ||
+        _currentObservationCustomPlace?.longitude !=
+            (customPlace?.longitude ??
+                _currentObservationCustomPlace?.longitude) ||
+        _currentObservationCustomPlace?.timezone !=
+            (customPlace?.timezone ??
+                _currentObservationCustomPlace?.timezone) ||
+        _currentObservationCustomPlace?.elevationM !=
+            (customPlace?.elevationM ??
+                _currentObservationCustomPlace?.elevationM)) {
+      _currentObservationPlaceLabel = trimmedLabel;
+      _currentObservationCustomPlace = customPlace;
+      notifyListeners();
+    }
+  }
+
+  void clearCurrentObservationLocation() {
+    if (!hasCurrentObservationLocation) {
+      return;
+    }
+    _currentObservationPlaceLabel = null;
+    _currentObservationCustomPlace = null;
     notifyListeners();
   }
 

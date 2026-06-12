@@ -292,6 +292,56 @@ void main() {
       expect(state.hasComputedChart, isFalse);
       expect(state.computedDasha, isNull);
     });
+
+    test('allows selecting and clearing current observation location', () {
+      final state = BirthInputState();
+      state.updateDateOfBirth('1999-07-04');
+      state.updateTimeOfBirth('12:22');
+      state.setResolvedPlace(
+        const CustomPlacePayload(
+          placeLabel: 'Mumbai, Maharashtra, India',
+          latitude: 19.076,
+          longitude: 72.8777,
+          timezone: 'Asia/Kolkata',
+          elevationM: 14,
+        ),
+      );
+
+      expect(state.hasCurrentObservationLocation, isFalse);
+      expect(state.placeForCurrentObservations, 'Mumbai, Maharashtra, India');
+      expect(state.currentObservationPlaceLabel, isNull);
+
+      state.setCurrentObservationLocation(
+        placeLabel: 'Detroit, Michigan, United States',
+        customPlace: const CustomPlacePayload(
+          placeLabel: 'Detroit, Michigan, United States',
+          latitude: 42.3314,
+          longitude: -83.0458,
+          timezone: 'America/Detroit',
+          elevationM: 177,
+        ),
+      );
+
+      expect(state.hasCurrentObservationLocation, isTrue);
+      expect(
+        state.placeForCurrentObservations,
+        'Detroit, Michigan, United States',
+      );
+      expect(
+        state.currentObservationPlaceLabel,
+        'Detroit, Michigan, United States',
+      );
+      expect(state.customPlaceForCurrentObservations, isNotNull);
+      expect(
+          state.customPlaceForCurrentObservations!.timezone, 'America/Detroit');
+
+      state.clearCurrentObservationLocation();
+
+      expect(state.hasCurrentObservationLocation, isFalse);
+      expect(state.placeForCurrentObservations, 'Mumbai, Maharashtra, India');
+      expect(state.currentObservationPlaceLabel, isNull);
+      expect(state.customPlaceForCurrentObservations!.timezone, 'Asia/Kolkata');
+    });
   });
 }
 

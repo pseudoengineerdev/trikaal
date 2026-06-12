@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/widgets/current_location_picker.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
@@ -22,6 +23,11 @@ class HomeOverviewPage extends StatelessWidget {
       return UniversalDockScaffold(
         appBar: buildTrikaalAppBar(
           context,
+          onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+            context: context,
+            birthInputState: birthInputState,
+          ),
+          currentLocationLabel: birthInputState.placeForCurrentObservations,
           onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
         ),
         activeItem: AppDockItem.home,
@@ -58,6 +64,11 @@ class HomeOverviewPage extends StatelessWidget {
     return UniversalDockScaffold(
       appBar: buildTrikaalAppBar(
         context,
+        onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+          context: context,
+          birthInputState: birthInputState,
+        ),
+        currentLocationLabel: birthInputState.placeForCurrentObservations,
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.home,

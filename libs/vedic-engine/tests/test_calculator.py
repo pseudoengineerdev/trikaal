@@ -30,8 +30,9 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert snapshot["panchanga"]["yoga"]["name_vedic"] == "Ayushman"
     assert snapshot["panchanga"]["karana"]["serial"] == 41
     assert snapshot["panchanga"]["karana"]["name_vedic"] == "Garija"
-    assert isinstance(snapshot["panchanga"]["sunrise"]["local_time"], str)
-    assert isinstance(snapshot["panchanga"]["sunset"]["local_time"], str)
+    # Hindu sunrise convention: solar disc center, no refraction.
+    assert snapshot["panchanga"]["sunrise"]["local_time"] == "06:09"
+    assert snapshot["panchanga"]["sunset"]["local_time"] == "19:16"
     assert isinstance(snapshot["astronomy"]["julian_day_utc"], float)
     assert isinstance(snapshot["astronomy"]["sun_sidereal_deg"], float)
     assert isinstance(snapshot["astronomy"]["moon_sidereal_deg"], float)

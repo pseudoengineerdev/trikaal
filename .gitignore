@@ -34,3 +34,6 @@ build/
 # Environment files
 .env
 .env.*
+
+# Internal reference material - never commit
+docs/

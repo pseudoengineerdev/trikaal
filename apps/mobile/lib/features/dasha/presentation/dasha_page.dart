@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/widgets/current_location_picker.dart';
 import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
@@ -24,6 +25,11 @@ class DashaPage extends StatelessWidget {
     return Scaffold(
       appBar: buildTrikaalAppBar(
         context,
+        onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+          context: context,
+          birthInputState: birthInputState,
+        ),
+        currentLocationLabel: birthInputState.placeForCurrentObservations,
         terminologyModeListenable: terminologyModeState,
         terminologyMode: terminologyModeState.mode,
         onTerminologyChanged: terminologyModeState.setMode,

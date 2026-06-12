@@ -1057,10 +1057,12 @@ def _compute_sun_event(
         utc_hours,
         swe.GREG_CAL,
     )
+    # Traditional Hindu sunrise: solar disc center, no atmospheric refraction.
+    # Keep in sync with hindu_calendar._compute_sun_event_jd.
     _, tret = swe.rise_trans(
         jd_utc,
         swe.SUN,
-        rsmi,
+        rsmi | swe.BIT_DISC_CENTER | swe.BIT_NO_REFRACTION,
         (longitude, latitude, elevation_m),
         0.0,
         15.0,

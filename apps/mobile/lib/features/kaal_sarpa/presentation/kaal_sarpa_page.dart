@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/widgets/current_location_picker.dart';
 import '../../../app/theme/trikaal_surface.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
@@ -87,6 +88,11 @@ class _KaalSarpaPageState extends State<KaalSarpaPage> {
     return UniversalDockScaffold(
       appBar: buildTrikaalAppBar(
         context,
+        onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+          context: context,
+          birthInputState: widget.birthInputState,
+        ),
+        currentLocationLabel: widget.birthInputState.placeForCurrentObservations,
         onPremiumTap: () => _handleDockTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,

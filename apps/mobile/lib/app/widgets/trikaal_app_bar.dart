@@ -14,6 +14,8 @@ PreferredSizeWidget buildTrikaalAppBar(
   TerminologyMode? terminologyMode,
   ValueListenable<TerminologyMode>? terminologyModeListenable,
   ValueChanged<TerminologyMode>? onTerminologyChanged,
+  VoidCallback? onCurrentLocationTap,
+  String? currentLocationLabel,
   VoidCallback? onLeftCtaTap,
   VoidCallback? onRightCtaTap,
   String leftCtaLabel = 'Today',
@@ -63,6 +65,28 @@ PreferredSizeWidget buildTrikaalAppBar(
       );
   }
 
+  Widget buildCtaButton({
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(56, 28),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        textStyle: Theme.of(
+          context,
+        )
+            .textTheme
+            .labelLarge
+            ?.copyWith(fontSize: 12, fontWeight: FontWeight.w700),
+      ),
+      onPressed: onPressed,
+      child: Text(label),
+    );
+  }
+
   Widget buildToggle({
     required TerminologyMode mode,
     required ValueChanged<TerminologyMode> onChanged,
@@ -74,6 +98,10 @@ PreferredSizeWidget buildTrikaalAppBar(
     );
   }
 
+  final shouldReplaceLeftCtaWithLocation = onCurrentLocationTap != null &&
+      onLeftCtaTap == null &&
+      leftCtaLabel == 'Today';
+
   final controlsRow = showControlsRow
       ? PreferredSize(
           preferredSize: const Size.fromHeight(48),
@@ -81,61 +109,43 @@ PreferredSizeWidget buildTrikaalAppBar(
             padding: const EdgeInsets.fromLTRB(10, 2, 10, 4),
             child: ValueListenableBuilder<TerminologyMode>(
               valueListenable: activeTerminologyListenable,
-              builder: (context, mode, _) {
+              builder:
+                  (BuildContext context, TerminologyMode mode, Widget? child) {
+                final leftSlot = shouldReplaceLeftCtaWithLocation
+                    ? IconButton(
+                        tooltip: currentLocationLabel == null
+                            ? 'Set current location'
+                            : 'Current location: $currentLocationLabel',
+                        icon: const Icon(Icons.location_on_rounded),
+                        onPressed: onCurrentLocationTap,
+                      )
+                    : buildCtaButton(
+                        label: leftCtaLabel,
+                        onPressed: handleLeftCtaTap,
+                      );
+
                 return Row(
                   children: <Widget>[
+                    leftSlot,
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Align(
-                        alignment: Alignment.centerRight,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(56, 28),
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            visualDensity: VisualDensity.compact,
-                            textStyle: Theme.of(
-                              context,
-                            ).textTheme.labelLarge?.copyWith(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                          onPressed: handleLeftCtaTap,
-                          child: Text(leftCtaLabel),
+                        alignment: Alignment.center,
+                        child: buildToggle(
+                          mode: mode,
+                          onChanged: (TerminologyMode selectedMode) {
+                            if (terminologyModeListenable == null) {
+                              _headerTerminologyMode.value = selectedMode;
+                            }
+                            onTerminologyChanged?.call(selectedMode);
+                          },
                         ),
                       ),
                     ),
                     const SizedBox(width: 8),
-                    buildToggle(
-                      mode: mode,
-                      onChanged: (TerminologyMode selectedMode) {
-                        if (terminologyModeListenable == null) {
-                          _headerTerminologyMode.value = selectedMode;
-                        }
-                        onTerminologyChanged?.call(selectedMode);
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(56, 28),
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            visualDensity: VisualDensity.compact,
-                            textStyle: Theme.of(
-                              context,
-                            ).textTheme.labelLarge?.copyWith(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                          onPressed: handleRightCtaTap,
-                          child: Text(rightCtaLabel),
-                        ),
-                      ),
+                    buildCtaButton(
+                      label: rightCtaLabel,
+                      onPressed: handleRightCtaTap,
                     ),
                   ],
                 );

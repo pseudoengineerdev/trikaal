@@ -5,6 +5,7 @@ import '../../../app/models/saved_birth_profile.dart';
 import '../../../app/state/astrology_terms_state.dart';
 import '../../../app/state/birth_input_state.dart';
 import '../../../app/state/terminology_mode_state.dart';
+import '../../../app/widgets/current_location_picker.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../dasha/data/models/dasha_models.dart';
@@ -121,6 +122,11 @@ class _BirthInputPageState extends State<BirthInputPage> {
     return Scaffold(
       appBar: buildTrikaalAppBar(
         context,
+        onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+          context: context,
+          birthInputState: widget.birthInputState,
+        ),
+        currentLocationLabel: widget.birthInputState.placeForCurrentObservations,
         terminologyModeListenable: widget.terminologyModeState,
         terminologyMode: widget.terminologyModeState.mode,
         onTerminologyChanged: widget.terminologyModeState.setMode,

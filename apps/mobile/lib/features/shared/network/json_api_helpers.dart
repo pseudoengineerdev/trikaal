@@ -15,6 +15,7 @@ Future<Map<String, dynamic>> getJson({
   final response = await client.get(uri);
   _logResponse('GET', uri, response.statusCode);
   final body = _decodeJsonObject(
+    statusCode: response.statusCode,
     response.body,
     exceptionBuilder: exceptionBuilder,
   );
@@ -40,6 +41,7 @@ Future<Map<String, dynamic>> postJson({
   );
   _logResponse('POST', uri, response.statusCode);
   final body = _decodeJsonObject(
+    statusCode: response.statusCode,
     response.body,
     exceptionBuilder: exceptionBuilder,
   );
@@ -53,13 +55,29 @@ Future<Map<String, dynamic>> postJson({
 
 Map<String, dynamic> _decodeJsonObject(
   String responseBody, {
+  required int statusCode,
   required ApiExceptionBuilder exceptionBuilder,
 }) {
+  if (responseBody.trim().isEmpty) {
+    throw exceptionBuilder(
+      'Server returned an empty response (HTTP $statusCode).',
+      statusCode,
+    );
+  }
+
   final dynamic decoded;
   try {
     decoded = jsonDecode(responseBody);
   } catch (_) {
-    throw exceptionBuilder('Unexpected response format from server', null);
+    final preview = responseBody.length <= 220
+        ? responseBody
+        : '${responseBody.substring(0, 220)}...';
+    final concise =
+        preview.replaceAll('\n', ' ').replaceAll('\r', ' ').replaceAll('\t', ' ');
+    throw exceptionBuilder(
+      'Non-JSON response from server (HTTP $statusCode): $concise',
+      statusCode,
+    );
   }
 
   if (decoded is Map<String, dynamic>) {
@@ -68,7 +86,10 @@ Map<String, dynamic> _decodeJsonObject(
   if (decoded is Map) {
     return decoded.map((key, value) => MapEntry(key.toString(), value));
   }
-  throw exceptionBuilder('Unexpected response format from server', null);
+  throw exceptionBuilder(
+    'Unexpected response format from server (HTTP $statusCode).',
+    statusCode,
+  );
 }
 
 void _throwIfError(
@@ -79,8 +100,24 @@ void _throwIfError(
   if (statusCode >= 200 && statusCode < 300) {
     return;
   }
+
+  if (statusCode == 404) {
+    final detail = body['detail'] as String?;
+    final detailText = detail?.trim().toLowerCase();
+    if (detailText == null || detailText == 'not found') {
+      throw exceptionBuilder(
+        'Endpoint not found on API. Please restart API with the latest backend build.',
+        statusCode,
+      );
+    }
+    throw exceptionBuilder(
+      detail ?? 'Endpoint not found on API.',
+      statusCode,
+    );
+  }
+
   throw exceptionBuilder(
-    (body['detail'] as String?) ?? 'Request failed',
+    (body['detail'] as String?) ?? 'Request failed with status $statusCode.',
     statusCode,
   );
 }

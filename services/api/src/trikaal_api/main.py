@@ -20,6 +20,11 @@ from trikaal_api.compatibility import (
     CompatibilityComputeResponse,
     compute_compatibility,
 )
+from trikaal_api.hindu_calendar import (
+    HinduCalendarComputeRequest,
+    HinduCalendarComputeResponse,
+    compute_hindu_calendar,
+)
 from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
 from trikaal_api.metadata import AstrologyTermsResponse, load_astrology_terms
 from trikaal_api.kaal_sarpa import (
@@ -154,6 +159,26 @@ def kaal_sarpa_compute(request: KaalSarpaComputeRequest) -> KaalSarpaComputeResp
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ZoneInfoNotFoundError as exc:
         raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+
+
+@app.post("/v1/hindu-calendar/compute", response_model=HinduCalendarComputeResponse)
+def hindu_calendar_compute(
+    request: HinduCalendarComputeRequest,
+) -> HinduCalendarComputeResponse:
+    try:
+        return compute_hindu_calendar(request)
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.post("/v1/hindu-calender/compute", response_model=HinduCalendarComputeResponse)
+def hindu_calendar_compute_calender_alias(
+    request: HinduCalendarComputeRequest,
+) -> HinduCalendarComputeResponse:
+    """Compatibility alias for misspelled clients."""
+    return hindu_calendar_compute(request)
 
 
 @app.get("/v1/places/search", response_model=PlaceSearchResponse)

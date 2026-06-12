@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/widgets/current_location_picker.dart';
 import '../../../app/theme/trikaal_surface.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
@@ -66,6 +67,11 @@ class ProfilePage extends StatelessWidget {
         onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
         appBar: buildTrikaalAppBar(
           context,
+          onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+            context: context,
+            birthInputState: birthInputState,
+          ),
+          currentLocationLabel: birthInputState.placeForCurrentObservations,
           onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
         ),
         body: const AstroPageBackground(
@@ -95,6 +101,11 @@ class ProfilePage extends StatelessWidget {
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),
       appBar: buildTrikaalAppBar(
         context,
+        onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+          context: context,
+          birthInputState: birthInputState,
+        ),
+        currentLocationLabel: birthInputState.placeForCurrentObservations,
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       body: AstroPageBackground(

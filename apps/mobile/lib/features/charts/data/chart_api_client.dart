@@ -4,6 +4,7 @@ import '../../../config/app_config.dart';
 import '../../shared/network/json_api_helpers.dart';
 import 'models/compute_chart_models.dart';
 import 'models/compute_compatibility_models.dart';
+import 'models/compute_hindu_calendar_models.dart';
 import 'models/compute_kaal_sarpa_models.dart';
 import 'models/compute_report_models.dart';
 import 'models/place_search_models.dart';
@@ -134,6 +135,47 @@ class ChartApiClient {
       ),
     );
     return ComputeKaalSarpaResponse.fromJson(body);
+  }
+
+  Future<ComputeHinduCalendarResponse> computeHinduCalendar(
+    ComputeHinduCalendarRequest request,
+  ) async {
+    const endpoints = <String>[
+      '/v1/hindu-calendar/compute',
+      '/v1/hindu-calender/compute',
+    ];
+
+    ChartApiException? lastError;
+    for (final path in endpoints) {
+      try {
+        final uri = Uri.parse('$_baseUrl$path');
+        final body = await postJson(
+          client: _httpClient,
+          uri: uri,
+          payload: request.toJson(),
+          exceptionBuilder: (message, statusCode) => ChartApiException(
+            message,
+            statusCode: statusCode,
+          ),
+        );
+        return ComputeHinduCalendarResponse.fromJson(body);
+      } on ChartApiException catch (exception) {
+        if (exception.statusCode == 404) {
+          lastError = exception;
+          continue;
+        }
+        rethrow;
+      }
+    }
+
+    if (lastError != null) {
+      throw ChartApiException(
+        '${lastError.message} (both calendar endpoints were tested)',
+        statusCode: lastError.statusCode,
+      );
+    }
+
+    throw const ChartApiException('Unable to compute Hindu calendar.');
   }
 
   void dispose() {

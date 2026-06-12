@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/navigation/app_dock_navigation.dart';
 import '../../../app/models/custom_place_payload.dart';
 import '../../../app/state/birth_input_state.dart';
+import '../../../app/widgets/current_location_picker.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
@@ -27,17 +28,19 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
   late final PanchaPakshiController _controller;
   late final TextEditingController _runtimePlaceController;
   String? _lastInputSignature;
-  String? _runtimePlaceQuery;
-  String? _runtimePlaceDisplayLabel;
-  CustomPlacePayload? _runtimeCustomPlace;
   String? _locationStatusMessage;
 
   @override
   void initState() {
     super.initState();
     _controller = PanchaPakshiController();
-    _runtimePlaceController = TextEditingController();
-    _locationStatusMessage = 'Using birth location for live activity windows.';
+    _runtimePlaceController = TextEditingController(
+      text: widget.birthInputState.placeForCurrentObservations,
+    );
+    _locationStatusMessage = widget
+            .birthInputState.hasCurrentObservationLocation
+        ? 'Using ${widget.birthInputState.currentObservationPlaceLabel} for live activity windows.'
+        : 'Using birth location for live activity windows.';
     widget.birthInputState.addListener(_handleBirthInputChange);
     _load();
   }
@@ -54,12 +57,17 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
     final input = _readBirthInputSnapshot();
     if (input == null) {
       _lastInputSignature = null;
+      _runtimePlaceController.text = '';
       return;
     }
+    _syncRuntimeLocationInput(input);
     _lastInputSignature = _buildInputSignature(
       dateOfBirth: input.dateOfBirth,
       timeOfBirth: input.timeOfBirth,
       placeOfBirth: input.placeOfBirth,
+      runtimePlaceOfObservation: input.runtimePlaceOfObservation,
+      runtimeCustomPlace: input.runtimeCustomPlace,
+      runtimeUsesOverride: input.hasCurrentObservationRuntime,
     );
     _loadPanchaPakshi(input);
   }
@@ -77,11 +85,18 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
       dateOfBirth: input.dateOfBirth,
       timeOfBirth: input.timeOfBirth,
       placeOfBirth: input.placeOfBirth,
+      runtimePlaceOfObservation: input.runtimePlaceOfObservation,
+      runtimeCustomPlace: input.runtimeCustomPlace,
+      runtimeUsesOverride: input.hasCurrentObservationRuntime,
     );
     if (inputSignature == _lastInputSignature) {
       return;
     }
     _lastInputSignature = inputSignature;
+    _syncRuntimeLocationInput(input);
+    _locationStatusMessage = input.hasCurrentObservationRuntime
+        ? 'Using ${input.runtimePlaceOfObservation} for live activity windows.'
+        : 'Using birth location for live activity windows.';
     _loadPanchaPakshi(input);
   }
 
@@ -92,10 +107,19 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
     if (dateOfBirth.isEmpty || timeOfBirth.isEmpty || placeOfBirth.isEmpty) {
       return null;
     }
+    final currentPlace = widget.birthInputState.placeForCurrentObservations;
+    if (currentPlace.isEmpty) {
+      return null;
+    }
     return _BirthInputSnapshot(
       dateOfBirth: dateOfBirth,
       timeOfBirth: timeOfBirth,
       placeOfBirth: placeOfBirth,
+      runtimePlaceOfObservation: currentPlace,
+      runtimeCustomPlace:
+          widget.birthInputState.customPlaceForCurrentObservations,
+      hasCurrentObservationRuntime:
+          widget.birthInputState.hasCurrentObservationLocation,
     );
   }
 
@@ -105,8 +129,8 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
       timeOfBirth: input.timeOfBirth,
       placeOfBirth: input.placeOfBirth,
       customPlace: widget.birthInputState.customPlace,
-      runtimePlaceOfObservation: _runtimePlaceQuery,
-      runtimeCustomPlace: _runtimeCustomPlace,
+      runtimePlaceOfObservation: input.runtimePlaceOfObservation,
+      runtimeCustomPlace: input.runtimeCustomPlace,
     );
   }
 
@@ -114,14 +138,10 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
     final trimmed = value.trim();
     if (trimmed.isEmpty) {
       setState(() {
-        _runtimePlaceQuery = null;
-        _runtimePlaceDisplayLabel = null;
-        _runtimeCustomPlace = null;
-        _locationStatusMessage =
-            'Using birth location for live activity windows.';
+        _runtimePlaceController.clear();
+        widget.birthInputState.clearCurrentObservationLocation();
       });
       _controller.clearPlaceSuggestions();
-      _load();
       return;
     }
     _controller.onRuntimePlaceQueryChanged(trimmed);
@@ -133,31 +153,25 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
       offset: _runtimePlaceController.text.length,
     );
     setState(() {
-      _runtimePlaceQuery = place.placeLabel;
-      _runtimePlaceDisplayLabel = place.placeLabel;
-      _runtimeCustomPlace = CustomPlacePayload(
+      _runtimePlaceController.text = place.placeLabel;
+    });
+    widget.birthInputState.setCurrentObservationLocation(
+      placeLabel: place.placeLabel,
+      customPlace: CustomPlacePayload(
         placeLabel: place.placeLabel,
         latitude: place.latitude,
         longitude: place.longitude,
         timezone: place.timezone,
         elevationM: place.elevationM,
-      );
-      _locationStatusMessage =
-          'Using ${place.placeLabel} for live activity windows.';
-    });
+      ),
+    );
     _controller.clearPlaceSuggestions();
     _load();
   }
 
   void _useBirthLocationRuntime() {
     _runtimePlaceController.clear();
-    setState(() {
-      _runtimePlaceQuery = null;
-      _runtimePlaceDisplayLabel = null;
-      _runtimeCustomPlace = null;
-      _locationStatusMessage =
-          'Using birth location for live activity windows.';
-    });
+    widget.birthInputState.clearCurrentObservationLocation();
     _controller.clearPlaceSuggestions();
     _load();
   }
@@ -166,6 +180,9 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
     required String dateOfBirth,
     required String timeOfBirth,
     required String placeOfBirth,
+    required String runtimePlaceOfObservation,
+    CustomPlacePayload? runtimeCustomPlace,
+    bool runtimeUsesOverride = false,
   }) {
     final customPlace = widget.birthInputState.customPlace;
     final customHash = customPlace == null
@@ -173,7 +190,19 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
         : '${customPlace.latitude.toStringAsFixed(6)}|'
             '${customPlace.longitude.toStringAsFixed(6)}|'
             '${customPlace.timezone}|${customPlace.elevationM.toStringAsFixed(1)}';
-    return '$dateOfBirth|$timeOfBirth|$placeOfBirth|$customHash';
+    final runtimeHash = runtimeCustomPlace == null
+        ? 'no-runtime'
+        : '${runtimeCustomPlace.latitude.toStringAsFixed(6)}|'
+            '${runtimeCustomPlace.longitude.toStringAsFixed(6)}|'
+            '${runtimeCustomPlace.timezone}|${runtimeCustomPlace.elevationM.toStringAsFixed(1)}';
+    return '$dateOfBirth|$timeOfBirth|$placeOfBirth|$customHash|'
+        '${runtimeUsesOverride ? 'override' : 'default'}|$runtimePlaceOfObservation|$runtimeHash';
+  }
+
+  void _syncRuntimeLocationInput(_BirthInputSnapshot input) {
+    if (_runtimePlaceController.text != input.runtimePlaceOfObservation) {
+      _runtimePlaceController.text = input.runtimePlaceOfObservation;
+    }
   }
 
   @override
@@ -181,6 +210,12 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
     return UniversalDockScaffold(
       appBar: buildTrikaalAppBar(
         context,
+        onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+          context: context,
+          birthInputState: widget.birthInputState,
+        ),
+        currentLocationLabel:
+            widget.birthInputState.placeForCurrentObservations,
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,
@@ -229,9 +264,11 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
                 );
               }
               final payload = result.panchaPakshi;
-              final usingCurrentReference = _runtimeCustomPlace != null &&
+              final currentRuntimeLocation =
+                  widget.birthInputState.placeForCurrentObservations;
+              final usingCurrentReference =
                   payload.runtime.referencePlaceLabel.trim().toLowerCase() ==
-                      _runtimeCustomPlace!.placeLabel.trim().toLowerCase();
+                      currentRuntimeLocation.trim().toLowerCase();
               return RefreshIndicator(
                 onRefresh: _controller.refresh,
                 child: ListView(
@@ -244,7 +281,8 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
                       placeController: _runtimePlaceController,
                       loadingSuggestions: _controller.loadingPlaceSuggestions,
                       suggestions: _controller.placeSuggestions,
-                      currentLocationLabel: _runtimePlaceDisplayLabel,
+                      currentLocationLabel:
+                          widget.birthInputState.currentObservationPlaceLabel,
                       statusMessage: _locationStatusMessage,
                       onPlaceQueryChanged: _onRuntimePlaceQueryChanged,
                       onPlaceSelected: _onRuntimePlaceSelected,
@@ -298,11 +336,17 @@ class _BirthInputSnapshot {
     required this.dateOfBirth,
     required this.timeOfBirth,
     required this.placeOfBirth,
+    required this.runtimePlaceOfObservation,
+    this.runtimeCustomPlace,
+    required this.hasCurrentObservationRuntime,
   });
 
   final String dateOfBirth;
   final String timeOfBirth;
   final String placeOfBirth;
+  final String runtimePlaceOfObservation;
+  final CustomPlacePayload? runtimeCustomPlace;
+  final bool hasCurrentObservationRuntime;
 }
 
 class _StateMessage extends StatelessWidget {

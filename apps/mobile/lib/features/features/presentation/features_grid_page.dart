@@ -6,8 +6,10 @@ import '../../../app/theme/trikaal_surface.dart';
 import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
+import '../../../app/widgets/current_location_picker.dart';
 import '../../compatibility/presentation/soulmate_page.dart';
 import '../../kaal_sarpa/presentation/kaal_sarpa_page.dart';
+import '../../hindu_calendar/presentation/hindu_calendar_page.dart';
 import '../../pancha_pakshi/presentation/pancha_pakshi_page.dart';
 import 'birth_chart_detail_page.dart';
 
@@ -61,6 +63,14 @@ class FeaturesGridPage extends StatelessWidget {
       icon: Icons.brightness_3_rounded,
       visualStyle: _FeatureVisualStyle.caution,
     ),
+    _FeatureTileData(
+      code: 'hindu_calendar',
+      title: 'Hindu Calendar',
+      description: 'Hindu lunar calendar module',
+      actionLabel: 'Open',
+      icon: Icons.calendar_today_rounded,
+      visualStyle: _FeatureVisualStyle.primary,
+    ),
   ];
 
   @override
@@ -68,6 +78,11 @@ class FeaturesGridPage extends StatelessWidget {
     return UniversalDockScaffold(
       appBar: buildTrikaalAppBar(
         context,
+        onCurrentLocationTap: () => showCurrentLocationPickerSheet(
+          context: context,
+          birthInputState: birthInputState,
+        ),
+        currentLocationLabel: birthInputState.placeForCurrentObservations,
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,
@@ -196,6 +211,17 @@ class FeaturesGridPage extends StatelessWidget {
           },
         ),
       );
+      return;
+    }
+
+    if (tile.code == 'hindu_calendar') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return HinduCalendarPage(birthInputState: birthInputState);
+          },
+        ),
+      );
     }
   }
 }
@@ -282,6 +308,8 @@ class _FeatureCard extends StatelessWidget {
         return '🔥';
       case 'kaal_sarpa_dosh':
         return '🐍';
+      case 'hindu_calendar':
+        return '📅';
       default:
         return '✨';
     }
@@ -299,6 +327,8 @@ class _FeatureCard extends StatelessWidget {
         return 'assets/feature_cards/pancha_pakshi_bg.png';
       case 'soulmate':
         return 'assets/feature_cards/soulmate_bg.png';
+      case 'hindu_calendar':
+        return 'assets/feature_cards/hindu_calendar_bg.png';
       default:
         return null;
     }
