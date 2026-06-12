@@ -155,6 +155,9 @@ class _HinduCalendarPageState extends State<HinduCalendarPage> {
         ),
         currentLocationLabel:
             widget.birthInputState.placeForCurrentObservations,
+        // Already on the calendar: keep the icon for bar consistency, but
+        // tapping it is a no-op (same pattern as premium on subscription).
+        onCalendarTap: () {},
         onPremiumTap: () => _handleDockTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,
