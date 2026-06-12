@@ -83,6 +83,7 @@ class FeaturesGridPage extends StatelessWidget {
           birthInputState: birthInputState,
         ),
         currentLocationLabel: birthInputState.placeForCurrentObservations,
+        onCalendarTap: () => openHinduCalendar(context, birthInputState),
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,

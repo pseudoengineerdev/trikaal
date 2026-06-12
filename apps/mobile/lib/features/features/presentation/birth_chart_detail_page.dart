@@ -119,7 +119,8 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
   @override
   void initState() {
     super.initState();
-    _terminologyModeState = TerminologyModeState();
+    _terminologyModeState = TerminologyModeState.shared;
+    _terminologyModeState.load();
     _astrologyTermsState = AstrologyTermsState();
     _chartApiClient = ChartApiClient();
     _astrologyTermsState.load();
@@ -131,7 +132,8 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
   @override
   void dispose() {
     _chartApiClient.dispose();
-    _terminologyModeState.dispose();
+    // _terminologyModeState is the shared app-wide instance — never
+    // disposed by a page.
     _astrologyTermsState.dispose();
     super.dispose();
   }
@@ -148,6 +150,8 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
           birthInputState: widget.birthInputState,
         ),
         currentLocationLabel: widget.birthInputState.placeForCurrentObservations,
+        onCalendarTap: () =>
+            openHinduCalendar(context, widget.birthInputState),
         onPremiumTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -159,11 +163,6 @@ class _BirthChartDetailPageState extends State<BirthChartDetailPage> {
             ),
           );
         },
-        terminologyModeListenable: _terminologyModeState,
-        terminologyMode: _terminologyModeState.mode,
-        onTerminologyChanged: _terminologyModeState.setMode,
-        leftCtaLabel: 'Chart',
-        rightCtaLabel: 'Guide',
       ),
       activeItem: AppDockItem.charts,
       onItemSelected: (AppDockItem item) => _handleDockItemTap(context, item),

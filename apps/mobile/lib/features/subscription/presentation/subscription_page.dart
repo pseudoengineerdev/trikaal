@@ -49,6 +49,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           birthInputState: widget.birthInputState,
         ),
         currentLocationLabel: widget.birthInputState.placeForCurrentObservations,
+        onCalendarTap: () => openHinduCalendar(context, widget.birthInputState),
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.premium,

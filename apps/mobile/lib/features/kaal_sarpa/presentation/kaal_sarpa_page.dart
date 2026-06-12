@@ -93,6 +93,7 @@ class _KaalSarpaPageState extends State<KaalSarpaPage> {
           birthInputState: widget.birthInputState,
         ),
         currentLocationLabel: widget.birthInputState.placeForCurrentObservations,
+        onCalendarTap: () => openHinduCalendar(context, widget.birthInputState),
         onPremiumTap: () => _handleDockTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,

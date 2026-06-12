@@ -109,6 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
             birthInputState: birthInputState,
           ),
           currentLocationLabel: birthInputState.placeForCurrentObservations,
+          onCalendarTap: () => openHinduCalendar(context, birthInputState),
           onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
         ),
         body: const AstroPageBackground(
@@ -139,6 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
           birthInputState: birthInputState,
         ),
         currentLocationLabel: birthInputState.placeForCurrentObservations,
+        onCalendarTap: () => openHinduCalendar(context, birthInputState),
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       body: AstroPageBackground(

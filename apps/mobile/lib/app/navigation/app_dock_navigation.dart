@@ -3,9 +3,34 @@ import 'package:flutter/material.dart';
 import '../state/birth_input_state.dart';
 import '../widgets/universal_dock_scaffold.dart';
 import '../../features/features/presentation/features_grid_page.dart';
+import '../../features/hindu_calendar/presentation/hindu_calendar_page.dart';
 import '../../features/learning/presentation/learning_modules_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/subscription/presentation/subscription_page.dart';
+
+/// Opens the Hindu calendar feature page; wired to the calendar icon in the
+/// primary app bar.
+void openHinduCalendar(BuildContext context, BirthInputState birthInputState) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return HinduCalendarPage(birthInputState: birthInputState);
+      },
+    ),
+  );
+}
+
+/// Opens the subscription page; wired to the premium icon in the primary
+/// app bar on screens without their own dock handler.
+void openSubscription(BuildContext context, BirthInputState birthInputState) {
+  Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (BuildContext context) {
+        return SubscriptionPage(birthInputState: birthInputState);
+      },
+    ),
+  );
+}
 
 enum DockHomeBehavior {
   stay,

@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
-import '../../features/feed/presentation/feed_page.dart';
-import '../../features/shared/widgets/terminology_toggle.dart';
-import '../state/terminology_mode_state.dart';
-
-final ValueNotifier<TerminologyMode> _headerTerminologyMode =
-    ValueNotifier<TerminologyMode>(TerminologyMode.vedic);
-
+/// The primary Trikaal app bar shared by every screen: notifications and
+/// current-location on the left, the Trikaal logo in the center, and
+/// calendar + premium shortcuts on the right.
+///
+/// Screens that need an extra header row below it (the home screen's
+/// Today/Feed tabs) pass it via [bottom]; every other screen renders only
+/// this primary bar.
 PreferredSizeWidget buildTrikaalAppBar(
   BuildContext context, {
-  VoidCallback? onPremiumTap,
-  List<Widget>? actions,
-  TerminologyMode? terminologyMode,
-  ValueListenable<TerminologyMode>? terminologyModeListenable,
-  ValueChanged<TerminologyMode>? onTerminologyChanged,
+  VoidCallback? onNotificationsTap,
   VoidCallback? onCurrentLocationTap,
   String? currentLocationLabel,
-  VoidCallback? onLeftCtaTap,
-  VoidCallback? onRightCtaTap,
-  String leftCtaLabel = 'Today',
-  String rightCtaLabel = 'Feed',
-  bool showControlsRow = true,
+  VoidCallback? onCalendarTap,
+  VoidCallback? onPremiumTap,
+  List<Widget>? actions,
+  PreferredSizeWidget? bottom,
 }) {
   final mergedActions = <Widget>[
+    if (onCalendarTap != null)
+      IconButton(
+        tooltip: 'Hindu calendar',
+        icon: const Icon(Icons.calendar_month_rounded),
+        onPressed: onCalendarTap,
+      ),
     if (onPremiumTap != null)
       IconButton(
         tooltip: 'Premium',
@@ -33,156 +33,44 @@ PreferredSizeWidget buildTrikaalAppBar(
     ...?actions,
   ];
 
-  if (terminologyModeListenable == null &&
-      terminologyMode != null &&
-      _headerTerminologyMode.value != terminologyMode) {
-    _headerTerminologyMode.value = terminologyMode;
-  }
-
-  final ValueListenable<TerminologyMode> activeTerminologyListenable =
-      terminologyModeListenable ?? _headerTerminologyMode;
-
-  void handleLeftCtaTap() {
-    if (onLeftCtaTap != null) {
-      onLeftCtaTap();
+  void handleNotificationsTap() {
+    if (onNotificationsTap != null) {
+      onNotificationsTap();
       return;
     }
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        const SnackBar(content: Text('Today highlights are coming soon.')),
-      );
-  }
-
-  void handleRightCtaTap() {
-    if (onRightCtaTap != null) {
-      onRightCtaTap();
-      return;
-    }
-    // Only the default 'Feed' label opens the feed; pages that override
-    // just the label ('Insights', 'Guide', 'Dasha') keep the legacy
-    // placeholder behavior until they wire their own handler.
-    if (rightCtaLabel == 'Feed') {
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (BuildContext context) => const FeedPage(),
+        const SnackBar(
+          content: Text(
+            'Notifications and home-screen widget controls are coming soon.',
+          ),
         ),
       );
-      return;
-    }
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('More quick actions are coming soon.')),
-      );
   }
 
-  Widget buildCtaButton({
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size(56, 28),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        visualDensity: VisualDensity.compact,
-        textStyle: Theme.of(
-          context,
-        )
-            .textTheme
-            .labelLarge
-            ?.copyWith(fontSize: 12, fontWeight: FontWeight.w700),
+  final leadingIcons = <Widget>[
+    IconButton(
+      tooltip: 'Notifications',
+      icon: const Icon(Icons.notifications_none_rounded),
+      onPressed: handleNotificationsTap,
+    ),
+    if (onCurrentLocationTap != null)
+      IconButton(
+        tooltip: currentLocationLabel == null
+            ? 'Set current location'
+            : 'Current location: $currentLocationLabel',
+        icon: const Icon(Icons.location_on_rounded),
+        onPressed: onCurrentLocationTap,
       ),
-      onPressed: onPressed,
-      child: Text(label),
-    );
-  }
-
-  Widget buildToggle({
-    required TerminologyMode mode,
-    required ValueChanged<TerminologyMode> onChanged,
-  }) {
-    return TerminologyToggle(
-      mode: mode,
-      onChanged: onChanged,
-      alignment: Alignment.center,
-    );
-  }
-
-  final shouldReplaceLeftCtaWithLocation = onCurrentLocationTap != null &&
-      onLeftCtaTap == null &&
-      leftCtaLabel == 'Today';
-
-  final controlsRow = showControlsRow
-      ? PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 2, 10, 4),
-            child: ValueListenableBuilder<TerminologyMode>(
-              valueListenable: activeTerminologyListenable,
-              builder:
-                  (BuildContext context, TerminologyMode mode, Widget? child) {
-                final leftSlot = shouldReplaceLeftCtaWithLocation
-                    ? IconButton(
-                        tooltip: currentLocationLabel == null
-                            ? 'Set current location'
-                            : 'Current location: $currentLocationLabel',
-                        icon: const Icon(Icons.location_on_rounded),
-                        onPressed: onCurrentLocationTap,
-                      )
-                    : buildCtaButton(
-                        label: leftCtaLabel,
-                        onPressed: handleLeftCtaTap,
-                      );
-
-                return Row(
-                  children: <Widget>[
-                    leftSlot,
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: buildToggle(
-                          mode: mode,
-                          onChanged: (TerminologyMode selectedMode) {
-                            if (terminologyModeListenable == null) {
-                              _headerTerminologyMode.value = selectedMode;
-                            }
-                            onTerminologyChanged?.call(selectedMode);
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    buildCtaButton(
-                      label: rightCtaLabel,
-                      onPressed: handleRightCtaTap,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        )
-      : null;
+  ];
 
   return AppBar(
     automaticallyImplyLeading: false,
-    leading: IconButton(
-      tooltip: 'Notifications',
-      icon: const Icon(Icons.notifications_none_rounded),
-      onPressed: () {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Notifications and home-screen widget controls are coming soon.',
-              ),
-            ),
-          );
-      },
+    leadingWidth: leadingIcons.length * 48.0,
+    leading: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: leadingIcons,
     ),
     centerTitle: true,
     title: Text(
@@ -194,6 +82,6 @@ PreferredSizeWidget buildTrikaalAppBar(
           ),
     ),
     actions: mergedActions.isEmpty ? null : mergedActions,
-    bottom: controlsRow,
+    bottom: bottom,
   );
 }

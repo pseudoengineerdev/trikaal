@@ -35,8 +35,8 @@ class TerminologyToggle extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               _ModeChip(
-                label: 'Vedic',
-                icon: Icons.auto_awesome_rounded,
+                label: 'Sanskrit',
+                glyph: 'ॐ',
                 selected: mode == TerminologyMode.vedic,
                 onTap: () => onChanged(TerminologyMode.vedic),
               ),
@@ -58,13 +58,17 @@ class TerminologyToggle extends StatelessWidget {
 class _ModeChip extends StatelessWidget {
   const _ModeChip({
     required this.label,
-    required this.icon,
     required this.selected,
     required this.onTap,
-  });
+    this.icon,
+    this.glyph,
+  }) : assert(icon != null || glyph != null, 'Provide an icon or a glyph');
 
   final String label;
-  final IconData icon;
+  final IconData? icon;
+
+  /// Text-rendered symbol for marks with no Material icon (the Om sign).
+  final String? glyph;
   final bool selected;
   final VoidCallback onTap;
 
@@ -110,13 +114,26 @@ class _ModeChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(
-              icon,
-              size: 12,
-              color: selected
-                  ? Colors.white
-                  : colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
-            ),
+            if (icon != null)
+              Icon(
+                icon,
+                size: 12,
+                color: selected
+                    ? Colors.white
+                    : colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
+              )
+            else
+              Text(
+                glyph!,
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1,
+                  fontWeight: FontWeight.w700,
+                  color: selected
+                      ? Colors.white
+                      : colorScheme.onSurfaceVariant.withValues(alpha: 0.9),
+                ),
+              ),
             const SizedBox(width: 5),
             Text(
               label,

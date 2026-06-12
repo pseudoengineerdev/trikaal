@@ -143,6 +143,7 @@ class _SoulmatePageState extends State<SoulmatePage> {
           birthInputState: widget.birthInputState,
         ),
         currentLocationLabel: widget.birthInputState.placeForCurrentObservations,
+        onCalendarTap: () => openHinduCalendar(context, widget.birthInputState),
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,

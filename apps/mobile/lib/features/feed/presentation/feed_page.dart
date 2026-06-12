@@ -7,23 +7,67 @@ import 'feed_post_detail_page.dart';
 import 'state/feed_controller.dart';
 import 'widgets/feed_post_card.dart';
 
-class FeedPage extends StatefulWidget {
+/// Standalone feed route (deep links, cold starts). The home screen embeds
+/// [FeedView] directly under its Feed tab instead of pushing this page.
+class FeedPage extends StatelessWidget {
   const FeedPage({this.controller, super.key});
 
-  /// Injectable for tests; the page creates and owns one by default.
+  /// Injectable for tests; the view creates and owns one by default.
   final FeedController? controller;
 
   @override
-  State<FeedPage> createState() => _FeedPageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          'Feed',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ),
+      body: AstroPageBackground(
+        child: SafeArea(
+          child: FeedView(controller: controller),
+        ),
+      ),
+    );
+  }
 }
 
-class _FeedPageState extends State<FeedPage> {
+/// The scaffold-less feed list: pull-to-refresh, infinite scroll, like/save
+/// actions. Hosted by [FeedPage] and by the home screen's Feed tab.
+class FeedView extends StatefulWidget {
+  const FeedView({
+    this.controller,
+    this.padding = const EdgeInsets.fromLTRB(16, 8, 16, 24),
+    super.key,
+  });
+
+  /// Injectable for tests and for hosts that keep feed state alive across
+  /// rebuilds; the view creates and owns one by default.
+  final FeedController? controller;
+
+  /// List padding; hosts with overlapping chrome (the home dock) raise the
+  /// bottom inset.
+  final EdgeInsetsGeometry padding;
+
+  @override
+  State<FeedView> createState() => _FeedViewState();
+}
+
+class _FeedViewState extends State<FeedView>
+    with AutomaticKeepAliveClientMixin<FeedView> {
   static const double _loadMoreThreshold = 600;
 
   late final FeedController _controller;
   final ScrollController _scrollController = ScrollController();
 
   bool get _ownsController => widget.controller == null;
+
+  // Keeps the feed (scroll offset, loaded pages) alive while the home
+  // PageView shows the Today tab.
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -82,69 +126,57 @@ class _FeedPageState extends State<FeedPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'Feed',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-      ),
-      body: AstroPageBackground(
-        child: SafeArea(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (BuildContext context, Widget? child) {
-              final posts = _controller.posts;
+    super.build(context);
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (BuildContext context, Widget? child) {
+        final posts = _controller.posts;
 
-              if (posts.isEmpty) {
-                if (_controller.initialLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (_controller.error != null) {
-                  return _FeedErrorState(
-                    message: _controller.error!,
-                    onRetry: _controller.loadInitial,
-                  );
-                }
+        if (posts.isEmpty) {
+          if (_controller.initialLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (_controller.error != null) {
+            return _FeedErrorState(
+              message: _controller.error!,
+              onRetry: _controller.loadInitial,
+            );
+          }
+        }
+
+        return RefreshIndicator(
+          onRefresh: _controller.loadInitial,
+          child: ListView.builder(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: widget.padding,
+            itemCount: posts.length + 1,
+            itemBuilder: (BuildContext context, int index) {
+              if (index >= posts.length) {
+                return _FeedFooter(
+                  error: _controller.error,
+                  onRetry: _controller.loadMore,
+                );
               }
-
-              return RefreshIndicator(
-                onRefresh: _controller.loadInitial,
-                child: ListView.builder(
-                  controller: _scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  itemCount: posts.length + 1,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index >= posts.length) {
-                      return _FeedFooter(
-                        error: _controller.error,
-                        onRetry: _controller.loadMore,
-                      );
-                    }
-                    final post = posts[index];
-                    final interactions = _controller.interactions;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: FeedPostCard(
-                        post: post,
-                        isLiked: interactions.isLiked(post.id),
-                        likeCount: interactions.likeCountFor(post),
-                        isSaved: interactions.isSaved(post.id),
-                        onToggleLike: () => interactions.toggleLike(post),
-                        onToggleSave: () => _toggleSave(post),
-                        onShare: () => shareFeedPostWithFeedback(context, post),
-                        onOpen: () => _openPost(post),
-                      ),
-                    );
-                  },
+              final post = posts[index];
+              final interactions = _controller.interactions;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: FeedPostCard(
+                  post: post,
+                  isLiked: interactions.isLiked(post.id),
+                  likeCount: interactions.likeCountFor(post),
+                  isSaved: interactions.isSaved(post.id),
+                  onToggleLike: () => interactions.toggleLike(post),
+                  onToggleSave: () => _toggleSave(post),
+                  onShare: () => shareFeedPostWithFeedback(context, post),
+                  onOpen: () => _openPost(post),
                 ),
               );
             },
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

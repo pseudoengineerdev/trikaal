@@ -216,6 +216,7 @@ class _PanchaPakshiPageState extends State<PanchaPakshiPage> {
         ),
         currentLocationLabel:
             widget.birthInputState.placeForCurrentObservations,
+        onCalendarTap: () => openHinduCalendar(context, widget.birthInputState),
         onPremiumTap: () => _handleDockItemTap(context, AppDockItem.premium),
       ),
       activeItem: AppDockItem.charts,
