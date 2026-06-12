@@ -8,6 +8,12 @@ import '../../../app/widgets/astro_page_background.dart';
 import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../charts/data/models/compute_report_models.dart';
+import '../../feed/data/models/feed_post.dart';
+import '../../feed/presentation/feed_page.dart';
+import '../../feed/presentation/feed_post_detail_page.dart';
+import '../../feed/presentation/state/feed_controller.dart';
+import '../../feed/presentation/widgets/feed_post_card.dart';
+import '../../feed/share/feed_sharing.dart';
 import '../../home/presentation/astrology/rashi_insights.dart';
 import '../../shared/astrology/sign_trio_insights.dart';
 
@@ -50,13 +56,44 @@ const Map<String, String> _grahaGlyph = <String, String>{
   'ketu': '☋',
 };
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({
     required this.birthInputState,
+    this.feedController,
     super.key,
   });
 
   final BirthInputState birthInputState;
+
+  /// Injectable for tests; the page creates and owns one by default.
+  final FeedController? feedController;
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  int _activeTabIndex = 0;
+  late final FeedController _feedController;
+
+  BirthInputState get birthInputState => widget.birthInputState;
+
+  bool get _ownsFeedController => widget.feedController == null;
+
+  @override
+  void initState() {
+    super.initState();
+    _feedController = widget.feedController ?? FeedController();
+    _feedController.interactions.load();
+  }
+
+  @override
+  void dispose() {
+    if (_ownsFeedController) {
+      _feedController.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,10 +128,6 @@ class ProfilePage extends StatelessWidget {
     final sun = trio.sun;
     final moon = trio.moon;
     final rising = trio.rising;
-    final chartRows = _buildChartRows(report.snapshot.grahaTable);
-
-    final tableBorderColor =
-        TrikaalSurface.border(Theme.of(context).colorScheme).color;
 
     return UniversalDockScaffold(
       activeItem: AppDockItem.profile,
@@ -168,190 +201,316 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
               _ProfileTabBar(
-                activeIndex: 0,
+                activeIndex: _activeTabIndex,
                 tabs: const <String>['Chart', 'Saved', 'Settings'],
+                onTabSelected: (int index) {
+                  setState(() {
+                    _activeTabIndex = index;
+                  });
+                },
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: IntrinsicHeight(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: DecoratedBox(
-                          decoration: TrikaalSurface.decoration(
-                            colorScheme: Theme.of(context).colorScheme,
-                            radius: 18,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              SizedBox(
-                                width: 28,
-                                child: Align(
-                                  alignment: Alignment.topLeft,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 10, top: 14),
-                                    child: Text(
-                                      'S\nI\nG\nN\nS',
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                        fontSize: 11.2,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                        letterSpacing: 1.3,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.topCenter,
-                                  child: Table(
-                                    columnWidths: const <int, TableColumnWidth>{
-                                      0: FlexColumnWidth(1.05),
-                                      1: FlexColumnWidth(1.34),
-                                      2: FlexColumnWidth(0.34),
-                                    },
-                                    border: TableBorder(
-                                      verticalInside: BorderSide(
-                                          color: tableBorderColor, width: 0.8),
-                                    ),
-                                    defaultVerticalAlignment:
-                                        TableCellVerticalAlignment.middle,
-                                    children: chartRows.map((row) {
-                                      final signBottomBorder =
-                                          row.isLastRow || !row.isRashiGroupEnd
-                                              ? BorderSide.none
-                                              : BorderSide(
-                                                  color: tableBorderColor,
-                                                  width: 0.8,
-                                                );
-                                      final houseBottomBorder =
-                                          row.isLastRow || !row.isHouseGroupEnd
-                                              ? BorderSide.none
-                                              : BorderSide(
-                                                  color: tableBorderColor,
-                                                  width: 0.8,
-                                                );
-                                      return TableRow(
-                                        children: <Widget>[
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                bottom: signBottomBorder,
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 10,
-                                                vertical: 6,
-                                              ),
-                                              child: Text(
-                                                row.showRashi
-                                                    ? _rashiName(row.rashiCode)
-                                                    : '',
-                                                style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface,
-                                                  fontSize: 13.0,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            color: const Color(0xFF10002B),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 9,
-                                                vertical: 6,
-                                              ),
-                                              child: Text(
-                                                '${_grahaGlyph[row.grahaKey] ?? '•'} ${_grahaLabel[row.grahaKey] ?? row.grahaKey.toUpperCase()}',
-                                                style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface,
-                                                  fontSize: 11.9,
-                                                  fontWeight: FontWeight.w500,
-                                                  letterSpacing: 0.18,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                bottom: houseBottomBorder,
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 6,
-                                                vertical: 6,
-                                              ),
-                                              child: Text(
-                                                row.showHouse
-                                                    ? '${row.house}'
-                                                    : '',
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface,
-                                                  fontSize: 13.3,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    }).toList(growable: false),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 28,
-                                child: Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        right: 10, bottom: 14),
-                                    child: Text(
-                                      'H\nO\nU\nS\nE\nS',
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(
-                                        fontSize: 11.2,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                        letterSpacing: 1.3,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+              Expanded(child: _buildActiveTab(context, report)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveTab(BuildContext context, ComputeReportResponse report) {
+    switch (_activeTabIndex) {
+      case 1:
+        return _buildSavedTab(context);
+      case 2:
+        return _buildSettingsTab(context);
+      default:
+        return _buildChartTab(context, report);
+    }
+  }
+
+  Widget _buildSavedTab(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _feedController,
+      builder: (BuildContext context, Widget? child) {
+        final interactions = _feedController.interactions;
+        if (!interactions.loaded) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final savedPosts = interactions.savedPosts;
+        if (savedPosts.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.bookmark_border_rounded,
+                    size: 40,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Posts you save from the Feed will appear here.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) => const FeedPage(),
+                        ),
+                      );
+                    },
+                    child: const Text('Open Feed'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 140),
+          itemCount: savedPosts.length,
+          itemBuilder: (BuildContext context, int index) {
+            final post = savedPosts[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: FeedPostCard(
+                post: post,
+                isLiked: interactions.isLiked(post.id),
+                likeCount: interactions.likeCountFor(post),
+                isSaved: true,
+                onToggleLike: () => interactions.toggleLike(post),
+                onToggleSave: () => _unsavePost(post),
+                onShare: () => shareFeedPostWithFeedback(context, post),
+                onOpen: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return FeedPostDetailPage(
+                          postId: post.id,
+                          controller: _feedController,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _unsavePost(FeedPost post) {
+    _feedController.interactions.toggleSave(post);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(content: Text('Removed from your saved posts.')),
+      );
+  }
+
+  Widget _buildSettingsTab(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.settings_rounded,
+              size: 40,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Settings are coming soon.',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChartTab(BuildContext context, ComputeReportResponse report) {
+    final chartRows = _buildChartRows(report.snapshot.grahaTable);
+    final tableBorderColor =
+        TrikaalSurface.border(Theme.of(context).colorScheme).color;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: IntrinsicHeight(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: DecoratedBox(
+              decoration: TrikaalSurface.decoration(
+                colorScheme: Theme.of(context).colorScheme,
+                radius: 18,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  SizedBox(
+                    width: 28,
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10, top: 14),
+                        child: Text(
+                          'S\nI\nG\nN\nS',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 11.2,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            letterSpacing: 1.3,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Table(
+                        columnWidths: const <int, TableColumnWidth>{
+                          0: FlexColumnWidth(1.05),
+                          1: FlexColumnWidth(1.34),
+                          2: FlexColumnWidth(0.34),
+                        },
+                        border: TableBorder(
+                          verticalInside: BorderSide(
+                              color: tableBorderColor, width: 0.8),
+                        ),
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.middle,
+                        children: chartRows.map((row) {
+                          final signBottomBorder =
+                              row.isLastRow || !row.isRashiGroupEnd
+                                  ? BorderSide.none
+                                  : BorderSide(
+                                      color: tableBorderColor,
+                                      width: 0.8,
+                                    );
+                          final houseBottomBorder =
+                              row.isLastRow || !row.isHouseGroupEnd
+                                  ? BorderSide.none
+                                  : BorderSide(
+                                      color: tableBorderColor,
+                                      width: 0.8,
+                                    );
+                          return TableRow(
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: signBottomBorder,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  child: Text(
+                                    row.showRashi
+                                        ? _rashiName(row.rashiCode)
+                                        : '',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      fontSize: 13.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                color: const Color(0xFF10002B),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 9,
+                                    vertical: 6,
+                                  ),
+                                  child: Text(
+                                    '${_grahaGlyph[row.grahaKey] ?? '•'} ${_grahaLabel[row.grahaKey] ?? row.grahaKey.toUpperCase()}',
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      fontSize: 11.9,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 0.18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: houseBottomBorder,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 6,
+                                  ),
+                                  child: Text(
+                                    row.showHouse ? '${row.house}' : '',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      fontSize: 13.3,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(growable: false),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 28,
+                    child: Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10, bottom: 14),
+                        child: Text(
+                          'H\nO\nU\nS\nE\nS',
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 11.2,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                            letterSpacing: 1.3,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -440,10 +599,12 @@ class _ProfileTabBar extends StatelessWidget {
   const _ProfileTabBar({
     required this.tabs,
     required this.activeIndex,
+    required this.onTabSelected,
   });
 
   final List<String> tabs;
   final int activeIndex;
+  final ValueChanged<int> onTabSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -457,34 +618,43 @@ class _ProfileTabBar extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
-        children: List<Widget>.generate(tabs.length, (index) {
-          final isActive = index == activeIndex;
-          return Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(
-                    tabs[index],
-                    style: TextStyle(
-                      color: isActive ? activeColor : inactiveColor,
-                      fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                      fontSize: 15,
+      // Transparent Material so tab ripples paint above the opaque
+      // AstroPageBackground instead of on the Scaffold's material below it.
+      child: Material(
+        type: MaterialType.transparency,
+        child: Row(
+          children: List<Widget>.generate(tabs.length, (index) {
+            final isActive = index == activeIndex;
+            return Expanded(
+              child: InkWell(
+                onTap: () => onTabSelected(index),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Text(
+                        tabs[index],
+                        style: TextStyle(
+                          color: isActive ? activeColor : inactiveColor,
+                          fontWeight:
+                              isActive ? FontWeight.w600 : FontWeight.w500,
+                          fontSize: 15,
+                        ),
+                      ),
                     ),
-                  ),
+                    Container(
+                      height: 1.8,
+                      color: isActive
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Colors.transparent,
+                    ),
+                  ],
                 ),
-                Container(
-                  height: 1.8,
-                  color: isActive
-                      ? Theme.of(context).colorScheme.onSurface
-                      : Colors.transparent,
-                ),
-              ],
-            ),
-          );
-        }),
+              ),
+            );
+          }),
+        ),
       ),
     );
   }

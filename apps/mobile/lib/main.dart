@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app/home_shell_page.dart';
+import 'app/navigation/app_routes.dart';
 import 'app/theme/trikaal_theme.dart';
 
 void main() {
@@ -18,7 +18,10 @@ class TrikaalApp extends StatelessWidget {
       themeMode: ThemeMode.dark,
       theme: TrikaalTheme.dark(),
       darkTheme: TrikaalTheme.dark(),
-      home: const HomeShellPage(),
+      // home is intentionally absent: deep-linked cold starts need
+      // onGenerateInitialRoutes, which is mutually exclusive with home.
+      onGenerateRoute: onGenerateAppRoute,
+      onGenerateInitialRoutes: generateAppInitialRoutes,
     );
   }
 }

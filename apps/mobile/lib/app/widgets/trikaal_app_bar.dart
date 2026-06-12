@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../features/feed/presentation/feed_page.dart';
 import '../../features/shared/widgets/terminology_toggle.dart';
 import '../state/terminology_mode_state.dart';
 
@@ -19,7 +20,7 @@ PreferredSizeWidget buildTrikaalAppBar(
   VoidCallback? onLeftCtaTap,
   VoidCallback? onRightCtaTap,
   String leftCtaLabel = 'Today',
-  String rightCtaLabel = 'Actions',
+  String rightCtaLabel = 'Feed',
   bool showControlsRow = true,
 }) {
   final mergedActions = <Widget>[
@@ -56,6 +57,17 @@ PreferredSizeWidget buildTrikaalAppBar(
   void handleRightCtaTap() {
     if (onRightCtaTap != null) {
       onRightCtaTap();
+      return;
+    }
+    // Only the default 'Feed' label opens the feed; pages that override
+    // just the label ('Insights', 'Guide', 'Dasha') keep the legacy
+    // placeholder behavior until they wire their own handler.
+    if (rightCtaLabel == 'Feed') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) => const FeedPage(),
+        ),
+      );
       return;
     }
     ScaffoldMessenger.of(context)
