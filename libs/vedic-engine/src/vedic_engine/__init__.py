@@ -6,6 +6,7 @@ from vedic_engine.dasha import compute_vimshottari_dasha
 from vedic_engine.domain import BirthEvent, CalculationProfile, ChartSnapshot
 from vedic_engine.pancha_pakshi import compute_pancha_pakshi_live
 from vedic_engine.hindu_calendar import compute_hindu_calendar_month
+from vedic_engine.panchang import compute_daily_panchang
 
 __all__ = [
     "BirthEvent",
@@ -15,6 +16,7 @@ __all__ = [
     "compute_kundali_compatibility",
     "compute_kaal_sarpa_for_snapshot",
     "compute_hindu_calendar_month",
+    "compute_daily_panchang",
     "compute_vimshottari_dasha",
     "compute_pancha_pakshi_live",
 ]

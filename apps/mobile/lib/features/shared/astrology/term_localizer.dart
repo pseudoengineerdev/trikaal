@@ -16,6 +16,17 @@ const Map<String, String> _vedicRashi = <String, String>{
   'Maka': 'Makara',
   'Kumb': 'Kumbha',
   'Meen': 'Meena',
+  // Full sidereal names as emitted by the panchang and calendar payloads.
+  'Mesha': 'Mesha',
+  'Vrishabha': 'Vrishabha',
+  'Mithuna': 'Mithuna',
+  'Karka': 'Karka',
+  'Simha': 'Simha',
+  'Kanya': 'Kanya',
+  'Vrischika': 'Vrischika',
+  'Makara': 'Makara',
+  'Kumbha': 'Kumbha',
+  'Meena': 'Meena',
 };
 
 const Map<String, String> _englishRashi = <String, String>{
@@ -33,6 +44,17 @@ const Map<String, String> _englishRashi = <String, String>{
   'Maka': 'Capricorn',
   'Kumb': 'Aquarius',
   'Meen': 'Pisces',
+  // Full sidereal names as emitted by the panchang and calendar payloads.
+  'Mesha': 'Aries',
+  'Vrishabha': 'Taurus',
+  'Mithuna': 'Gemini',
+  'Karka': 'Cancer',
+  'Simha': 'Leo',
+  'Kanya': 'Virgo',
+  'Vrischika': 'Scorpio',
+  'Makara': 'Capricorn',
+  'Kumbha': 'Aquarius',
+  'Meena': 'Pisces',
 };
 
 const Map<String, String> _vedicNakshatra = <String, String>{

@@ -9,6 +9,7 @@ import 'models/compute_kaal_sarpa_models.dart';
 import 'models/compute_report_models.dart';
 import 'models/place_search_models.dart';
 import '../../pancha_pakshi/data/models/pancha_pakshi_models.dart';
+import '../../panchang/data/models/panchang_models.dart';
 import '../../subscription/data/models/subscription_models.dart';
 
 class ChartApiException implements Exception {
@@ -135,6 +136,22 @@ class ChartApiClient {
       ),
     );
     return ComputeKaalSarpaResponse.fromJson(body);
+  }
+
+  Future<ComputePanchangResponse> computePanchang(
+    ComputePanchangRequest request,
+  ) async {
+    final uri = Uri.parse('$_baseUrl/v1/panchang/compute');
+    final body = await postJson(
+      client: _httpClient,
+      uri: uri,
+      payload: request.toJson(),
+      exceptionBuilder: (message, statusCode) => ChartApiException(
+        message,
+        statusCode: statusCode,
+      ),
+    );
+    return ComputePanchangResponse.fromJson(body);
   }
 
   Future<ComputeHinduCalendarResponse> computeHinduCalendar(

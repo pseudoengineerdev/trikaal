@@ -11,6 +11,7 @@ import '../../compatibility/presentation/soulmate_page.dart';
 import '../../kaal_sarpa/presentation/kaal_sarpa_page.dart';
 import '../../hindu_calendar/presentation/hindu_calendar_page.dart';
 import '../../pancha_pakshi/presentation/pancha_pakshi_page.dart';
+import '../../panchang/presentation/panchang_page.dart';
 import 'birth_chart_detail_page.dart';
 
 class FeaturesGridPage extends StatelessWidget {
@@ -28,6 +29,14 @@ class FeaturesGridPage extends StatelessWidget {
       description: 'Birth chart module',
       actionLabel: 'Open',
       icon: Icons.donut_large_rounded,
+      visualStyle: _FeatureVisualStyle.primary,
+    ),
+    _FeatureTileData(
+      code: 'dainik_panchang',
+      title: 'Dainik Panchang',
+      description: 'Daily panchang module',
+      actionLabel: 'Open',
+      icon: Icons.brightness_5_rounded,
       visualStyle: _FeatureVisualStyle.primary,
     ),
     _FeatureTileData(
@@ -133,6 +142,17 @@ class FeaturesGridPage extends StatelessWidget {
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
             return BirthChartDetailPage(birthInputState: birthInputState);
+          },
+        ),
+      );
+      return;
+    }
+
+    if (tile.code == 'dainik_panchang') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return PanchangPage(birthInputState: birthInputState);
           },
         ),
       );
@@ -301,6 +321,8 @@ class _FeatureCard extends StatelessWidget {
     switch (code) {
       case 'birth_chart':
         return '🪐';
+      case 'dainik_panchang':
+        return '🪔';
       case 'soulmate':
         return '💞';
       case 'pancha_pakshi':

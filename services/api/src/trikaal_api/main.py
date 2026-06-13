@@ -37,6 +37,11 @@ from trikaal_api.pancha_pakshi import (
     PanchaPakshiComputeResponse,
     compute_pancha_pakshi,
 )
+from trikaal_api.panchang import (
+    PanchangComputeRequest,
+    PanchangComputeResponse,
+    compute_panchang,
+)
 from trikaal_api.parity import (
     ParityResult,
     ParitySuiteResult,
@@ -159,6 +164,18 @@ def kaal_sarpa_compute(request: KaalSarpaComputeRequest) -> KaalSarpaComputeResp
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ZoneInfoNotFoundError as exc:
         raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+
+
+@app.post("/v1/panchang/compute", response_model=PanchangComputeResponse)
+def panchang_compute(request: PanchangComputeRequest) -> PanchangComputeResponse:
+    try:
+        return compute_panchang(request)
+    except PlaceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/v1/hindu-calendar/compute", response_model=HinduCalendarComputeResponse)
