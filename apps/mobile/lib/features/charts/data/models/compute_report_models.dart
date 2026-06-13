@@ -10,6 +10,7 @@ class ComputeReportResponse {
     required this.dasha,
     required this.interpretations,
     required this.dailyTransit,
+    this.rawJson,
   });
 
   final ReportProfile profile;
@@ -19,6 +20,12 @@ class ComputeReportResponse {
   final DashaSummary dasha;
   final ReportInterpretations interpretations;
   final ReportDailyTransitBrief dailyTransit;
+
+  /// The decoded response map this report was parsed from, retained verbatim so
+  /// the session can be persisted as raw JSON without hand-writing `toJson` for
+  /// the whole model tree. Null when the report was constructed directly rather
+  /// than decoded from a response.
+  final Map<String, dynamic>? rawJson;
 
   factory ComputeReportResponse.fromJson(Map<String, dynamic> json) {
     return ComputeReportResponse(
@@ -35,6 +42,7 @@ class ComputeReportResponse {
       dailyTransit: ReportDailyTransitBrief.fromJson(
         _readMap(json, 'daily_transit'),
       ),
+      rawJson: Map<String, dynamic>.from(json),
     );
   }
 }

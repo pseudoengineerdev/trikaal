@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
+import '../data/birth_session_repository.dart';
 import '../data/saved_profiles_repository.dart';
+import '../models/birth_session.dart';
 import '../models/compatibility_partner_profile.dart';
 import '../models/custom_place_payload.dart';
 import '../models/person_gender.dart';
@@ -16,13 +20,16 @@ class BirthInputState extends ChangeNotifier {
     String timeOfBirth = '',
     String placeOfBirth = '',
     SavedProfilesRepository? profilesRepository,
+    BirthSessionRepository? sessionRepository,
   })  : _firstName = firstName,
         _gender = gender,
         _dateOfBirth = dateOfBirth,
         _timeOfBirth = timeOfBirth,
         _placeOfBirth = placeOfBirth,
         _profilesRepository =
-            profilesRepository ?? SharedPreferencesSavedProfilesRepository();
+            profilesRepository ?? SharedPreferencesSavedProfilesRepository(),
+        _sessionRepository =
+            sessionRepository ?? SharedPreferencesBirthSessionRepository();
 
   String _firstName;
   PersonGender _gender;
@@ -37,6 +44,8 @@ class BirthInputState extends ChangeNotifier {
   ComputeReportResponse? _computedReport;
   bool _onboardingCompleted = false;
   final SavedProfilesRepository _profilesRepository;
+  final BirthSessionRepository _sessionRepository;
+  bool _sessionRestoreAttempted = false;
   List<SavedBirthProfile> _savedProfiles = <SavedBirthProfile>[];
   String? _activeProfileId;
   bool _profilesLoaded = false;
@@ -212,6 +221,7 @@ class BirthInputState extends ChangeNotifier {
     _hasComputedChart = true;
     _computedReport = report;
     _computedDasha = report.dasha;
+    _persistSessionSnapshot();
     notifyListeners();
   }
 
@@ -220,6 +230,7 @@ class BirthInputState extends ChangeNotifier {
       return;
     }
     _onboardingCompleted = true;
+    _persistSessionSnapshot();
     notifyListeners();
   }
 
@@ -228,6 +239,7 @@ class BirthInputState extends ChangeNotifier {
       return;
     }
     _onboardingCompleted = false;
+    _persistSessionSnapshot();
     notifyListeners();
   }
 
@@ -241,6 +253,7 @@ class BirthInputState extends ChangeNotifier {
     _computedDasha = null;
     _computedReport = null;
     _onboardingCompleted = false;
+    _persistSessionSnapshot();
     notifyListeners();
   }
 
@@ -254,6 +267,50 @@ class BirthInputState extends ChangeNotifier {
       return;
     }
     _compatibilityPartnerProfile = null;
+    notifyListeners();
+  }
+
+  /// Rehydrates the in-memory session (birth inputs + computed report +
+  /// onboarding flag) from persistent storage. Call this once on startup,
+  /// before the onboarding-vs-home decision. A missing or corrupt cache leaves
+  /// the state untouched so the app falls back to onboarding cleanly. This
+  /// reads only local storage and never touches the network.
+  Future<void> restoreSession() async {
+    if (_sessionRestoreAttempted) {
+      return;
+    }
+    _sessionRestoreAttempted = true;
+
+    BirthSession? session;
+    try {
+      session = await _sessionRepository.loadSession();
+    } catch (_) {
+      session = null;
+    }
+    if (session == null) {
+      return;
+    }
+
+    final ComputeReportResponse report;
+    try {
+      report = ComputeReportResponse.fromJson(session.reportJson);
+    } catch (_) {
+      // The persisted report no longer parses (e.g. the response shape
+      // changed). Drop the cache and start onboarding fresh.
+      unawaited(_sessionRepository.clearSession());
+      return;
+    }
+
+    _firstName = session.firstName;
+    _gender = session.gender;
+    _dateOfBirth = session.dateOfBirth;
+    _timeOfBirth = session.timeOfBirth;
+    _placeOfBirth = session.placeOfBirth;
+    _customPlace = session.customPlace;
+    _computedReport = report;
+    _computedDasha = report.dasha;
+    _hasComputedChart = true;
+    _onboardingCompleted = session.onboardingCompleted;
     notifyListeners();
   }
 
@@ -447,6 +504,7 @@ class BirthInputState extends ChangeNotifier {
     _customPlace = profile.customPlace;
     _activeProfileId = profile.id;
     _clearComputedState();
+    _persistSessionSnapshot();
     if (notify) {
       notifyListeners();
     }
@@ -528,6 +586,38 @@ class BirthInputState extends ChangeNotifier {
     }
   }
 
+  /// Saves a complete session, or clears the cache when the current state is no
+  /// longer a finished onboarding (e.g. the report was cleared or onboarding
+  /// reopened). Fire-and-forget so notifying listeners never blocks on disk.
+  void _persistSessionSnapshot() {
+    unawaited(_writeSessionSnapshot());
+  }
+
+  Future<void> _writeSessionSnapshot() async {
+    final report = _computedReport;
+    final reportJson = report?.rawJson;
+    final canPersist = _onboardingCompleted &&
+        _hasComputedChart &&
+        report != null &&
+        reportJson != null;
+    if (!canPersist) {
+      await _sessionRepository.clearSession();
+      return;
+    }
+    await _sessionRepository.saveSession(
+      BirthSession(
+        onboardingCompleted: _onboardingCompleted,
+        firstName: _firstName,
+        gender: _gender,
+        dateOfBirth: _dateOfBirth,
+        timeOfBirth: _timeOfBirth,
+        placeOfBirth: _placeOfBirth,
+        customPlace: _customPlace,
+        reportJson: reportJson,
+      ),
+    );
+  }
+
   void _clearComputedState() {
     _hasComputedChart = false;
     _computedDasha = null;
@@ -544,5 +634,6 @@ class BirthInputState extends ChangeNotifier {
     _activeProfileId = null;
     _clearComputedState();
     _onboardingCompleted = false;
+    _persistSessionSnapshot();
   }
 }

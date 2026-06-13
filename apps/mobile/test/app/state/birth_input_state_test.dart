@@ -1,10 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:trikaal_mobile/app/data/birth_session_repository.dart';
 import 'package:trikaal_mobile/app/data/saved_profiles_repository.dart';
+import 'package:trikaal_mobile/app/models/birth_session.dart';
 import 'package:trikaal_mobile/app/models/custom_place_payload.dart';
+import 'package:trikaal_mobile/app/models/person_gender.dart';
 import 'package:trikaal_mobile/app/models/saved_birth_profile.dart';
 import 'package:trikaal_mobile/app/state/birth_input_state.dart';
+import 'package:trikaal_mobile/features/charts/data/models/compute_report_models.dart';
+
+import '../../helpers/sample_report.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    // The default session repository falls back to SharedPreferences for any
+    // state that does not inject its own; keep that deterministic in tests.
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+  });
+
   group('BirthInputState saved profiles', () {
     test(
         'loadSavedProfiles applies default profile when current input is empty',
@@ -343,6 +358,281 @@ void main() {
       expect(state.customPlaceForCurrentObservations!.timezone, 'Asia/Kolkata');
     });
   });
+
+  group('BirthInputState session persistence', () {
+    test('restoreSession rehydrates inputs, report, and onboarding flag',
+        () async {
+      final repository = _MemoryBirthSessionRepository(
+        session: _completedSession(),
+      );
+      final state = BirthInputState(sessionRepository: repository);
+
+      await state.restoreSession();
+
+      expect(state.onboardingCompleted, isTrue);
+      expect(state.hasComputedChart, isTrue);
+      expect(state.computedReport, isNotNull);
+      expect(state.computedDasha, isNotNull);
+      expect(state.firstName, 'Asha');
+      expect(state.gender, PersonGender.female);
+      expect(state.dateOfBirth, '1999-07-04');
+      expect(state.timeOfBirth, '12:22');
+      expect(state.placeOfBirth, 'Mumbai, Maharashtra, India');
+      expect(state.customPlace!.timezone, 'Asia/Kolkata');
+    });
+
+    test('restoreSession is a no-op when nothing is persisted', () async {
+      final repository = _MemoryBirthSessionRepository();
+      final state = BirthInputState(sessionRepository: repository);
+
+      await state.restoreSession();
+
+      expect(state.onboardingCompleted, isFalse);
+      expect(state.hasComputedChart, isFalse);
+      expect(state.computedReport, isNull);
+      expect(state.firstName, isEmpty);
+    });
+
+    test('restoreSession runs at most once', () async {
+      final repository = _MemoryBirthSessionRepository(
+        session: _completedSession(),
+      );
+      final state = BirthInputState(sessionRepository: repository);
+
+      await state.restoreSession();
+      await state.restoreSession();
+
+      expect(repository.loadCalls, 1);
+    });
+
+    test('restoreSession drops an unparseable report and falls back', () async {
+      final repository = _MemoryBirthSessionRepository(
+        session: _completedSession(
+          reportJson: <String, dynamic>{'totally': 'broken'},
+        ),
+      );
+      final state = BirthInputState(sessionRepository: repository);
+
+      await state.restoreSession();
+
+      expect(state.onboardingCompleted, isFalse);
+      expect(state.computedReport, isNull);
+      expect(repository.clearCalls, greaterThanOrEqualTo(1));
+    });
+
+    test('completeOnboarding persists the full session', () async {
+      final repository = _MemoryBirthSessionRepository();
+      final state = BirthInputState(sessionRepository: repository);
+      state.updateFirstName('Asha');
+      state.updateDateOfBirth('1999-07-04', clearComputed: false);
+      state.updateTimeOfBirth('12:22', clearComputed: false);
+      state.updatePlaceOfBirth(
+        'Mumbai, Maharashtra, India',
+        clearComputed: false,
+      );
+      state.markReportComputed(_sampleReport());
+
+      state.completeOnboarding();
+      await _settle();
+
+      expect(repository.saveCalls, greaterThanOrEqualTo(1));
+      expect(repository.session, isNotNull);
+      expect(repository.session!.onboardingCompleted, isTrue);
+      expect(repository.session!.dateOfBirth, '1999-07-04');
+      expect(repository.session!.reportJson.isNotEmpty, isTrue);
+    });
+
+    test('markReportComputed persists when onboarding is already complete',
+        () async {
+      final repository = _MemoryBirthSessionRepository(
+        session: _completedSession(),
+      );
+      final state = BirthInputState(sessionRepository: repository);
+      await state.restoreSession();
+      repository.saveCalls = 0;
+
+      state.markReportComputed(_sampleReport());
+      await _settle();
+
+      expect(repository.saveCalls, greaterThanOrEqualTo(1));
+      expect(repository.session, isNotNull);
+      expect(repository.session!.onboardingCompleted, isTrue);
+    });
+
+    test('clearComputedChart clears the persisted session', () async {
+      final repository = _MemoryBirthSessionRepository(
+        session: _completedSession(),
+      );
+      final state = BirthInputState(sessionRepository: repository);
+      await state.restoreSession();
+
+      state.clearComputedChart();
+      await _settle();
+
+      expect(repository.clearCalls, greaterThanOrEqualTo(1));
+      expect(repository.session, isNull);
+    });
+
+    test('applying a saved profile clears the persisted session', () async {
+      final repository = _MemoryBirthSessionRepository(
+        session: _completedSession(),
+      );
+      final state = BirthInputState(
+        profilesRepository: _MemorySavedProfilesRepository(
+          initialProfiles: <SavedBirthProfile>[
+            _profile(
+              id: 'p1',
+              name: 'Primary',
+              date: '1999-07-04',
+              time: '12:22',
+              place: 'Mumbai, Maharashtra, India',
+              timezone: 'Asia/Kolkata',
+              isDefault: true,
+            ),
+            _profile(
+              id: 'p2',
+              name: 'Tokyo',
+              date: '2005-06-21',
+              time: '15:10',
+              place: 'Tokyo, Japan',
+              timezone: 'Asia/Tokyo',
+            ),
+          ],
+        ),
+        sessionRepository: repository,
+      );
+      await state.restoreSession();
+      await state.loadSavedProfiles();
+
+      state.applyProfile('p2');
+      await _settle();
+
+      expect(repository.clearCalls, greaterThanOrEqualTo(1));
+      expect(repository.session, isNull);
+    });
+
+    test('loadSavedProfiles does not clobber a restored session', () async {
+      final sessionRepository = _MemoryBirthSessionRepository(
+        session: _completedSession(),
+      );
+      final profilesRepository = _MemorySavedProfilesRepository(
+        initialProfiles: <SavedBirthProfile>[
+          _profile(
+            id: 'p1',
+            name: 'Tokyo',
+            date: '2005-06-21',
+            time: '15:10',
+            place: 'Tokyo, Japan',
+            timezone: 'Asia/Tokyo',
+            isDefault: true,
+          ),
+        ],
+      );
+      final state = BirthInputState(
+        profilesRepository: profilesRepository,
+        sessionRepository: sessionRepository,
+      );
+
+      await state.restoreSession();
+      await state.loadSavedProfiles();
+
+      // The restored session (Asha / 1999-07-04) must survive: the default
+      // profile is auto-applied only when the current input is empty.
+      expect(state.firstName, 'Asha');
+      expect(state.dateOfBirth, '1999-07-04');
+      expect(state.timeOfBirth, '12:22');
+      expect(state.placeOfBirth, 'Mumbai, Maharashtra, India');
+      expect(state.onboardingCompleted, isTrue);
+      expect(state.computedReport, isNotNull);
+      // The saved profile is still loaded and available, just not applied.
+      expect(state.savedProfiles.length, 1);
+    });
+
+    test('markReportComputed without rawJson clears rather than persists',
+        () async {
+      final repository = _MemoryBirthSessionRepository(
+        session: _completedSession(),
+      );
+      final state = BirthInputState(sessionRepository: repository);
+      await state.restoreSession();
+      expect(repository.session, isNotNull);
+      repository.clearCalls = 0;
+
+      // A report that was not decoded from a response carries no rawJson and so
+      // cannot be re-encoded; persisting it would leave an unrestorable
+      // half-session, so the cache is cleared instead.
+      state.markReportComputed(_reportWithoutRawJson());
+      await _settle();
+
+      expect(repository.session, isNull);
+      expect(repository.clearCalls, greaterThanOrEqualTo(1));
+    });
+  });
+}
+
+Future<void> _settle() => Future<void>.delayed(Duration.zero);
+
+ComputeReportResponse _sampleReport() {
+  return ComputeReportResponse.fromJson(sampleReportJson());
+}
+
+ComputeReportResponse _reportWithoutRawJson() {
+  final base = ComputeReportResponse.fromJson(sampleReportJson());
+  return ComputeReportResponse(
+    profile: base.profile,
+    normalizedInput: base.normalizedInput,
+    resolvedPlace: base.resolvedPlace,
+    snapshot: base.snapshot,
+    dasha: base.dasha,
+    interpretations: base.interpretations,
+    dailyTransit: base.dailyTransit,
+  );
+}
+
+BirthSession _completedSession({Map<String, dynamic>? reportJson}) {
+  return BirthSession(
+    onboardingCompleted: true,
+    firstName: 'Asha',
+    gender: PersonGender.female,
+    dateOfBirth: '1999-07-04',
+    timeOfBirth: '12:22',
+    placeOfBirth: 'Mumbai, Maharashtra, India',
+    customPlace: const CustomPlacePayload(
+      placeLabel: 'Mumbai, Maharashtra, India',
+      latitude: 19.076,
+      longitude: 72.8777,
+      timezone: 'Asia/Kolkata',
+      elevationM: 14,
+    ),
+    reportJson: reportJson ?? sampleReportJson(),
+  );
+}
+
+class _MemoryBirthSessionRepository implements BirthSessionRepository {
+  _MemoryBirthSessionRepository({this.session});
+
+  BirthSession? session;
+  int loadCalls = 0;
+  int saveCalls = 0;
+  int clearCalls = 0;
+
+  @override
+  Future<BirthSession?> loadSession() async {
+    loadCalls += 1;
+    return session;
+  }
+
+  @override
+  Future<void> saveSession(BirthSession session) async {
+    saveCalls += 1;
+    this.session = session;
+  }
+
+  @override
+  Future<void> clearSession() async {
+    clearCalls += 1;
+    session = null;
+  }
 }
 
 class _MemorySavedProfilesRepository implements SavedProfilesRepository {
