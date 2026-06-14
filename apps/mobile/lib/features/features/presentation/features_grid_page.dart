@@ -8,6 +8,7 @@ import '../../../app/widgets/trikaal_app_bar.dart';
 import '../../../app/widgets/universal_dock_scaffold.dart';
 import '../../../app/widgets/current_location_picker.dart';
 import '../../compatibility/presentation/soulmate_page.dart';
+import '../../hora/presentation/hora_page.dart';
 import '../../kaal_sarpa/presentation/kaal_sarpa_page.dart';
 import '../../hindu_calendar/presentation/hindu_calendar_page.dart';
 import '../../pancha_pakshi/presentation/pancha_pakshi_page.dart';
@@ -37,6 +38,14 @@ class FeaturesGridPage extends StatelessWidget {
       description: 'Daily panchang module',
       actionLabel: 'Open',
       icon: Icons.brightness_5_rounded,
+      visualStyle: _FeatureVisualStyle.primary,
+    ),
+    _FeatureTileData(
+      code: 'hora',
+      title: 'Hora',
+      description: 'Planetary hours module',
+      actionLabel: 'Open',
+      icon: Icons.hourglass_bottom_rounded,
       visualStyle: _FeatureVisualStyle.primary,
     ),
     _FeatureTileData(
@@ -153,6 +162,17 @@ class FeaturesGridPage extends StatelessWidget {
         MaterialPageRoute<void>(
           builder: (BuildContext context) {
             return PanchangPage(birthInputState: birthInputState);
+          },
+        ),
+      );
+      return;
+    }
+
+    if (tile.code == 'hora') {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (BuildContext context) {
+            return HoraPage(birthInputState: birthInputState);
           },
         ),
       );
@@ -323,6 +343,8 @@ class _FeatureCard extends StatelessWidget {
         return '🪐';
       case 'dainik_panchang':
         return '🪔';
+      case 'hora':
+        return '⏳';
       case 'soulmate':
         return '💞';
       case 'pancha_pakshi':

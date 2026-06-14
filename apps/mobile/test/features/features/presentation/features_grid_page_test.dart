@@ -4,6 +4,7 @@ import 'package:trikaal_mobile/app/state/birth_input_state.dart';
 import 'package:trikaal_mobile/app/theme/trikaal_theme.dart';
 import 'package:trikaal_mobile/features/features/presentation/birth_chart_detail_page.dart';
 import 'package:trikaal_mobile/features/features/presentation/features_grid_page.dart';
+import 'package:trikaal_mobile/features/hora/presentation/hora_page.dart';
 import 'package:trikaal_mobile/features/kaal_sarpa/presentation/kaal_sarpa_page.dart';
 
 void main() {
@@ -28,6 +29,7 @@ void main() {
     expect(find.text('Birth Chart'), findsOneWidget);
     expect(find.text('Your Soulmate'), findsOneWidget);
     expect(find.text('Pancha Pakshi'), findsOneWidget);
+    expect(find.text('Hora'), findsOneWidget);
     expect(find.text('Mangal Dosh'), findsOneWidget);
     expect(find.text('Kaal Sarpa Dosh'), findsOneWidget);
     expect(find.text('🪐'), findsNothing);
@@ -93,5 +95,31 @@ void main() {
 
     expect(find.byType(KaalSarpaPage), findsOneWidget);
     expect(find.text('Kaal Sarpa Dosh'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('opens the Hora page from the Hora feature card',
+      (WidgetTester tester) async {
+    final birthInputState = BirthInputState(
+      firstName: 'Sahil',
+      dateOfBirth: '',
+      timeOfBirth: '',
+      placeOfBirth: '',
+    );
+    addTearDown(birthInputState.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: TrikaalTheme.dark(),
+        home: FeaturesGridPage(birthInputState: birthInputState),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final horaCardFinder = find.text('Hora').first;
+    await tester.ensureVisible(horaCardFinder);
+    await tester.tap(horaCardFinder, warnIfMissed: false);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HoraPage), findsOneWidget);
   });
 }
