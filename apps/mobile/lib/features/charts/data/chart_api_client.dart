@@ -8,6 +8,7 @@ import 'models/compute_hindu_calendar_models.dart';
 import 'models/compute_kaal_sarpa_models.dart';
 import 'models/compute_report_models.dart';
 import 'models/place_search_models.dart';
+import '../../gochar/data/models/transit_models.dart';
 import '../../pancha_pakshi/data/models/pancha_pakshi_models.dart';
 import '../../panchang/data/models/panchang_models.dart';
 import '../../subscription/data/models/subscription_models.dart';
@@ -152,6 +153,22 @@ class ChartApiClient {
       ),
     );
     return ComputePanchangResponse.fromJson(body);
+  }
+
+  Future<TransitComputeResponse> computeTransit(
+    TransitComputeRequest request,
+  ) async {
+    final uri = Uri.parse('$_baseUrl/v1/transit/compute');
+    final body = await postJson(
+      client: _httpClient,
+      uri: uri,
+      payload: request.toJson(),
+      exceptionBuilder: (message, statusCode) => ChartApiException(
+        message,
+        statusCode: statusCode,
+      ),
+    );
+    return TransitComputeResponse.fromJson(body);
   }
 
   Future<ComputeHinduCalendarResponse> computeHinduCalendar(

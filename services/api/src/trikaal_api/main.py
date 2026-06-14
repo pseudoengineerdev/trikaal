@@ -20,18 +20,19 @@ from trikaal_api.compatibility import (
     CompatibilityComputeResponse,
     compute_compatibility,
 )
+from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
+from trikaal_api.gochar import TransitComputeRequest, TransitComputeResponse, compute_transit
 from trikaal_api.hindu_calendar import (
     HinduCalendarComputeRequest,
     HinduCalendarComputeResponse,
     compute_hindu_calendar,
 )
-from trikaal_api.dasha import DashaComputeRequest, DashaComputeResponse, compute_dasha
-from trikaal_api.metadata import AstrologyTermsResponse, load_astrology_terms
 from trikaal_api.kaal_sarpa import (
     KaalSarpaComputeRequest,
     KaalSarpaComputeResponse,
     compute_kaal_sarpa,
 )
+from trikaal_api.metadata import AstrologyTermsResponse, load_astrology_terms
 from trikaal_api.pancha_pakshi import (
     PanchaPakshiComputeRequest,
     PanchaPakshiComputeResponse,
@@ -134,6 +135,18 @@ def reports_compute(request: ComputeReportRequest) -> ComputeReportResponse:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ZoneInfoNotFoundError as exc:
         raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+
+
+@app.post("/v1/transit/compute", response_model=TransitComputeResponse)
+def transit_compute(request: TransitComputeRequest) -> TransitComputeResponse:
+    try:
+        return compute_transit(request)
+    except PlaceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ZoneInfoNotFoundError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown timezone: {exc}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/v1/pancha-pakshi/compute", response_model=PanchaPakshiComputeResponse)
