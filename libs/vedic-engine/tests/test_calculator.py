@@ -146,6 +146,31 @@ def test_calculator_returns_computed_snapshot_for_canonical_case() -> None:
     assert isinstance(snapshot["graha_table"]["sun"]["d9_house"], int)
 
 
+def test_calculator_vara_uses_sunrise_to_sunrise_day_for_pre_sunrise_birth() -> None:
+    # The vara runs sunrise to sunrise, not midnight to midnight. This birth is
+    # at 02:00 IST, before the 06:09 sunrise, so it belongs to the previous
+    # day's vara: Shanivara (Saturday), not Ravivara (Sunday). The canonical
+    # case above is the same date at 12:22 (post-sunrise) and stays Ravivara.
+    snapshot = compute_chart_snapshot(
+        birth_event=BirthEvent(
+            local_date="1999-07-04",
+            local_time="02:00",
+            timezone="Asia/Kolkata",
+            latitude=19.0760,
+            longitude=72.8777,
+            elevation_m=14.0,
+            place_label="Mumbai, India",
+        ),
+        profile=CalculationProfile(),
+    )
+
+    # Sunrise is unchanged, confirming the birth is genuinely pre-sunrise.
+    assert snapshot["panchanga"]["sunrise"]["local_time"] == "06:09"
+    assert snapshot["panchanga"]["vara"]["number"] == 7
+    assert snapshot["panchanga"]["vara"]["name_vedic"] == "Shanivara"
+    assert snapshot["panchanga"]["vara"]["name_english"] == "Saturday"
+
+
 def test_calculator_computes_for_non_canonical_case() -> None:
     snapshot = compute_chart_snapshot(
         birth_event=BirthEvent(

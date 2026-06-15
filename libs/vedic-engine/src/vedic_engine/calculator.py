@@ -933,11 +933,6 @@ def _compute_panchanga(
     moon_nakshatra: str,
     moon_pada: int,
 ) -> dict[str, object]:
-    vara_index = local_dt.weekday()
-    vara_number = ((vara_index + 1) % 7) + 1
-    vara_vedic = VARA_NAMES_VEDIC[vara_number - 1]
-    vara_english = VARA_NAMES_ENGLISH[vara_number - 1]
-
     tithi_phase = (moon_sidereal_deg - sun_sidereal_deg) % 360.0
     tithi_number = int(tithi_phase // 12.0) + 1
     tithi_vedic = TITHI_NAMES_VEDIC[tithi_number - 1]
@@ -976,6 +971,14 @@ def _compute_panchanga(
         timezone=timezone,
         rsmi=swe.CALC_SET,
     )
+
+    # The vara runs sunrise to sunrise, not midnight to midnight. A birth
+    # between midnight and sunrise still belongs to the previous day's vara.
+    # Mirrors the sunrise-to-sunrise rule in panchang.compute_daily_panchang.
+    vara_date = local_dt - timedelta(days=1) if local_dt < sunrise_local else local_dt
+    vara_number = ((vara_date.weekday() + 1) % 7) + 1
+    vara_vedic = VARA_NAMES_VEDIC[vara_number - 1]
+    vara_english = VARA_NAMES_ENGLISH[vara_number - 1]
 
     return {
         "vara": {
