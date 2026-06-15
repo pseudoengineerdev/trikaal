@@ -86,8 +86,9 @@ class PanchangaContract(StrictModel):
     nakshatra: NakshatraContract
     yoga: YogaContract
     karana: KaranaContract
-    sunrise: SolarEventContract
-    sunset: SolarEventContract
+    # Null above the polar circles, where the sun may not rise or set on a date.
+    sunrise: SolarEventContract | None = None
+    sunset: SolarEventContract | None = None
 
 
 class AstronomyContract(StrictModel):

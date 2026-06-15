@@ -94,3 +94,32 @@ def test_reports_compute_accepts_custom_place_payload() -> None:
     assert payload["dasha"]["system"] == "Vimshottari"
     assert payload["interpretations"]["version"] == "v1"
     assert payload["daily_transit"]["version"] == "v1"
+
+
+def test_reports_compute_succeeds_for_high_latitude_polar_birth() -> None:
+    # Above the polar circles the chart must still compute (200) rather than
+    # 500. The sun may not rise or set there, so the snapshot's sunrise/sunset
+    # are null and the report contract must accept that.
+    client = TestClient(app)
+    response = client.post(
+        "/v1/reports/compute",
+        json={
+            "date_of_birth": "2000-12-21",
+            "time_of_birth": "12:00",
+            "place_of_birth": "Tromso",
+            "custom_place": {
+                "place_label": "Tromso, Norway",
+                "latitude": 69.65,
+                "longitude": 18.96,
+                "timezone": "Europe/Oslo",
+                "elevation_m": 0.0,
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["snapshot"]["meta"]["status"] == "computed"
+    assert payload["snapshot"]["vedic"]["lagna_rashi"]
+    assert payload["snapshot"]["panchanga"]["sunrise"] is None
+    assert payload["snapshot"]["panchanga"]["sunset"] is None

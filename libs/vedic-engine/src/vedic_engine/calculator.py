@@ -319,11 +319,15 @@ def compute_chart_snapshot(
     saturn_data, _ = swe.calc_ut(julian_day_utc, swe.SATURN, flags)
     mean_node_data, _ = swe.calc_ut(julian_day_utc, swe.MEAN_NODE, flags)
     true_node_data, _ = swe.calc_ut(julian_day_utc, swe.TRUE_NODE, flags)
+    # Whole-sign house system: valid at every latitude (Placidus is undefined
+    # above the polar circles and raises there) and yields the identical
+    # ascendant. Only the ascendant is used here; houses are derived from the
+    # lagna's sign downstream, so the unused cusps stay discarded.
     _, ascmc = swe.houses_ex(
         julian_day_utc,
         birth_event.latitude,
         birth_event.longitude,
-        b"P",
+        b"W",
         swe.FLG_SIDEREAL,
     )
     lagna_raw = ascmc[0]
@@ -955,7 +959,7 @@ def _compute_panchanga(
     nakshatra_number = int((moon_sidereal_deg % 360.0) // nakshatra_span) + 1
     nakshatra_progress = (((moon_sidereal_deg % 360.0) % nakshatra_span) / nakshatra_span) * 100.0
 
-    sunrise_utc, sunrise_local = _compute_sun_event(
+    sunrise_event = _compute_sun_event(
         local_dt=local_dt,
         latitude=latitude,
         longitude=longitude,
@@ -963,7 +967,7 @@ def _compute_panchanga(
         timezone=timezone,
         rsmi=swe.CALC_RISE,
     )
-    sunset_utc, sunset_local = _compute_sun_event(
+    sunset_event = _compute_sun_event(
         local_dt=local_dt,
         latitude=latitude,
         longitude=longitude,
@@ -971,11 +975,17 @@ def _compute_panchanga(
         timezone=timezone,
         rsmi=swe.CALC_SET,
     )
+    sunrise_local = sunrise_event[1] if sunrise_event is not None else None
 
     # The vara runs sunrise to sunrise, not midnight to midnight. A birth
     # between midnight and sunrise still belongs to the previous day's vara.
     # Mirrors the sunrise-to-sunrise rule in panchang.compute_daily_panchang.
-    vara_date = local_dt - timedelta(days=1) if local_dt < sunrise_local else local_dt
+    # Above the polar circles the sun may not rise; with no sunrise to anchor
+    # the day, fall back to the civil weekday.
+    if sunrise_local is not None and local_dt < sunrise_local:
+        vara_date = local_dt - timedelta(days=1)
+    else:
+        vara_date = local_dt
     vara_number = ((vara_date.weekday() + 1) % 7) + 1
     vara_vedic = VARA_NAMES_VEDIC[vara_number - 1]
     vara_english = VARA_NAMES_ENGLISH[vara_number - 1]
@@ -1013,16 +1023,22 @@ def _compute_panchanga(
             "name_english": karana_english,
             "progress_percent": round(karana_progress, 2),
         },
-        "sunrise": {
-            "utc_iso": sunrise_utc.isoformat().replace("+00:00", "Z"),
-            "local_iso": sunrise_local.isoformat(),
-            "local_time": sunrise_local.strftime("%H:%M"),
-        },
-        "sunset": {
-            "utc_iso": sunset_utc.isoformat().replace("+00:00", "Z"),
-            "local_iso": sunset_local.isoformat(),
-            "local_time": sunset_local.strftime("%H:%M"),
-        },
+        "sunrise": _sun_event_payload(sunrise_event),
+        "sunset": _sun_event_payload(sunset_event),
+    }
+
+
+def _sun_event_payload(
+    event: tuple[datetime, datetime] | None,
+) -> dict[str, str] | None:
+    if event is None:
+        # Circumpolar date: no sunrise/sunset to report.
+        return None
+    event_utc, event_local = event
+    return {
+        "utc_iso": event_utc.isoformat().replace("+00:00", "Z"),
+        "local_iso": event_local.isoformat(),
+        "local_time": event_local.strftime("%H:%M"),
     }
 
 
@@ -1044,7 +1060,7 @@ def _compute_sun_event(
     elevation_m: float,
     timezone: str,
     rsmi: int,
-) -> tuple[datetime, datetime]:
+) -> tuple[datetime, datetime] | None:
     local_midnight = local_dt.replace(hour=0, minute=0, second=0, microsecond=0)
     utc_midnight = local_midnight.astimezone(ZoneInfo("UTC"))
     utc_hours = (
@@ -1062,7 +1078,7 @@ def _compute_sun_event(
     )
     # Traditional Hindu sunrise: solar disc center, no atmospheric refraction.
     # Keep in sync with hindu_calendar._compute_sun_event_jd.
-    _, tret = swe.rise_trans(
+    result, tret = swe.rise_trans(
         jd_utc,
         swe.SUN,
         rsmi | swe.BIT_DISC_CENTER | swe.BIT_NO_REFRACTION,
@@ -1071,6 +1087,9 @@ def _compute_sun_event(
         15.0,
         swe.FLG_SWIEPH,
     )
+    if result != 0:
+        # Circumpolar date: the sun never crosses the horizon.
+        return None
     event_utc = _jd_to_utc_datetime(tret[0])
     event_local = event_utc.astimezone(ZoneInfo(timezone))
     return event_utc, event_local

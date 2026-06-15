@@ -171,6 +171,35 @@ def test_calculator_vara_uses_sunrise_to_sunrise_day_for_pre_sunrise_birth() -> 
     assert snapshot["panchanga"]["vara"]["name_english"] == "Saturday"
 
 
+def test_calculator_computes_for_high_latitude_polar_birth() -> None:
+    # Above the polar circles Placidus houses are undefined and the sun may
+    # never cross the horizon. The chart must still compute (whole-sign houses
+    # are valid at every latitude) instead of raising. Tromso on the winter
+    # solstice is a polar-night date: no sunrise or sunset.
+    snapshot = compute_chart_snapshot(
+        birth_event=BirthEvent(
+            local_date="2000-12-21",
+            local_time="12:00",
+            timezone="Europe/Oslo",
+            latitude=69.65,
+            longitude=18.96,
+            elevation_m=0.0,
+            place_label="Tromso, Norway",
+        ),
+        profile=CalculationProfile(),
+    )
+
+    assert snapshot["meta"]["status"] == "computed"
+    # A sensible lagna is returned from the whole-sign ascendant.
+    assert snapshot["vedic"]["lagna_rashi"] == "Kumb"
+    assert snapshot["bhava"]["lagna_house"] == 1
+    assert isinstance(snapshot["astronomy"]["lagna_sidereal_deg"], float)
+    # Polar night: no sunrise/sunset, so the vara falls back to the civil weekday.
+    assert snapshot["panchanga"]["sunrise"] is None
+    assert snapshot["panchanga"]["sunset"] is None
+    assert snapshot["panchanga"]["vara"]["name_english"] == "Thursday"
+
+
 def test_calculator_computes_for_non_canonical_case() -> None:
     snapshot = compute_chart_snapshot(
         birth_event=BirthEvent(
